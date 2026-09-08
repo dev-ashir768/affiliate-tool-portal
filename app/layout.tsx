@@ -37,7 +37,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         spaceGrotesk.variable,
       )}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full w-full flex flex-col">
         <Providers>{children}</Providers>
       </body>
     </html>
