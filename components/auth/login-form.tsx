@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from "../ui/card";
 import { Input } from "../ui/input";
+import { PasswordInput } from "../ui/password-input";
 import Image from "next/image";
 import { Controller, useForm } from "react-hook-form";
 import {
@@ -17,13 +18,6 @@ import {
 } from "@/validations/auth.validations";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "../ui/button";
-
-/** TODO: replace with the API-layer login call. */
-const submitLogin: (credentials: LoginFormSchemaType) => Promise<void> =
-  async () => {
-    await new Promise((resolve) => setTimeout(resolve, 400));
-    throw new Error("Login is not wired yet");
-  };
 
 export default function LoginForm() {
   const loginForm = useForm<LoginFormSchemaType>({
@@ -39,17 +33,7 @@ export default function LoginForm() {
 
   async function onSubmit(data: LoginFormSchemaType) {
     loginForm.clearErrors("root");
-
-    try {
-      await submitLogin(data);
-    } catch (error) {
-      loginForm.setError("root", {
-        message:
-          error instanceof Error
-            ? error.message
-            : "Login failed. Please try again.",
-      });
-    }
+    console.log(data);
   }
 
   return (
@@ -67,7 +51,7 @@ export default function LoginForm() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <form id="login-form" onSubmit={loginForm.handleSubmit(onSubmit)}>
+          <form id="login-form" noValidate onSubmit={loginForm.handleSubmit(onSubmit)}>
             <FieldGroup>
               <Controller
                 name="email"
@@ -95,12 +79,11 @@ export default function LoginForm() {
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor={field.name}>Password</FieldLabel>
-                    <Input
+                    <PasswordInput
                       id={field.name}
                       {...field}
                       aria-invalid={fieldState.invalid}
                       autoComplete="current-password"
-                      type="password"
                       placeholder="Enter your password"
                     />
                     {fieldState.error && (
