@@ -15,32 +15,27 @@ import {
   CardTitle,
 } from "../ui/card";
 import { Input } from "../ui/input";
-import { PasswordInput } from "../ui/password-input";
 import Image from "next/image";
 import { Controller, useForm } from "react-hook-form";
 import {
-  LoginFormSchemaType,
-  loginSchema,
+  forgotPasswordSchema,
+  ForgotPasswordFormSchemaType,
 } from "@/validations/auth.validations";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "../ui/button";
 import Link from "next/link";
 
-export default function LoginForm() {
+export default function ForgotPasswordForm() {
   // =============================== State Variables ===============================
-  const loginForm = useForm<LoginFormSchemaType>({
-    resolver: zodResolver(loginSchema),
+  const forgotPasswordForm = useForm<ForgotPasswordFormSchemaType>({
+    resolver: zodResolver(forgotPasswordSchema),
     defaultValues: {
       email: "",
-      password: "",
     },
   });
 
-  const isSubmitting = loginForm.formState.isSubmitting;
-  const formError = loginForm.formState.errors.root;
-
-  async function onSubmit(data: LoginFormSchemaType) {
-    loginForm.clearErrors("root");
+  async function onSubmit(data: ForgotPasswordFormSchemaType) {
+    forgotPasswordForm.clearErrors("root");
     console.log(data);
   }
 
@@ -56,19 +51,19 @@ export default function LoginForm() {
             className="mb-4"
           />
           <CardTitle className="text-2xl font-bold">
-            Login to your account
+            Forgot your password?
           </CardTitle>
         </CardHeader>
         <CardContent>
           <form
-            id="login-form"
+            id="forgot-password-form"
             noValidate
-            onSubmit={loginForm.handleSubmit(onSubmit)}
+            onSubmit={forgotPasswordForm.handleSubmit(onSubmit)}
           >
             <FieldGroup>
               <Controller
                 name="email"
-                control={loginForm.control}
+                control={forgotPasswordForm.control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel htmlFor={field.name}>Email</FieldLabel>
@@ -78,33 +73,11 @@ export default function LoginForm() {
                       aria-invalid={fieldState.invalid}
                       autoComplete="off"
                       type="email"
-                      placeholder="Enter your email"
+                      placeholder="Enter your registered email"
                     />
                     {fieldState.error && (
                       <FieldError errors={[fieldState.error]} />
                     )}
-                  </Field>
-                )}
-              />
-              <Controller
-                name="password"
-                control={loginForm.control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor={field.name}>Password</FieldLabel>
-                    <PasswordInput
-                      id={field.name}
-                      {...field}
-                      aria-invalid={fieldState.invalid}
-                      autoComplete="current-password"
-                      placeholder="Enter your password"
-                    />
-                    {fieldState.error && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                    <FieldDescription className="text-end">
-                      <Link href="/forgot-password">Forgot your password?</Link>
-                    </FieldDescription>
                   </Field>
                 )}
               />
@@ -116,13 +89,12 @@ export default function LoginForm() {
             <Button
               type="submit"
               size="lg"
-              form="login-form"
-              disabled={isSubmitting}
+              form="forgot-password-form"
             >
-              {isSubmitting ? "Submitting..." : "Login"}
+             Reset Password
             </Button>
             <FieldDescription className="text-center">
-              Don&apos;t have an account? <Link href="/signup">Sign up</Link>
+              Remember your password? <Link href="/login">Login</Link>
             </FieldDescription>
           </Field>
         </CardFooter>

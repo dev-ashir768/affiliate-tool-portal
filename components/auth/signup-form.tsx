@@ -1,6 +1,12 @@
 "use client";
 
-import { Field, FieldError, FieldGroup, FieldLabel } from "../ui/field";
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "../ui/field";
 import {
   Card,
   CardContent,
@@ -18,6 +24,7 @@ import {
 } from "@/validations/auth.validations";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "../ui/button";
+import Link from "next/link";
 
 export default function SignupForm() {
   // =============================== State Variables ===============================
@@ -131,8 +138,11 @@ export default function SignupForm() {
               form="login-form"
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Submitting..." : "Submit"}
+              {isSubmitting ? "Submitting..." : "Sign up"}
             </Button>
+            <FieldDescription className="text-center">
+              Already have an account? <Link href="/login">Login</Link>
+            </FieldDescription>
           </Field>
         </CardFooter>
       </Card>
