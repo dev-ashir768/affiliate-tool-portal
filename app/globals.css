@@ -55,7 +55,6 @@
 }
 
 :root {
-  /* Brand: primary oklch(58.1% 0.235 28) · secondary oklch(26.4% 0.006 34.3) */
   --background: oklch(0.995 0.002 34.3);
   --foreground: oklch(0.264 0.006 34.3);
   --card: oklch(1 0 0);
@@ -99,8 +98,8 @@
   --popover-foreground: oklch(0.985 0.002 34.3);
   --primary: oklch(0.581 0.235 28);
   --primary-foreground: oklch(0.985 0.015 28);
-  --secondary: oklch(0.32 0.01 34.3);
-  --secondary-foreground: oklch(0.985 0.002 34.3);
+  --secondary: oklch(0.985 0.002 34.3);
+  --secondary-foreground: oklch(0.32 0.01 34.3);
   --muted: oklch(0.32 0.01 34.3);
   --muted-foreground: oklch(0.72 0.012 34.3);
   --accent: oklch(0.34 0.04 28);
@@ -131,7 +130,8 @@
   body {
     @apply bg-background text-foreground;
   }
-  button:not(:disabled), [role="button"]:not(:disabled) {
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
     cursor: pointer;
   }
   html {
