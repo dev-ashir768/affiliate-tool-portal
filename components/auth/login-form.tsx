@@ -18,6 +18,13 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "../ui/button";
 
+/** TODO: replace with the API-layer login call. */
+const submitLogin: (credentials: LoginFormSchemaType) => Promise<void> =
+  async () => {
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    throw new Error("Login is not wired yet");
+  };
+
 export default function LoginForm() {
   const loginForm = useForm<LoginFormSchemaType>({
     resolver: zodResolver(loginSchema),
@@ -27,8 +34,22 @@ export default function LoginForm() {
     },
   });
 
-  function onSubmit(data: LoginFormSchemaType) {
-    console.log(data);
+  const isSubmitting = loginForm.formState.isSubmitting;
+  const formError = loginForm.formState.errors.root;
+
+  async function onSubmit(data: LoginFormSchemaType) {
+    loginForm.clearErrors("root");
+
+    try {
+      await submitLogin(data);
+    } catch (error) {
+      loginForm.setError("root", {
+        message:
+          error instanceof Error
+            ? error.message
+            : "Login failed. Please try again.",
+      });
+    }
   }
 
   return (
@@ -68,13 +89,39 @@ export default function LoginForm() {
                   </Field>
                 )}
               />
+              <Controller
+                name="password"
+                control={loginForm.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                    <Input
+                      id={field.name}
+                      {...field}
+                      aria-invalid={fieldState.invalid}
+                      autoComplete="current-password"
+                      type="password"
+                      placeholder="Enter your password"
+                    />
+                    {fieldState.error && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+              {formError && <FieldError errors={[formError]} />}
             </FieldGroup>
           </form>
         </CardContent>
         <CardFooter className="bg-white border-0">
           <Field>
-            <Button type="submit" size="lg" form="login-form">
-              Submit
+            <Button
+              type="submit"
+              size="lg"
+              form="login-form"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Submitting..." : "Submit"}
             </Button>
           </Field>
         </CardFooter>
