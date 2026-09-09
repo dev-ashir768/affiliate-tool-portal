@@ -45,6 +45,7 @@ export default function LoginForm() {
             alt="logo"
             width={100}
             height={60}
+            className="mb-4"
           />
           <CardTitle className="text-2xl font-bold">
             Login to your account
