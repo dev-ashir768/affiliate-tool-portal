@@ -36,6 +36,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         "font-sans",
         spaceGrotesk.variable,
       )}
+      suppressHydrationWarning
     >
       <body className="min-h-full w-full flex flex-col">
         <Providers>{children}</Providers>
