@@ -1,0 +1,41 @@
+---
+description: Strict shadcn-first UI consistency for the affiliate portal
+alwaysApply: true
+---
+
+# Portal design system
+
+## shadcn first (mandatory)
+
+- Prefer components from `components/ui/*` (shadcn). Do not invent one-off UI primitives.
+- If a custom component is needed, compose it from existing shadcn pieces (`Button`, `Input`, `Card`, `Field`, `Dialog`, etc.) plus tokens — never raw HTML controls or parallel design systems.
+- Add new shadcn UI via the project’s shadcn workflow into `components/ui/`; do not copy paste third-party component libs.
+
+## Buttons
+
+- Primary actions (submit, save, continue, CTA): always `size="lg"`.
+- Prefer `variant="default"` for primary; use `outline` / `secondary` / `ghost` only when matching an existing pattern.
+- Do not use ad-hoc button classes that bypass `Button` / `buttonVariants`.
+
+```tsx
+// ✅
+<Button type="submit" size="lg">Submit</Button>
+
+// ❌
+<button className="px-4 py-2 bg-red-500">Submit</button>
+<Button size="default">Submit</Button> // primary CTA
+```
+
+## Visual consistency (whole portal)
+
+- **Colors**: only CSS variables from `globals.css` (`bg-background`, `text-foreground`, `bg-primary`, `text-muted-foreground`, `border-border`, etc.). No hard-coded hex/rgb/oklch in components unless matching an established layout token already used in that screen.
+- **Fonts**: use theme fonts (`font-sans` / heading tokens). Do not introduce new font families per page.
+- **Type scale**: reuse the same sizes as nearby screens (e.g. auth titles `text-2xl font-bold`, body/labels via Field + default Input). Do not invent one-off `text-[13px]` / random weights per page.
+- **Spacing / radius**: use Tailwind spacing and theme radius (`rounded-lg`, etc.) consistently with existing pages.
+- Every new page must feel like the same product: same tokens, same control sizes, same hierarchy.
+
+## Strictness
+
+- Match existing page patterns before inventing new layouts.
+- If unsure, copy structure from the closest similar screen (auth, dashboard, settings) and only swap content.
+- Design deviations need an explicit user request — do not “improve” colors, fonts, or button sizes unilaterally.
