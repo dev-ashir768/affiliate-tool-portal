@@ -20,6 +20,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "../ui/button";
 
 export default function SignupForm() {
+  // =============================== State Variables ===============================
   const signupForm = useForm<SignupFormSchemaType>({
     resolver: zodResolver(signupSchema),
     defaultValues: {

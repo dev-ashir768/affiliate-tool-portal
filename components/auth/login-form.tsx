@@ -20,6 +20,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "../ui/button";
 
 export default function LoginForm() {
+  // =============================== State Variables ===============================
   const loginForm = useForm<LoginFormSchemaType>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -52,7 +53,11 @@ export default function LoginForm() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <form id="login-form" noValidate onSubmit={loginForm.handleSubmit(onSubmit)}>
+          <form
+            id="login-form"
+            noValidate
+            onSubmit={loginForm.handleSubmit(onSubmit)}
+          >
             <FieldGroup>
               <Controller
                 name="email"
