@@ -23,6 +23,12 @@
     "ast_hash": "a39fa343ba332b8464b13750bdc75f01",
     "semantic_hash": "a39fa343ba332b8464b13750bdc75f01"
   },
+  "app/(auth)/register/page.tsx": {
+    "mtime": 1788624494.572777,
+    "seen": 1788979389.9273598,
+    "ast_hash": "b7681d8c842e115b0ff28f9551e4fecd",
+    "semantic_hash": "b7681d8c842e115b0ff28f9551e4fecd"
+  },
   "app/(backoffice)/backoffice/crawler/page.tsx": {
     "mtime": 1788624366.3977866,
     "seen": 1788979389.9273667,
@@ -78,16 +84,16 @@
     "semantic_hash": "e550016731ce4023d8ee657b756d74a6"
   },
   "components/auth/auth-wrapper.tsx": {
-    "mtime": 1788983018.7311864,
-    "seen": 1788983247.1344523,
-    "ast_hash": "16eb0ba00201f5ba41b898c4ed0d0512",
-    "semantic_hash": ""
+    "mtime": 1788974705.9529102,
+    "seen": 1788979389.9274156,
+    "ast_hash": "2b8d9387db3cab31ca439d0af66016c2",
+    "semantic_hash": "2b8d9387db3cab31ca439d0af66016c2"
   },
   "components/auth/login-form.tsx": {
-    "mtime": 1788982943.3498468,
-    "seen": 1788983247.1344564,
-    "ast_hash": "9a3fa38493797da71d6d3e26f6022989",
-    "semantic_hash": ""
+    "mtime": 1788977179.7026334,
+    "seen": 1788979389.9274206,
+    "ast_hash": "cd0282f252b9829048e4d45912ba2d6a",
+    "semantic_hash": "cd0282f252b9829048e4d45912ba2d6a"
   },
   "components/ui/avatar.tsx": {
     "mtime": 1788621362.4409842,
@@ -132,10 +138,10 @@
     "semantic_hash": "f05bb7b0f862de90cc2022a69ee92017"
   },
   "components/ui/input-group.tsx": {
-    "mtime": 1788980146.0671024,
-    "seen": 1788983247.1344757,
-    "ast_hash": "52f8a873e38a403ef99417223a9ff015",
-    "semantic_hash": ""
+    "mtime": 1788973717.7183573,
+    "seen": 1788979389.9274623,
+    "ast_hash": "67bf66e9a0df9fd4f0e43f60da1e9bf5",
+    "semantic_hash": "67bf66e9a0df9fd4f0e43f60da1e9bf5"
   },
   "components/ui/input.tsx": {
     "mtime": 1788976922.6123705,
@@ -246,81 +252,9 @@
     "semantic_hash": "ab575e944f15d39a5486cf9fca385c5e"
   },
   "validations/auth.validations.ts": {
-    "mtime": 1788982157.768916,
-    "seen": 1788983247.1345184,
-    "ast_hash": "9903e918d0f6cd6bf2184311dbb09d6e",
-    "semantic_hash": ""
-  },
-  "app/(auth)/forgot-password/page.tsx": {
-    "mtime": 1788982261.1231468,
-    "seen": 1788983247.1344192,
-    "ast_hash": "2eccb2e2dfda7196594727b8d49d3847",
-    "semantic_hash": ""
-  },
-  "app/(auth)/signup/page.tsx": {
-    "mtime": 1788981430.8799438,
-    "seen": 1788983247.13443,
-    "ast_hash": "8c96c333869a1fcd02c4558d0d403df6",
-    "semantic_hash": ""
-  },
-  "components/auth/forgot-password-form.tsx": {
-    "mtime": 1788983034.3983014,
-    "seen": 1788983247.134454,
-    "ast_hash": "d48a5b1c1e5844e2d522fc5ab0f2336e",
-    "semantic_hash": ""
-  },
-  "components/auth/signup-form.tsx": {
-    "mtime": 1788983039.4614248,
-    "seen": 1788983247.1344583,
-    "ast_hash": "3d670acecb8d6e4d7ee4abc9e7ca88f0",
-    "semantic_hash": ""
-  },
-  "components/ui/password-input.tsx": {
-    "mtime": 1788980116.4748597,
-    "seen": 1788983247.1344814,
-    "ast_hash": "62fb4cf55ec3c519fc06f074928f00e6",
-    "semantic_hash": ""
-  },
-  "AGENTS.md": {
-    "mtime": 1788620434.8779213,
-    "seen": 1788983247.1345203,
-    "ast_hash": "3ad29ed1c7e1970f724e872fcffc4909",
-    "semantic_hash": ""
-  },
-  "CLAUDE.md": {
-    "mtime": 1788620434.8779213,
-    "seen": 1788983247.1345224,
-    "ast_hash": "771faa62feb60b7de901a397aebb29b0",
-    "semantic_hash": ""
-  },
-  "README.md": {
-    "mtime": 1788620434.8779213,
-    "seen": 1788983247.134524,
-    "ast_hash": "9162add00befbcdb432430f405c4ad8d",
-    "semantic_hash": ""
-  },
-  "docs/superpowers/specs/2026-09-10-shopify-app-shell-design.md": {
-    "mtime": 1788983237.67427,
-    "seen": 1788983247.1345258,
-    "ast_hash": "f3b7e1259f77cd731ddde325d03e8a66",
-    "semantic_hash": ""
-  },
-  "public/images/banners/mobile-in-hand.png": {
-    "mtime": 1788892654.4637685,
-    "seen": 1788983247.1345272,
-    "ast_hash": "8f577766c5bc14196b5a29128c18b8ae",
-    "semantic_hash": ""
-  },
-  "public/images/brandings/favicon.png": {
-    "mtime": 1788972363.9202747,
-    "seen": 1788983247.134529,
-    "ast_hash": "01abc269ec4355560216b706d8c18a48",
-    "semantic_hash": ""
-  },
-  "public/images/brandings/logo.png": {
-    "mtime": 1788972252.3717587,
-    "seen": 1788983247.134531,
-    "ast_hash": "8f601ad83342a283b7e06974ec0f45f2",
-    "semantic_hash": ""
+    "mtime": 1788974286.3853302,
+    "seen": 1788979389.9275541,
+    "ast_hash": "1564c357c7cd27b43d88c453051ad0a7",
+    "semantic_hash": "1564c357c7cd27b43d88c453051ad0a7"
   }
 }
