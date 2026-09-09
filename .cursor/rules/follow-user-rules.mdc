@@ -1,0 +1,12 @@
+---
+description: Always follow Cursor user rules for this project
+alwaysApply: true
+---
+
+# Follow user rules
+
+- Always apply the user's Cursor **User Rules** on every turn. Do not skip, weaken, or override them for convenience.
+- Prefer coding directly over design-doc / plan ceremony when the user already approved a clear, small change.
+- Only commit or push when the user explicitly asks.
+- Keep responses concise; match existing code style; change only what the task needs.
+- For frontend work, follow the user's frontend design rules unless an existing design system already defines the pattern.
