@@ -12,7 +12,7 @@ export default function AuthWrapper({ children }: Props) {
         <div className="hidden w-full h-full lg:flex justify-center items-end">
           <div>
             <Image
-              src="/images/banners/mobile-in-hand.png"
+              src="/images/mockups/mobile-in-hand.png"
               alt="mobile-in-hand"
               width={800}
               height={500}
