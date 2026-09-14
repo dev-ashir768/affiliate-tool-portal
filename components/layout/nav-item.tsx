@@ -29,12 +29,12 @@ export function SidebarNavItem({
 
   if (hasChildren) {
     return (
-      <div>
+      <div className="flex flex-col gap-1.5">
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
           className={cn(
-            "flex w-full items-center border-transparent px-2.5 h-9 gap-2 rounded-lg text-left text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+            "flex h-9 w-full items-center gap-2 rounded-lg px-2.5 text-left text-sm text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
             (open || childActive) && "text-sidebar-accent-foreground"
           )}
           style={depth ? { paddingLeft: `${16 + depth * 12}px` } : undefined}
@@ -70,16 +70,23 @@ export function SidebarNavItem({
       href={item.href}
       onClick={onNavigate}
       className={cn(
-        "relative flex items-center border-transparent px-2.5 h-9 gap-2 rounded-lg text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+        "relative flex h-9 items-center gap-2 rounded-lg px-2.5 text-sm text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
         active &&
-          "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
+          "bg-sidebar-primary font-medium text-sidebar-primary-foreground hover:bg-sidebar-primary hover:text-sidebar-primary-foreground"
       )}
       style={depth ? { paddingLeft: `${16 + depth * 12}px` } : undefined}
     >
       <NavIcon name={item.icon} className="size-4 shrink-0" />
       <span className="flex-1 truncate">{item.label}</span>
       {item.badge ? (
-        <Badge variant="secondary" className="h-5 px-1.5 text-xs">
+        <Badge
+          variant="secondary"
+          className={cn(
+            "h-5 px-1.5 text-xs",
+            active &&
+              "border-transparent bg-sidebar-primary-foreground/20 text-sidebar-primary-foreground"
+          )}
+        >
           {item.badge}
         </Badge>
       ) : null}

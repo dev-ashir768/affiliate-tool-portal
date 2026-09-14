@@ -18,6 +18,11 @@
   --color-sidebar-primary: var(--sidebar-primary);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar: var(--sidebar);
+  --color-topbar-border: var(--topbar-border);
+  --color-topbar-accent-foreground: var(--topbar-accent-foreground);
+  --color-topbar-accent: var(--topbar-accent);
+  --color-topbar-foreground: var(--topbar-foreground);
+  --color-topbar: var(--topbar);
   --color-chart-5: var(--chart-5);
   --color-chart-4: var(--chart-4);
   --color-chart-3: var(--chart-3);
@@ -55,6 +60,7 @@
 }
 
 :root {
+  /* Brand: primary oklch(58.1% 0.235 28) · secondary oklch(26.4% 0.006 34.3) */
   --background: oklch(0.995 0.002 34.3);
   --foreground: oklch(0.264 0.006 34.3);
   --card: oklch(1 0 0);
@@ -79,12 +85,21 @@
   --chart-4: oklch(0.4 0.08 34.3);
   --chart-5: oklch(0.264 0.006 34.3);
   --radius: 0.625rem;
+
+  /* App chrome — dark top bar (stays dark in light mode) */
+  --topbar: oklch(0.264 0.006 34.3);
+  --topbar-foreground: oklch(0.985 0.002 34.3);
+  --topbar-accent: oklch(1 0 0 / 15%);
+  --topbar-accent-foreground: oklch(0.985 0.002 34.3);
+  --topbar-border: oklch(1 0 0 / 12%);
+
+  /* Sidebar — light rail; primary = active pill */
   --sidebar: oklch(0.985 0.003 34.3);
-  --sidebar-foreground: oklch(0.264 0.006 34.3);
+  --sidebar-foreground: oklch(0.45 0.01 34.3);
   --sidebar-primary: oklch(0.581 0.235 28);
   --sidebar-primary-foreground: oklch(0.985 0.015 28);
-  --sidebar-accent: oklch(0.581 0.235 28);
-  --sidebar-accent-foreground: oklch(0.955 0.005 34.3);
+  --sidebar-accent: oklch(0.955 0.005 34.3);
+  --sidebar-accent-foreground: oklch(0.264 0.006 34.3);
   --sidebar-border: oklch(0.9 0.008 34.3);
   --sidebar-ring: oklch(0.581 0.235 28);
 }
@@ -92,15 +107,15 @@
 .dark {
   --background: oklch(0.18 0.005 34.3);
   --foreground: oklch(0.985 0.002 34.3);
-  --card: oklch(0.264 0.006 34.3);
+  --card: oklch(0.22 0.006 34.3);
   --card-foreground: oklch(0.985 0.002 34.3);
-  --popover: oklch(0.264 0.006 34.3);
+  --popover: oklch(0.22 0.006 34.3);
   --popover-foreground: oklch(0.985 0.002 34.3);
   --primary: oklch(0.581 0.235 28);
   --primary-foreground: oklch(0.985 0.015 28);
-  --secondary: oklch(0.985 0.002 34.3);
-  --secondary-foreground: oklch(0.32 0.01 34.3);
-  --muted: oklch(0.32 0.01 34.3);
+  --secondary: oklch(0.28 0.008 34.3);
+  --secondary-foreground: oklch(0.985 0.002 34.3);
+  --muted: oklch(0.26 0.008 34.3);
   --muted-foreground: oklch(0.72 0.012 34.3);
   --accent: oklch(0.34 0.04 28);
   --accent-foreground: oklch(0.985 0.002 34.3);
@@ -113,12 +128,21 @@
   --chart-3: oklch(0.5 0.18 28);
   --chart-4: oklch(0.42 0.08 34.3);
   --chart-5: oklch(0.7 0.05 34.3);
-  --sidebar: oklch(0.22 0.006 34.3);
-  --sidebar-foreground: oklch(0.985 0.002 34.3);
+
+  /* Top bar stays darker than page background */
+  --topbar: oklch(0.14 0.005 34.3);
+  --topbar-foreground: oklch(0.985 0.002 34.3);
+  --topbar-accent: oklch(1 0 0 / 12%);
+  --topbar-accent-foreground: oklch(0.985 0.002 34.3);
+  --topbar-border: oklch(1 0 0 / 10%);
+
+  /* Sidebar dark rail; active pill stays brand primary */
+  --sidebar: oklch(0.2 0.006 34.3);
+  --sidebar-foreground: oklch(0.72 0.012 34.3);
   --sidebar-primary: oklch(0.581 0.235 28);
   --sidebar-primary-foreground: oklch(0.985 0.015 28);
-  --sidebar-accent: oklch(0.955 0.005 34.3);
-  --sidebar-accent-foreground: oklch(0.581 0.235 28);
+  --sidebar-accent: oklch(0.28 0.01 34.3);
+  --sidebar-accent-foreground: oklch(0.985 0.002 34.3);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.581 0.235 28);
 }

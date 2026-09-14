@@ -34,7 +34,7 @@ export function AppShell({
   }
 
   return (
-    <div className="flex h-svh flex-col overflow-hidden bg-secondary">
+    <div className="flex h-svh flex-col overflow-hidden bg-topbar">
       <AppTopbar brand={data?.brand} onMenuClick={handleMenuClick} />
 
       <div className="flex min-h-0 flex-1">
@@ -52,7 +52,7 @@ export function AppShell({
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
           <SheetContent
             side="left"
-            className="w-60 p-0"
+            className="w-60 border-sidebar-border bg-sidebar p-0"
             showCloseButton={false}
           >
             <SheetTitle className="sr-only">Navigation</SheetTitle>
@@ -62,14 +62,14 @@ export function AppShell({
               isLoading={isLoading}
               isError={isError}
               onNavigate={() => setMobileOpen(false)}
-              className="border-0"
+              className="rounded-none border-0"
             />
           </SheetContent>
         </Sheet>
 
-        <div className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-tr-2xl bg-background">
+        <div className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-tr-2xl bg-muted">
           <AppPageHeader sections={sections} pathname={pathname} />
-          <main className="flex-1 overflow-y-auto px-4 pb-4 pt-2">
+          <main className="flex-1 overflow-y-auto px-4 pt-2 pb-4">
             {children}
           </main>
         </div>
