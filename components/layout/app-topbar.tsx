@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { BellIcon, MenuIcon, SearchIcon } from "lucide-react";
+import { BellIcon, MenuIcon, SearchIcon, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -17,9 +17,11 @@ import type { NavBrand } from "@/types/navigation";
 export function AppTopbar({
   brand,
   onMenuClick,
+  menuOpen,
 }: {
   brand?: NavBrand;
   onMenuClick: () => void;
+  menuOpen: boolean;
 }) {
   return (
     <header className="flex h-14 shrink-0 items-center justify-between gap-2 bg-topbar px-2 text-topbar-foreground">
@@ -29,10 +31,15 @@ export function AppTopbar({
           variant="ghost"
           size="icon"
           onClick={onMenuClick}
-          aria-label="Toggle navigation"
+          aria-label={menuOpen ? "Collapse navigation" : "Expand navigation"}
+          aria-expanded={menuOpen}
           className="text-topbar-foreground hover:bg-topbar-accent hover:text-topbar-accent-foreground"
         >
-          <MenuIcon className="size-5" />
+          {menuOpen ? (
+            <XIcon className="size-5" />
+          ) : (
+            <MenuIcon className="size-5" />
+          )}
         </Button>
 
         <Link href={brand?.href ?? "#"} className="shrink-0">

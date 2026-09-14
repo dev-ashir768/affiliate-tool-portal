@@ -7,18 +7,31 @@ import { cn } from "cn";
 import { Badge } from "@/components/ui/badge";
 import { NavIcon } from "@/components/layout/nav-icon";
 import { isNavItemActive } from "@/lib/navigation";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type { NavItem } from "@/types/navigation";
+
+function firstHref(item: NavItem): string {
+  if (item.children?.length) return firstHref(item.children[0]!);
+  return item.href === "#" ? "/" : item.href;
+}
 
 export function SidebarNavItem({
   item,
   pathname,
   onNavigate,
   depth = 0,
+  collapsed = false,
 }: {
   item: NavItem;
   pathname: string;
   onNavigate?: () => void;
   depth?: number;
+  collapsed?: boolean;
 }) {
   const hasChildren = Boolean(item.children?.length);
   const childActive = item.children?.some((child) =>
@@ -26,6 +39,39 @@ export function SidebarNavItem({
   );
   const active = isNavItemActive(pathname, item.href) && !hasChildren;
   const [open, setOpen] = useState(Boolean(childActive));
+
+  if (collapsed) {
+    const href = firstHref(item);
+    const isActive =
+      active ||
+      Boolean(childActive) ||
+      isNavItemActive(pathname, href);
+
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger
+            delay={200}
+            render={
+              <Link
+                href={href}
+                onClick={onNavigate}
+                aria-label={item.label}
+                className={cn(
+                  "flex size-9 items-center justify-center rounded-lg text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                  isActive &&
+                    "bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary hover:text-sidebar-primary-foreground"
+                )}
+              />
+            }
+          >
+            <NavIcon name={item.icon} className="size-4 shrink-0" />
+          </TooltipTrigger>
+          <TooltipContent side="right">{item.label}</TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  }
 
   if (hasChildren) {
     return (
