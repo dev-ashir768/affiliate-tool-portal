@@ -42,7 +42,8 @@ export function AppShell({
     getDesktopServerSnapshot
   );
   const sections = data?.sections ?? [];
-  const menuOpen = isDesktop ? desktopExpanded : mobileOpen;
+  // Expanded → hamburger; collapsed / mobile sheet open → X
+  const showCloseIcon = isDesktop ? !desktopExpanded : mobileOpen;
 
   function handleMenuClick() {
     if (window.matchMedia(LG_QUERY).matches) {
@@ -57,7 +58,7 @@ export function AppShell({
       <AppTopbar
         brand={data?.brand}
         onMenuClick={handleMenuClick}
-        menuOpen={menuOpen}
+        showCloseIcon={showCloseIcon}
       />
 
       <div className="flex min-h-0 flex-1">

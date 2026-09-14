@@ -17,11 +17,11 @@ import type { NavBrand } from "@/types/navigation";
 export function AppTopbar({
   brand,
   onMenuClick,
-  menuOpen,
+  showCloseIcon,
 }: {
   brand?: NavBrand;
   onMenuClick: () => void;
-  menuOpen: boolean;
+  showCloseIcon: boolean;
 }) {
   return (
     <header className="flex h-14 shrink-0 items-center justify-between gap-2 bg-topbar px-2 text-topbar-foreground">
@@ -31,11 +31,11 @@ export function AppTopbar({
           variant="ghost"
           size="icon"
           onClick={onMenuClick}
-          aria-label={menuOpen ? "Collapse navigation" : "Expand navigation"}
-          aria-expanded={menuOpen}
+          aria-label={showCloseIcon ? "Expand navigation" : "Collapse navigation"}
+          aria-expanded={!showCloseIcon}
           className="text-topbar-foreground hover:bg-topbar-accent hover:text-topbar-accent-foreground"
         >
-          {menuOpen ? (
+          {showCloseIcon ? (
             <XIcon className="size-5" />
           ) : (
             <MenuIcon className="size-5" />
