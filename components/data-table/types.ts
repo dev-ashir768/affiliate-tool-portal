@@ -53,4 +53,5 @@ export type DataTableProps<TData extends Record<string, unknown>> = {
   enableColumnOrdering?: boolean;
   pageSizeOptions?: number[];
   getRowId?: (row: TData) => string;
+  ariaLabel?: string;
 };

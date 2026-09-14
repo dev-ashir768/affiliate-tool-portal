@@ -38,8 +38,6 @@ export function DataTableColumnHeader<
   className,
 }: DataTableColumnHeaderProps<TData, TValue>) {
   const sorted = column.getIsSorted();
-  const ariaSort =
-    sorted === "asc" ? "ascending" : sorted === "desc" ? "descending" : "none";
   const SortIcon =
     sorted === "asc" ? ArrowUp : sorted === "desc" ? ArrowDown : ArrowUpDown;
   const canSort = column.getCanSort();
@@ -65,7 +63,6 @@ export function DataTableColumnHeader<
           variant="ghost"
           size="sm"
           className="-ml-1.5 h-7 gap-1 px-1.5 font-medium"
-          aria-sort={ariaSort}
           onClick={() => cycleSorting(column)}
         >
           <span className="truncate">{title}</span>

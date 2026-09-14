@@ -14,6 +14,7 @@ import {
   type Header,
   type HeaderGroup,
 } from "@tanstack/react-table";
+import { GripVertical } from "lucide-react";
 import { cn } from "cn";
 import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header";
 import { DataTableEmpty } from "@/components/data-table/data-table-empty";
@@ -37,9 +38,7 @@ import {
 } from "@/components/ui/table";
 
 export type DataTableComponentProps<TData extends Record<string, unknown>> =
-  DataTableProps<TData> & {
-    ariaLabel?: string;
-  };
+  DataTableProps<TData>;
 
 function resolveColumnOrder(storedOrder: string[], leafIds: string[]): string[] {
   if (storedOrder.length === 0) return leafIds;
@@ -74,6 +73,13 @@ function getHeaderTitle<TData extends Record<string, unknown>>(
   return typeof def === "string" && def.length > 0 ? def : header.column.id;
 }
 
+function isCustomColumnHeader<TData extends Record<string, unknown>>(
+  header: Header<DataTableFeatures, TData, unknown>,
+): boolean {
+  const def = header.column.columnDef.header;
+  return typeof def === "function" || (def != null && typeof def !== "string");
+}
+
 function getAriaSort<TData extends Record<string, unknown>>(
   header: Header<DataTableFeatures, TData, unknown>,
 ): "ascending" | "descending" | "none" | undefined {
@@ -96,6 +102,8 @@ function DataTableHeaderCell<TData extends Record<string, unknown>>({
   dragHandle?: DraggableProvided;
 }) {
   const canResize = enableColumnResizing && header.column.getCanResize();
+  const showDragHandle =
+    enableColumnOrdering && dragHandle != null && !header.isPlaceholder;
   const sizeStyle = {
     width: header.getSize(),
     ...(dragHandle?.draggableProps.style ?? {}),
@@ -108,14 +116,26 @@ function DataTableHeaderCell<TData extends Record<string, unknown>>({
       aria-sort={getAriaSort(header)}
       {...dragHandle?.draggableProps}
       style={sizeStyle}
-      className="group/th relative"
+      className="group/th relative flex items-center gap-1"
     >
-      {header.isPlaceholder ? null : (
+      {showDragHandle ? (
+        <span
+          className="inline-flex size-6 shrink-0 cursor-grab items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground active:cursor-grabbing"
+          aria-label="Reorder column"
+          {...dragHandle?.dragHandleProps}
+          onPointerDown={(event) => {
+            event.stopPropagation();
+          }}
+        >
+          <GripVertical className="size-3.5" />
+        </span>
+      ) : null}
+      {header.isPlaceholder ? null : isCustomColumnHeader(header) ? (
+        flexRender(header.column.columnDef.header, header.getContext())
+      ) : (
         <DataTableColumnHeader
           column={header.column}
           title={getHeaderTitle(header)}
-          enableColumnOrdering={enableColumnOrdering}
-          dragHandleProps={dragHandle?.dragHandleProps}
         />
       )}
       {canResize ? (
