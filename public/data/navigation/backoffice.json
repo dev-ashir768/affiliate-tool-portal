@@ -1,0 +1,36 @@
+{
+  "area": "backoffice",
+  "brand": { "name": "Tiksly Backoffice", "href": "/backoffice/users" },
+  "sections": [
+    {
+      "id": "main",
+      "label": null,
+      "items": [
+        {
+          "id": "users",
+          "label": "Users",
+          "href": "/backoffice/users",
+          "icon": "Users"
+        },
+        {
+          "id": "shops",
+          "label": "Shops",
+          "href": "/backoffice/shops",
+          "icon": "Store"
+        },
+        {
+          "id": "proxies",
+          "label": "Proxies",
+          "href": "/backoffice/proxies",
+          "icon": "Globe"
+        },
+        {
+          "id": "crawler",
+          "label": "Crawler",
+          "href": "/backoffice/crawler",
+          "icon": "Bot"
+        }
+      ]
+    }
+  ]
+}

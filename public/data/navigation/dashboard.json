@@ -1,0 +1,46 @@
+{
+  "area": "dashboard",
+  "brand": { "name": "Tiksly", "href": "/home" },
+  "sections": [
+    {
+      "id": "main",
+      "label": null,
+      "items": [
+        { "id": "home", "label": "Home", "href": "/home", "icon": "Home" },
+        {
+          "id": "products",
+          "label": "Products",
+          "href": "/products",
+          "icon": "Package"
+        },
+        {
+          "id": "orders",
+          "label": "Orders",
+          "href": "/orders",
+          "icon": "ShoppingCart",
+          "badge": "12"
+        },
+        {
+          "id": "reports",
+          "label": "Reports",
+          "href": "#",
+          "icon": "BarChart3",
+          "children": [
+            {
+              "id": "analytics",
+              "label": "Analytics",
+              "href": "/analytics",
+              "icon": "BarChart3"
+            }
+          ]
+        },
+        {
+          "id": "settings",
+          "label": "Settings",
+          "href": "/settings",
+          "icon": "Settings"
+        }
+      ]
+    }
+  ]
+}
