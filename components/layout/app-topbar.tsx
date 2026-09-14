@@ -101,8 +101,9 @@ export function AppTopbar({
             </div>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem>Profile</DropdownMenuItem>
-            <DropdownMenuItem>Logout</DropdownMenuItem>
+            <DropdownMenuItem className="cursor-pointer">Profile</DropdownMenuItem>
+            <DropdownMenuItem className="cursor-pointer">Logout</DropdownMenuItem>
+            
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
