@@ -21,30 +21,32 @@ export function AppTopbar({
   onMenuClick: () => void;
 }) {
   return (
-    <header className="flex h-14 shrink-0 items-center gap-2 bg-secondary text-primary-foreground sm:px-4">
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        onClick={onMenuClick}
-        aria-label="Toggle navigation"
-        className="text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"
-      >
-        <MenuIcon className="size-5" />
-      </Button>
+    <header className="flex h-14 shrink-0 items-center gap-2 bg-secondary text-primary-foreground px-2 justify-between">
+      <div className="flex items-center gap-2">
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          onClick={onMenuClick}
+          aria-label="Toggle navigation"
+          className="text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"
+        >
+          <MenuIcon className="size-5" />
+        </Button>
 
-      <Link href={brand?.href ?? "#"} className="shrink-0">
-        <Image
-          src="/images/brandings/logo.png"
-          alt={brand?.name ?? "Tiksly"}
-          width={100}
-          height={36}
-          className="h-8 w-auto"
-          priority
-        />
-      </Link>
+        <Link href={brand?.href ?? "#"} className="shrink-0">
+          <Image
+            src="/images/brandings/logo.png"
+            alt={brand?.name ?? "Tiksly"}
+            width={100}
+            height={36}
+            className="h-8 w-auto"
+            priority
+          />
+        </Link>
+      </div>
 
-      <div className="mx-auto hidden w-full max-w-xl flex-1 md:block">
+      <div className="hidden w-full max-w-xl flex-1 md:block">
         <label className="relative flex items-center">
           <SearchIcon className="pointer-events-none absolute left-3 size-4 text-primary-foreground/80" />
           <input
@@ -60,7 +62,7 @@ export function AppTopbar({
         </label>
       </div>
 
-      <div className="ml-auto flex items-center gap-1 sm:gap-2">
+      <div className="flex items-center gap-1 sm:gap-2">
         <Button
           type="button"
           variant="ghost"
