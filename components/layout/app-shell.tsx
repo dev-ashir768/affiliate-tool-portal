@@ -34,7 +34,7 @@ export function AppShell({
   }
 
   return (
-    <div className="flex h-svh flex-col overflow-hidden bg-primary">
+    <div className="flex h-svh flex-col overflow-hidden bg-secondary">
       <AppTopbar brand={data?.brand} onMenuClick={handleMenuClick} />
 
       <div className="flex min-h-0 flex-1">

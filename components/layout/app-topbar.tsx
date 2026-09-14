@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { BellIcon, MenuIcon, SearchIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -20,7 +21,7 @@ export function AppTopbar({
   onMenuClick: () => void;
 }) {
   return (
-    <header className="flex h-14 shrink-0 items-center gap-2 bg-primary text-primary-foreground sm:px-4">
+    <header className="flex h-14 shrink-0 items-center gap-2 bg-secondary text-primary-foreground sm:px-4">
       <Button
         type="button"
         variant="ghost"
@@ -32,11 +33,15 @@ export function AppTopbar({
         <MenuIcon className="size-5" />
       </Button>
 
-      <Link
-        href={brand?.href ?? "#"}
-        className="shrink-0 text-lg font-bold tracking-wide uppercase"
-      >
-        {brand?.name ?? "Tiksly"}
+      <Link href={brand?.href ?? "#"} className="shrink-0">
+        <Image
+          src="/images/brandings/logo.png"
+          alt={brand?.name ?? "Tiksly"}
+          width={100}
+          height={36}
+          className="h-8 w-auto"
+          priority
+        />
       </Link>
 
       <div className="mx-auto hidden w-full max-w-xl flex-1 md:block">
