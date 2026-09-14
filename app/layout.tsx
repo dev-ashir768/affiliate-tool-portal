@@ -38,7 +38,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       )}
       suppressHydrationWarning
     >
-      <body className="min-h-full w-full flex flex-col">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var m=window.matchMedia('(prefers-color-scheme: dark)');var s=localStorage.getItem('theme');var d=s==='dark'||(s!=='light'&&m.matches);document.documentElement.classList.toggle('dark',d);document.documentElement.classList.toggle('light',!d);}catch(e){}})();`,
+          }}
+        />
+      </head>
+      <body className="flex min-h-full w-full flex-col">
         <Providers>{children}</Providers>
       </body>
     </html>

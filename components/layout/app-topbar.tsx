@@ -11,6 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ThemeToggle } from "@/components/layout/theme-toggle";
 import type { NavBrand } from "@/types/navigation";
 
 export function AppTopbar({
@@ -72,6 +73,8 @@ export function AppTopbar({
         >
           <BellIcon className="size-5" />
         </Button>
+
+        <ThemeToggle />
 
         <DropdownMenu>
           <DropdownMenuTrigger
