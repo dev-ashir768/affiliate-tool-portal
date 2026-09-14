@@ -55,8 +55,9 @@ export function UsersTable() {
 
   const onPaginationChange: OnChangeFn<PaginationState> = (updater) => {
     const next = typeof updater === "function" ? updater(pagination) : updater;
+    const pageSizeChanged = next.pageSize !== pagination.pageSize;
     void setParams({
-      page: next.pageIndex + 1,
+      page: pageSizeChanged ? 1 : next.pageIndex + 1,
       pageSize: next.pageSize,
     });
   };
