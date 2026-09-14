@@ -13,21 +13,23 @@ import {
 import type { DataTableFeatures } from "@/components/data-table/types";
 
 export type DataTableColumnVisibilityProps<
-  TData extends Record<string, unknown>,
+  TData extends object,
 > = {
   table: Table<DataTableFeatures, TData>;
   disabled?: boolean;
 };
 
-function getColumnLabel<TData extends Record<string, unknown>>(
+function getColumnLabel<TData extends object>(
   column: Column<DataTableFeatures, TData, unknown>,
 ): string {
+  const label = column.columnDef.meta?.label;
+  if (typeof label === "string" && label.length > 0) return label;
   const header = column.columnDef.header;
   return typeof header === "string" && header.length > 0 ? header : column.id;
 }
 
 export function DataTableColumnVisibility<
-  TData extends Record<string, unknown>,
+  TData extends object,
 >({ table, disabled }: DataTableColumnVisibilityProps<TData>) {
   const hideableColumns = table
     .getAllLeafColumns()

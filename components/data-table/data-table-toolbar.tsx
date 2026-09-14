@@ -14,7 +14,7 @@ import type {
 
 const SEARCH_DEBOUNCE_MS = 400;
 
-export type DataTableToolbarProps<TData extends Record<string, unknown>> = {
+export type DataTableToolbarProps<TData extends object> = {
   table: Table<DataTableFeatures, TData>;
   search: string;
   onSearchChange: (value: string) => void;
@@ -25,7 +25,7 @@ export type DataTableToolbarProps<TData extends Record<string, unknown>> = {
   disabled?: boolean;
 };
 
-export function DataTableToolbar<TData extends Record<string, unknown>>({
+export function DataTableToolbar<TData extends object>({
   table,
   search,
   onSearchChange,

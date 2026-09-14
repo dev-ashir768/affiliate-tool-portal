@@ -45,8 +45,10 @@ export function filterSortPaginateUsers(
 export function usersToCsv(users: User[]): string {
   const headers = ["id", "name", "email", "role", "status", "shop", "createdAt"];
   const escape = (v: string) => {
-    if (/[",\n]/.test(v)) return `"${v.replace(/"/g, '""')}"`;
-    return v;
+    let value = v;
+    if (/^[=+\-@\t\r]/.test(value)) value = `'${value}`;
+    if (/[",\n\r]/.test(value)) return `"${value.replace(/"/g, '""')}"`;
+    return value;
   };
   const lines = [
     headers.join(","),

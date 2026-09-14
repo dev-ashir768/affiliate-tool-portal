@@ -44,6 +44,6 @@ export const useDataTablePreferencesStore = create<PreferencesState>()(
           },
         })),
     }),
-    { name: "datatable-preferences" },
+    { name: "datatable-preferences", version: 1 },
   ),
 );

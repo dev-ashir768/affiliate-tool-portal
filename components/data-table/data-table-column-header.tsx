@@ -1,24 +1,21 @@
 "use client";
 
-import type { DraggableProvidedDragHandleProps } from "@hello-pangea/dnd";
 import type { Column } from "@tanstack/react-table";
-import { ArrowDown, ArrowUp, ArrowUpDown, GripVertical } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { cn } from "cn";
 import { Button } from "@/components/ui/button";
 import type { DataTableFeatures } from "@/components/data-table/types";
 
 export type DataTableColumnHeaderProps<
-  TData extends Record<string, unknown>,
+  TData extends object,
   TValue = unknown,
 > = {
   column: Column<DataTableFeatures, TData, TValue>;
   title: string;
-  enableColumnOrdering?: boolean;
-  dragHandleProps?: DraggableProvidedDragHandleProps | null;
   className?: string;
 };
 
-function cycleSorting<TData extends Record<string, unknown>, TValue>(
+function cycleSorting<TData extends object, TValue>(
   column: Column<DataTableFeatures, TData, TValue>,
 ) {
   const sorted = column.getIsSorted();
@@ -28,13 +25,11 @@ function cycleSorting<TData extends Record<string, unknown>, TValue>(
 }
 
 export function DataTableColumnHeader<
-  TData extends Record<string, unknown>,
+  TData extends object,
   TValue = unknown,
 >({
   column,
   title,
-  enableColumnOrdering = false,
-  dragHandleProps,
   className,
 }: DataTableColumnHeaderProps<TData, TValue>) {
   const sorted = column.getIsSorted();
@@ -44,19 +39,6 @@ export function DataTableColumnHeader<
 
   return (
     <div className={cn("flex min-w-0 items-center gap-1", className)}>
-      {enableColumnOrdering ? (
-        <span
-          className="inline-flex size-6 shrink-0 cursor-grab items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground active:cursor-grabbing"
-          aria-label="Reorder column"
-          {...dragHandleProps}
-          onPointerDown={(event) => {
-            event.stopPropagation();
-          }}
-        >
-          <GripVertical className="size-3.5" />
-        </span>
-      ) : null}
-
       {canSort ? (
         <Button
           type="button"

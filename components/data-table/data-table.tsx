@@ -37,10 +37,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-export type DataTableComponentProps<TData extends Record<string, unknown>> =
+export type DataTableComponentProps<TData extends object> =
   DataTableProps<TData>;
 
-function resolveColumnOrder(storedOrder: string[], leafIds: string[]): string[] {
+function resolveColumnOrder(
+  storedOrder: string[],
+  leafIds: string[],
+): string[] {
   if (storedOrder.length === 0) return leafIds;
   const leafSet = new Set(leafIds);
   const kept = storedOrder.filter((id) => leafSet.has(id));
@@ -61,26 +64,24 @@ function reorderVisibleColumns(
 
   const visibleSet = new Set(nextVisible);
   let i = 0;
-  return fullOrder.map((id) =>
-    visibleSet.has(id) ? nextVisible[i++]! : id,
-  );
+  return fullOrder.map((id) => (visibleSet.has(id) ? nextVisible[i++]! : id));
 }
 
-function getHeaderTitle<TData extends Record<string, unknown>>(
+function getHeaderTitle<TData extends object>(
   header: Header<DataTableFeatures, TData, unknown>,
 ): string {
   const def = header.column.columnDef.header;
   return typeof def === "string" && def.length > 0 ? def : header.column.id;
 }
 
-function isCustomColumnHeader<TData extends Record<string, unknown>>(
+function isCustomColumnHeader<TData extends object>(
   header: Header<DataTableFeatures, TData, unknown>,
 ): boolean {
   const def = header.column.columnDef.header;
   return typeof def === "function" || (def != null && typeof def !== "string");
 }
 
-function getAriaSort<TData extends Record<string, unknown>>(
+function getAriaSort<TData extends object>(
   header: Header<DataTableFeatures, TData, unknown>,
 ): "ascending" | "descending" | "none" | undefined {
   if (!header.column.getCanSort()) return undefined;
@@ -90,7 +91,7 @@ function getAriaSort<TData extends Record<string, unknown>>(
   return "none";
 }
 
-function DataTableHeaderCell<TData extends Record<string, unknown>>({
+function DataTableHeaderCell<TData extends object>({
   header,
   enableColumnOrdering,
   enableColumnResizing,
@@ -116,28 +117,30 @@ function DataTableHeaderCell<TData extends Record<string, unknown>>({
       aria-sort={getAriaSort(header)}
       {...dragHandle?.draggableProps}
       style={sizeStyle}
-      className="group/th relative flex items-center gap-1"
+      className="group/th relative"
     >
-      {showDragHandle ? (
-        <span
-          className="inline-flex size-6 shrink-0 cursor-grab items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground active:cursor-grabbing"
-          aria-label="Reorder column"
-          {...dragHandle?.dragHandleProps}
-          onPointerDown={(event) => {
-            event.stopPropagation();
-          }}
-        >
-          <GripVertical className="size-3.5" />
-        </span>
-      ) : null}
-      {header.isPlaceholder ? null : isCustomColumnHeader(header) ? (
-        flexRender(header.column.columnDef.header, header.getContext())
-      ) : (
-        <DataTableColumnHeader
-          column={header.column}
-          title={getHeaderTitle(header)}
-        />
-      )}
+      <div className="flex items-center gap-1">
+        {showDragHandle ? (
+          <span
+            className="inline-flex size-6 shrink-0 cursor-grab items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground active:cursor-grabbing"
+            aria-label="Reorder column"
+            {...dragHandle?.dragHandleProps}
+            onPointerDown={(event) => {
+              event.stopPropagation();
+            }}
+          >
+            <GripVertical className="size-3.5" />
+          </span>
+        ) : null}
+        {header.isPlaceholder ? null : isCustomColumnHeader(header) ? (
+          flexRender(header.column.columnDef.header, header.getContext())
+        ) : (
+          <DataTableColumnHeader
+            column={header.column}
+            title={getHeaderTitle(header)}
+          />
+        )}
+      </div>
       {canResize ? (
         <div
           role="separator"
@@ -156,7 +159,7 @@ function DataTableHeaderCell<TData extends Record<string, unknown>>({
   );
 }
 
-function DataTableHeaderRow<TData extends Record<string, unknown>>({
+function DataTableHeaderRow<TData extends object>({
   headerGroup,
   enableColumnOrdering,
   enableColumnResizing,
@@ -212,7 +215,7 @@ function DataTableHeaderRow<TData extends Record<string, unknown>>({
   );
 }
 
-export function DataTable<TData extends Record<string, unknown>>({
+export function DataTable<TData extends object>({
   tableId,
   columns,
   data,
@@ -273,7 +276,9 @@ export function DataTable<TData extends Record<string, unknown>>({
       if (result.source.index === result.destination.index) return;
 
       const leafIds = table.getAllLeafColumns().map((column) => column.id);
-      const visibleIds = table.getVisibleLeafColumns().map((column) => column.id);
+      const visibleIds = table
+        .getVisibleLeafColumns()
+        .map((column) => column.id);
       const nextOrder = reorderVisibleColumns(
         resolveColumnOrder(prefs.columnOrder, leafIds),
         visibleIds,
@@ -285,7 +290,8 @@ export function DataTable<TData extends Record<string, unknown>>({
     [prefs.columnOrder, table],
   );
 
-  const showError = isError && data.length === 0;
+  const showFullError = isError && data.length === 0;
+  const showInlineError = isError && data.length > 0;
   const isSoftFetching = isFetching && !isLoading;
   const rows = table.getRowModel().rows;
   const visibleColumnCount = Math.max(table.getVisibleLeafColumns().length, 1);
@@ -352,7 +358,7 @@ export function DataTable<TData extends Record<string, unknown>>({
         isFetching={isFetching}
       />
 
-      {showError ? (
+      {showFullError ? (
         <DataTableError onRetry={onRetry} />
       ) : isLoading ? (
         <DataTableSkeleton
@@ -360,15 +366,22 @@ export function DataTable<TData extends Record<string, unknown>>({
           rowCount={Math.min(pagination.pageSize, 8)}
         />
       ) : (
-        <div className="relative" aria-busy={isSoftFetching || undefined}>
-          <div className={cn(isSoftFetching && "opacity-60")}>{orderedTable}</div>
-          {isSoftFetching ? (
-            <div className="pointer-events-none absolute inset-0 bg-background/60" />
+        <>
+          {showInlineError ? (
+            <DataTableError variant="inline" onRetry={onRetry} />
           ) : null}
-        </div>
+          <div className="relative" aria-busy={isSoftFetching || undefined}>
+            <div className={cn(isSoftFetching && "opacity-60")}>
+              {orderedTable}
+            </div>
+            {isSoftFetching ? (
+              <div className="pointer-events-none absolute inset-0 bg-background/60" />
+            ) : null}
+          </div>
+        </>
       )}
 
-      {showError ? null : (
+      {showFullError ? null : (
         <DataTablePagination
           table={table}
           pageSizeOptions={pageSizeOptions}

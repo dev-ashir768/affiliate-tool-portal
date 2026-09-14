@@ -12,6 +12,7 @@ import {
   columnResizingFeature,
   columnSizingFeature,
   columnVisibilityFeature,
+  metaHelper,
   rowPaginationFeature,
   rowSortingFeature,
   tableFeatures,
@@ -24,6 +25,7 @@ export const dataTableFeatures = tableFeatures({
   columnResizingFeature,
   rowSortingFeature,
   rowPaginationFeature,
+  columnMeta: metaHelper<{ label?: string }>(),
 });
 
 export type DataTableFeatures = typeof dataTableFeatures;
@@ -32,7 +34,7 @@ export type DataTableExportFormat = "csv" | "xlsx";
 
 export type { ColumnOrderState, ColumnSizingState, ColumnVisibilityState };
 
-export type DataTableProps<TData extends Record<string, unknown>> = {
+export type DataTableProps<TData extends object> = {
   tableId: string;
   columns: ColumnDef<DataTableFeatures, TData, unknown>[];
   data: TData[];

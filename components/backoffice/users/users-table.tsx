@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import {
   parseAsInteger,
   parseAsString,
@@ -16,7 +16,7 @@ import { DataTable } from "@/components/data-table";
 import { downloadBlob } from "@/components/data-table/utils/export-download";
 import { useExportUsers, useUsersQuery } from "@/hooks/use-users";
 import type { User } from "@/types/users";
-import { usersColumns, type UserRow } from "./users-columns";
+import { usersColumns } from "./users-columns";
 
 const searchParamsParsers = {
   page: parseAsInteger.withDefault(1),
@@ -42,6 +42,18 @@ export function UsersTable() {
 
   const query = useUsersQuery(listParams);
   const exportMutation = useExportUsers();
+  const totalCount = query.data?.meta.total ?? 0;
+  const knownPageCount =
+    query.data == null
+      ? null
+      : Math.max(1, Math.ceil(totalCount / Math.max(1, params.pageSize)));
+
+  useEffect(() => {
+    if (knownPageCount == null) return;
+    if (params.page > knownPageCount) {
+      void setParams({ page: knownPageCount });
+    }
+  }, [knownPageCount, params.page, setParams]);
 
   const pagination: PaginationState = {
     pageIndex: Math.max(0, params.page - 1),
@@ -81,8 +93,8 @@ export function UsersTable() {
       <DataTable
         tableId="backoffice-users"
         columns={usersColumns}
-        data={(query.data?.data ?? []) as UserRow[]}
-        totalCount={query.data?.meta.total ?? 0}
+        data={query.data?.data ?? []}
+        totalCount={totalCount}
         pagination={pagination}
         onPaginationChange={onPaginationChange}
         sorting={sorting}

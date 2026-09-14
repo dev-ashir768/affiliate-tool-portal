@@ -14,14 +14,14 @@ import { getPaginationItems } from "@/components/data-table/utils/pagination";
 
 export const DEFAULT_PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
 
-export type DataTablePaginationProps<TData extends Record<string, unknown>> = {
+export type DataTablePaginationProps<TData extends object> = {
   table: Table<DataTableFeatures, TData>;
   pageSizeOptions?: number[];
   isLoading?: boolean;
   disabled?: boolean;
 };
 
-export function DataTablePagination<TData extends Record<string, unknown>>({
+export function DataTablePagination<TData extends object>({
   table,
   pageSizeOptions = DEFAULT_PAGE_SIZE_OPTIONS,
   isLoading = false,
@@ -32,12 +32,15 @@ export function DataTablePagination<TData extends Record<string, unknown>>({
   const pageSize = pagination.pageSize;
   const totalCount = table.getRowCount();
   const pageCount = table.getPageCount();
-  const currentPage = pageIndex + 1;
+  const lastPageIndex = Math.max(0, pageCount - 1);
+  const clampedPageIndex =
+    pageCount <= 0 ? 0 : Math.min(Math.max(0, pageIndex), lastPageIndex);
+  const currentPage = pageCount <= 0 ? 1 : clampedPageIndex + 1;
   const controlsDisabled = isLoading || disabled;
   const isFirstPage = pageIndex === 0;
   const isLastPage = pageCount <= 0 || pageIndex >= pageCount - 1;
-  const from = totalCount === 0 ? 0 : pageIndex * pageSize + 1;
-  const to = Math.min(totalCount, (pageIndex + 1) * pageSize);
+  const from = totalCount === 0 ? 0 : clampedPageIndex * pageSize + 1;
+  const to = Math.min(totalCount, (clampedPageIndex + 1) * pageSize);
   const items = getPaginationItems(currentPage, Math.max(pageCount, 0));
 
   return (
