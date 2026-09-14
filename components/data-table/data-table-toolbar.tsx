@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Table } from "@tanstack/react-table";
 import { RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -36,20 +36,26 @@ export function DataTableToolbar<TData extends Record<string, unknown>>({
   disabled = false,
 }: DataTableToolbarProps<TData>) {
   const [inputValue, setInputValue] = useState(search);
-  const [prevSearch, setPrevSearch] = useState(search);
+  const searchRef = useRef(search);
+  const onSearchChangeRef = useRef(onSearchChange);
 
-  if (search !== prevSearch) {
-    setPrevSearch(search);
-    setInputValue(search);
-  }
+  useEffect(() => {
+    onSearchChangeRef.current = onSearchChange;
+  }, [onSearchChange]);
+
+  useEffect(() => {
+    // sync input from prop only if user isn't mid-edit relative to last committed value
+    setInputValue((current) => (current === searchRef.current ? search : current));
+    searchRef.current = search;
+  }, [search]);
 
   useEffect(() => {
     if (inputValue === search) return;
     const timeoutId = window.setTimeout(() => {
-      onSearchChange(inputValue);
+      onSearchChangeRef.current(inputValue);
     }, SEARCH_DEBOUNCE_MS);
     return () => window.clearTimeout(timeoutId);
-  }, [inputValue, search, onSearchChange]);
+  }, [inputValue, search]);
 
   return (
     <div className="flex flex-wrap items-start gap-2">

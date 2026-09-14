@@ -2,11 +2,10 @@
 
 import type { Column, Table } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -46,19 +45,13 @@ export function DataTableColumnVisibility<
       <DropdownMenuContent align="end" className="w-48">
         <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
         {hideableColumns.map((column) => (
-          <DropdownMenuItem
+          <DropdownMenuCheckboxItem
             key={column.id}
-            closeOnClick={false}
-            onClick={() => column.toggleVisibility()}
+            checked={column.getIsVisible()}
+            onCheckedChange={(checked) => column.toggleVisibility(checked)}
           >
-            <Checkbox
-              checked={column.getIsVisible()}
-              className="pointer-events-none"
-              tabIndex={-1}
-              aria-hidden
-            />
             <span className="truncate">{getColumnLabel(column)}</span>
-          </DropdownMenuItem>
+          </DropdownMenuCheckboxItem>
         ))}
       </DropdownMenuContent>
     </DropdownMenu>
