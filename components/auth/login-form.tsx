@@ -37,7 +37,6 @@ export default function LoginForm() {
   });
 
   const isSubmitting = loginForm.formState.isSubmitting;
-  const formError = loginForm.formState.errors.root;
 
   async function onSubmit(data: LoginFormSchemaType) {
     loginForm.clearErrors("root");
@@ -46,7 +45,7 @@ export default function LoginForm() {
 
   return (
     <>
-      <Card className="ring-0 w-full max-w-md bg-background">
+      <Card className="ring-0 w-full max-w-md bg-white">
         <CardHeader className="flex flex-col items-center">
           <Image
             src="/images/brandings/logo.png"

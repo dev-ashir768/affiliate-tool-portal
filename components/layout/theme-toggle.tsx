@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { MoonIcon, SunIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,22 +16,30 @@ function applyTheme(dark: boolean) {
   localStorage.setItem("theme", dark ? "dark" : "light");
 }
 
-export function ThemeToggle() {
-  const [dark, setDark] = useState(false);
-  const [ready, setReady] = useState(false);
+function subscribe(onStoreChange: () => void) {
+  const observer = new MutationObserver(onStoreChange);
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["class"],
+  });
+  return () => observer.disconnect();
+}
 
-  useEffect(() => {
-    setDark(document.documentElement.classList.contains("dark"));
-    setReady(true);
-  }, []);
+function getSnapshot() {
+  return document.documentElement.classList.contains("dark");
+}
+
+function getServerSnapshot() {
+  return false;
+}
+
+export function ThemeToggle() {
+  const dark = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const label = dark ? "Switch to light mode" : "Switch to dark mode";
 
   function toggle() {
-    const next = !document.documentElement.classList.contains("dark");
-    applyTheme(next);
-    setDark(next);
+    applyTheme(!document.documentElement.classList.contains("dark"));
   }
-
-  const label = dark ? "Switch to light mode" : "Switch to dark mode";
 
   return (
     <TooltipProvider>
@@ -49,14 +57,10 @@ export function ThemeToggle() {
             />
           }
         >
-          {ready ? (
-            dark ? (
-              <SunIcon className="size-5" />
-            ) : (
-              <MoonIcon className="size-5" />
-            )
+          {dark ? (
+            <SunIcon className="size-5" />
           ) : (
-            <MoonIcon className="size-5 opacity-0" />
+            <MoonIcon className="size-5" />
           )}
         </TooltipTrigger>
         <TooltipContent side="bottom">{label}</TooltipContent>

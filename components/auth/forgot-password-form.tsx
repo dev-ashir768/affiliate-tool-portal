@@ -41,7 +41,7 @@ export default function ForgotPasswordForm() {
 
   return (
     <>
-      <Card className="ring-0 w-full max-w-md">
+      <Card className="ring-0 w-full max-w-md bg-white">
         <CardHeader className="flex flex-col items-center">
           <Image
             src="/images/brandings/logo.png"
