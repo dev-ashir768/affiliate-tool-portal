@@ -17,7 +17,7 @@ export function AppPageHeader({
     "Home";
 
   return (
-    <div className="px-4 pt-5 pb-2 lg:px-6">
+    <div className="px-4 pt-4 pb-2">
       <h1 className="text-2xl font-bold tracking-tight capitalize text-foreground">
         {title}
       </h1>

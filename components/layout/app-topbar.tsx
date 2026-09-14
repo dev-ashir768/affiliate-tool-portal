@@ -20,7 +20,7 @@ export function AppTopbar({
   onMenuClick: () => void;
 }) {
   return (
-    <header className="flex h-14 shrink-0 items-center gap-3 bg-primary px-3 text-primary-foreground sm:px-4">
+    <header className="flex h-14 shrink-0 items-center gap-2 bg-primary text-primary-foreground sm:px-4">
       <Button
         type="button"
         variant="ghost"

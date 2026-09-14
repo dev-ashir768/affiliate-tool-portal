@@ -34,7 +34,7 @@ export function AppShell({
   }
 
   return (
-    <div className="flex h-svh flex-col overflow-hidden bg-background">
+    <div className="flex h-svh flex-col overflow-hidden bg-primary">
       <AppTopbar brand={data?.brand} onMenuClick={handleMenuClick} />
 
       <div className="flex min-h-0 flex-1">
@@ -67,9 +67,9 @@ export function AppShell({
           </SheetContent>
         </Sheet>
 
-        <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <div className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-tr-2xl bg-background">
           <AppPageHeader sections={sections} pathname={pathname} />
-          <main className="flex-1 overflow-y-auto px-4 pb-6 lg:px-6">
+          <main className="flex-1 overflow-y-auto px-4 pb-4 pt-2">
             {children}
           </main>
         </div>

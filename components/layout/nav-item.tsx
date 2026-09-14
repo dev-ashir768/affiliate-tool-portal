@@ -34,8 +34,8 @@ export function SidebarNavItem({
           type="button"
           onClick={() => setOpen((v) => !v)}
           className={cn(
-            "flex w-full items-center gap-3 border-l-[3px] border-transparent px-4 py-2.5 text-left text-sm text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground",
-            (open || childActive) && "text-foreground"
+            "flex w-full items-center border-transparent px-2.5 h-9 gap-2 rounded-lg text-left text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+            (open || childActive) && "text-sidebar-accent-foreground"
           )}
           style={depth ? { paddingLeft: `${16 + depth * 12}px` } : undefined}
         >
@@ -70,9 +70,9 @@ export function SidebarNavItem({
       href={item.href}
       onClick={onNavigate}
       className={cn(
-        "relative flex items-center gap-3 border-l-[3px] border-transparent px-4 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground",
+        "relative flex items-center border-transparent px-2.5 h-9 gap-2 rounded-lg text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
         active &&
-          "border-l-primary bg-secondary font-medium text-secondary-foreground shadow-sm"
+          "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
       )}
       style={depth ? { paddingLeft: `${16 + depth * 12}px` } : undefined}
     >
