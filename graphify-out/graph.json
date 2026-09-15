@@ -4,6 +4,19 @@
   "graph": {},
   "nodes": [
     {
+      "id": "components_data_table_data_table_toolbar_datatabletoolbarprops",
+      "label": "DataTableToolbarProps",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "datatabletoolbarprops",
+      "source_file": "components/data-table/data-table-toolbar.tsx",
+      "source_location": "L17"
+    },
+    {
       "id": "validations_auth_validations_forgotpasswordformschematype",
       "label": "ForgotPasswordFormSchemaType",
       "_callable": true,
@@ -290,6 +303,32 @@
       "source_location": "L40"
     },
     {
+      "id": "components_data_table_data_table_empty_props",
+      "label": "Props",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "data-table.tsx",
+      "file_type": "code",
+      "norm_label": "props",
+      "source_file": "components/data-table/data-table-empty.tsx",
+      "source_location": "L5"
+    },
+    {
+      "id": "components_data_table_data_table_error_props",
+      "label": "Props",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "data-table.tsx",
+      "file_type": "code",
+      "norm_label": "props",
+      "source_file": "components/data-table/data-table-error.tsx",
+      "source_location": "L5"
+    },
+    {
       "id": "components_data_table_data_table_skeleton_props",
       "label": "Props",
       "_callable": true,
@@ -368,6 +407,84 @@
       "source_location": "L37"
     },
     {
+      "id": "app_api_auth_login_route_loginresponse",
+      "label": "LoginResponse",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 56,
+      "community_name": "proxy.ts",
+      "file_type": "code",
+      "norm_label": "loginresponse",
+      "source_file": "app/api/auth/login/route.ts",
+      "source_location": "L5"
+    },
+    {
+      "id": "app_api_auth_refresh_route_refreshresponse",
+      "label": "RefreshResponse",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 56,
+      "community_name": "proxy.ts",
+      "file_type": "code",
+      "norm_label": "refreshresponse",
+      "source_file": "app/api/auth/refresh/route.ts",
+      "source_location": "L9"
+    },
+    {
+      "id": "app_api_auth_register_route_registerresponse",
+      "label": "RegisterResponse",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 56,
+      "community_name": "proxy.ts",
+      "file_type": "code",
+      "norm_label": "registerresponse",
+      "source_file": "app/api/auth/register/route.ts",
+      "source_location": "L5"
+    },
+    {
+      "id": "lib_auth_api_apiclienterror",
+      "label": "ApiClientError",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 56,
+      "community_name": "proxy.ts",
+      "file_type": "code",
+      "norm_label": "apiclienterror",
+      "source_file": "lib/auth/api.ts",
+      "source_location": "L7"
+    },
+    {
+      "id": "lib_auth_api_apierrorbody",
+      "label": "ApiErrorBody",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 56,
+      "community_name": "proxy.ts",
+      "file_type": "code",
+      "norm_label": "apierrorbody",
+      "source_file": "lib/auth/api.ts",
+      "source_location": "L3"
+    },
+    {
+      "id": "lib_auth_session_sessiontokens",
+      "label": "SessionTokens",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 56,
+      "community_name": "proxy.ts",
+      "file_type": "code",
+      "norm_label": "sessiontokens",
+      "source_file": "lib/auth/session.ts",
+      "source_location": "L9"
+    },
+    {
       "id": "providers_index_props",
       "label": "Props",
       "_callable": true,
@@ -407,32 +524,6 @@
       "source_location": "L15"
     },
     {
-      "id": "components_data_table_data_table_empty_props",
-      "label": "Props",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "dropdown-menu.tsx",
-      "file_type": "code",
-      "norm_label": "props",
-      "source_file": "components/data-table/data-table-empty.tsx",
-      "source_location": "L5"
-    },
-    {
-      "id": "components_data_table_data_table_error_props",
-      "label": "Props",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "dropdown-menu.tsx",
-      "file_type": "code",
-      "norm_label": "props",
-      "source_file": "components/data-table/data-table-error.tsx",
-      "source_location": "L5"
-    },
-    {
       "id": "components_data_table_data_table_export_datatableexportprops",
       "label": "DataTableExportProps",
       "_callable": true,
@@ -444,19 +535,6 @@
       "norm_label": "datatableexportprops",
       "source_file": "components/data-table/data-table-export.tsx",
       "source_location": "L14"
-    },
-    {
-      "id": "components_data_table_data_table_toolbar_datatabletoolbarprops",
-      "label": "DataTableToolbarProps",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "dropdown-menu.tsx",
-      "file_type": "code",
-      "norm_label": "datatabletoolbarprops",
-      "source_file": "components/data-table/data-table-toolbar.tsx",
-      "source_location": "L17"
     },
     {
       "id": "types_navigation_navbrand",
@@ -590,6 +668,54 @@
       "norm_label": "dialogtrigger()",
       "source_file": "components/ui/dialog.tsx",
       "source_location": "L14"
+    },
+    {
+      "id": "app_auth_login_page_loginpage",
+      "label": "LoginPage()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "loginpage()",
+      "source_file": "app/(auth)/login/page.tsx",
+      "source_location": "L10"
+    },
+    {
+      "id": "components_auth_login_form_loginform",
+      "label": "LoginForm()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "loginform()",
+      "source_file": "components/auth/login-form.tsx",
+      "source_location": "L30"
+    },
+    {
+      "id": "components_auth_login_form_loginform_onsubmit",
+      "label": "onSubmit()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "onsubmit()",
+      "source_file": "components/auth/login-form.tsx",
+      "source_location": "L44"
+    },
+    {
+      "id": "components_ui_button_button",
+      "label": "Button()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "button()",
+      "source_file": "components/ui/button.tsx",
+      "source_location": "L42"
     },
     {
       "id": "components_ui_card_card",
@@ -1192,54 +1318,6 @@
       "source_location": "L27"
     },
     {
-      "id": "components_layout_nav_item_iconrailflyout",
-      "label": "IconRailFlyout()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 15,
-      "community_name": "nav-item.tsx",
-      "file_type": "code",
-      "norm_label": "iconrailflyout()",
-      "source_file": "components/layout/nav-item.tsx",
-      "source_location": "L58"
-    },
-    {
-      "id": "components_layout_nav_item_iconrailflyout_clearclosetimer",
-      "label": "clearCloseTimer()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 15,
-      "community_name": "nav-item.tsx",
-      "file_type": "code",
-      "norm_label": "clearclosetimer()",
-      "source_file": "components/layout/nav-item.tsx",
-      "source_location": "L74"
-    },
-    {
-      "id": "components_layout_nav_item_iconrailflyout_hide",
-      "label": "hide()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 15,
-      "community_name": "nav-item.tsx",
-      "file_type": "code",
-      "norm_label": "hide()",
-      "source_file": "components/layout/nav-item.tsx",
-      "source_location": "L86"
-    },
-    {
-      "id": "components_layout_nav_item_iconrailflyout_show",
-      "label": "show()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 15,
-      "community_name": "nav-item.tsx",
-      "file_type": "code",
-      "norm_label": "show()",
-      "source_file": "components/layout/nav-item.tsx",
-      "source_location": "L81"
-    },
-    {
       "id": "components_layout_nav_item_iconraillink",
       "label": "IconRailLink()",
       "_callable": true,
@@ -1478,6 +1556,18 @@
       "norm_label": "userspage()",
       "source_file": "app/(backoffice)/backoffice/users/page.tsx",
       "source_location": "L3"
+    },
+    {
+      "id": "components_backoffice_users_users_columns_statusvariant",
+      "label": "statusVariant()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 19,
+      "community_name": "users-table.tsx",
+      "file_type": "code",
+      "norm_label": "statusvariant()",
+      "source_file": "components/backoffice/users/users-columns.tsx",
+      "source_location": "L18"
     },
     {
       "id": "components_backoffice_users_users_table_userstable",
@@ -1780,6 +1870,78 @@
       "source_location": "L7"
     },
     {
+      "id": "components_layout_app_topbar_apptopbar",
+      "label": "AppTopbar()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "app-shell.tsx",
+      "file_type": "code",
+      "norm_label": "apptopbar()",
+      "source_file": "components/layout/app-topbar.tsx",
+      "source_location": "L18"
+    },
+    {
+      "id": "components_layout_app_topbar_apptopbar_handlelogout",
+      "label": "handleLogout()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "app-shell.tsx",
+      "file_type": "code",
+      "norm_label": "handlelogout()",
+      "source_file": "components/layout/app-topbar.tsx",
+      "source_location": "L29"
+    },
+    {
+      "id": "components_layout_nav_item_iconrailflyout",
+      "label": "IconRailFlyout()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "app-shell.tsx",
+      "file_type": "code",
+      "norm_label": "iconrailflyout()",
+      "source_file": "components/layout/nav-item.tsx",
+      "source_location": "L58"
+    },
+    {
+      "id": "components_layout_nav_item_iconrailflyout_clearclosetimer",
+      "label": "clearCloseTimer()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "app-shell.tsx",
+      "file_type": "code",
+      "norm_label": "clearclosetimer()",
+      "source_file": "components/layout/nav-item.tsx",
+      "source_location": "L74"
+    },
+    {
+      "id": "components_layout_nav_item_iconrailflyout_hide",
+      "label": "hide()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "app-shell.tsx",
+      "file_type": "code",
+      "norm_label": "hide()",
+      "source_file": "components/layout/nav-item.tsx",
+      "source_location": "L86"
+    },
+    {
+      "id": "components_layout_nav_item_iconrailflyout_show",
+      "label": "show()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "app-shell.tsx",
+      "file_type": "code",
+      "norm_label": "show()",
+      "source_file": "components/layout/nav-item.tsx",
+      "source_location": "L81"
+    },
+    {
       "id": "components_layout_nav_item_sidebarnavitem",
       "label": "SidebarNavItem()",
       "_callable": true,
@@ -2044,18 +2206,6 @@
       "source_location": "L1"
     },
     {
-      "id": "components_backoffice_users_users_columns_statusvariant",
-      "label": "statusVariant()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "data-table.tsx",
-      "file_type": "code",
-      "norm_label": "statusvariant()",
-      "source_file": "components/backoffice/users/users-columns.tsx",
-      "source_location": "L18"
-    },
-    {
       "id": "components_data_table_data_table_column_header_cyclesorting",
       "label": "cycleSorting()",
       "_callable": true,
@@ -2114,6 +2264,30 @@
       "norm_label": "datatableheaderrow()",
       "source_file": "components/data-table/data-table.tsx",
       "source_location": "L162"
+    },
+    {
+      "id": "components_data_table_data_table_empty_datatableempty",
+      "label": "DataTableEmpty()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "data-table.tsx",
+      "file_type": "code",
+      "norm_label": "datatableempty()",
+      "source_file": "components/data-table/data-table-empty.tsx",
+      "source_location": "L10"
+    },
+    {
+      "id": "components_data_table_data_table_error_datatableerror",
+      "label": "DataTableError()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "data-table.tsx",
+      "file_type": "code",
+      "norm_label": "datatableerror()",
+      "source_file": "components/data-table/data-table-error.tsx",
+      "source_location": "L7"
     },
     {
       "id": "components_data_table_data_table_getariasort",
@@ -2186,6 +2360,18 @@
       "norm_label": "datatableskeleton()",
       "source_file": "components/data-table/data-table-skeleton.tsx",
       "source_location": "L15"
+    },
+    {
+      "id": "components_data_table_data_table_toolbar_datatabletoolbar",
+      "label": "DataTableToolbar()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "data-table.tsx",
+      "file_type": "code",
+      "norm_label": "datatabletoolbar()",
+      "source_file": "components/data-table/data-table-toolbar.tsx",
+      "source_location": "L28"
     },
     {
       "id": "components_data_table_hooks_use_data_table_preferences_usedatatablepreferences",
@@ -2320,6 +2506,234 @@
       "source_location": "L54"
     },
     {
+      "id": "app_api_auth_login_route_post",
+      "label": "POST()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 56,
+      "community_name": "proxy.ts",
+      "file_type": "code",
+      "norm_label": "post()",
+      "source_file": "app/api/auth/login/route.ts",
+      "source_location": "L12"
+    },
+    {
+      "id": "app_api_auth_logout_route_post",
+      "label": "POST()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 56,
+      "community_name": "proxy.ts",
+      "file_type": "code",
+      "norm_label": "post()",
+      "source_file": "app/api/auth/logout/route.ts",
+      "source_location": "L5"
+    },
+    {
+      "id": "app_api_auth_refresh_route_post",
+      "label": "POST()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 56,
+      "community_name": "proxy.ts",
+      "file_type": "code",
+      "norm_label": "post()",
+      "source_file": "app/api/auth/refresh/route.ts",
+      "source_location": "L14"
+    },
+    {
+      "id": "app_api_auth_register_route_post",
+      "label": "POST()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 56,
+      "community_name": "proxy.ts",
+      "file_type": "code",
+      "norm_label": "post()",
+      "source_file": "app/api/auth/register/route.ts",
+      "source_location": "L12"
+    },
+    {
+      "id": "lib_auth_api_apiclienterror_constructor",
+      "label": ".constructor()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 56,
+      "community_name": "proxy.ts",
+      "file_type": "code",
+      "norm_label": ".constructor()",
+      "source_file": "lib/auth/api.ts",
+      "source_location": "L8"
+    },
+    {
+      "id": "lib_auth_api_apifetch",
+      "label": "apiFetch()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 56,
+      "community_name": "proxy.ts",
+      "file_type": "code",
+      "norm_label": "apifetch()",
+      "source_file": "lib/auth/api.ts",
+      "source_location": "L19"
+    },
+    {
+      "id": "lib_auth_constants_accesscookieoptions",
+      "label": "accessCookieOptions()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 56,
+      "community_name": "proxy.ts",
+      "file_type": "code",
+      "norm_label": "accesscookieoptions()",
+      "source_file": "lib/auth/constants.ts",
+      "source_location": "L12"
+    },
+    {
+      "id": "lib_auth_constants_getapibaseurl",
+      "label": "getApiBaseUrl()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 56,
+      "community_name": "proxy.ts",
+      "file_type": "code",
+      "norm_label": "getapibaseurl()",
+      "source_file": "lib/auth/constants.ts",
+      "source_location": "L4"
+    },
+    {
+      "id": "lib_auth_constants_refreshcookieoptions",
+      "label": "refreshCookieOptions()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 56,
+      "community_name": "proxy.ts",
+      "file_type": "code",
+      "norm_label": "refreshcookieoptions()",
+      "source_file": "lib/auth/constants.ts",
+      "source_location": "L22"
+    },
+    {
+      "id": "lib_auth_session_clearsessioncookies",
+      "label": "clearSessionCookies()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 56,
+      "community_name": "proxy.ts",
+      "file_type": "code",
+      "norm_label": "clearsessioncookies()",
+      "source_file": "lib/auth/session.ts",
+      "source_location": "L20"
+    },
+    {
+      "id": "lib_auth_session_getaccesstoken",
+      "label": "getAccessToken()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 56,
+      "community_name": "proxy.ts",
+      "file_type": "code",
+      "norm_label": "getaccesstoken()",
+      "source_file": "lib/auth/session.ts",
+      "source_location": "L26"
+    },
+    {
+      "id": "lib_auth_session_getrefreshtoken",
+      "label": "getRefreshToken()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 56,
+      "community_name": "proxy.ts",
+      "file_type": "code",
+      "norm_label": "getrefreshtoken()",
+      "source_file": "lib/auth/session.ts",
+      "source_location": "L31"
+    },
+    {
+      "id": "lib_auth_session_setsessioncookies",
+      "label": "setSessionCookies()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 56,
+      "community_name": "proxy.ts",
+      "file_type": "code",
+      "norm_label": "setsessioncookies()",
+      "source_file": "lib/auth/session.ts",
+      "source_location": "L14"
+    },
+    {
+      "id": "proxy_applysessioncookies",
+      "label": "applySessionCookies()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 56,
+      "community_name": "proxy.ts",
+      "file_type": "code",
+      "norm_label": "applysessioncookies()",
+      "source_file": "proxy.ts",
+      "source_location": "L42"
+    },
+    {
+      "id": "proxy_clearsessioncookies",
+      "label": "clearSessionCookies()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 56,
+      "community_name": "proxy.ts",
+      "file_type": "code",
+      "norm_label": "clearsessioncookies()",
+      "source_file": "proxy.ts",
+      "source_location": "L58"
+    },
+    {
+      "id": "proxy_isauthpage",
+      "label": "isAuthPage()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 56,
+      "community_name": "proxy.ts",
+      "file_type": "code",
+      "norm_label": "isauthpage()",
+      "source_file": "proxy.ts",
+      "source_location": "L21"
+    },
+    {
+      "id": "proxy_isprotected",
+      "label": "isProtected()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 56,
+      "community_name": "proxy.ts",
+      "file_type": "code",
+      "norm_label": "isprotected()",
+      "source_file": "proxy.ts",
+      "source_location": "L25"
+    },
+    {
+      "id": "proxy_proxy",
+      "label": "proxy()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 56,
+      "community_name": "proxy.ts",
+      "file_type": "code",
+      "norm_label": "proxy()",
+      "source_file": "proxy.ts",
+      "source_location": "L63"
+    },
+    {
+      "id": "proxy_rotatetokens",
+      "label": "rotateTokens()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 56,
+      "community_name": "proxy.ts",
+      "file_type": "code",
+      "norm_label": "rotatetokens()",
+      "source_file": "proxy.ts",
+      "source_location": "L31"
+    },
+    {
       "id": "app_auth_forgot_password_page_forgotpasswordpage",
       "label": "ForgotPasswordPage()",
       "_callable": true,
@@ -2329,18 +2743,6 @@
       "file_type": "code",
       "norm_label": "forgotpasswordpage()",
       "source_file": "app/(auth)/forgot-password/page.tsx",
-      "source_location": "L9"
-    },
-    {
-      "id": "app_auth_login_page_loginpage",
-      "label": "LoginPage()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "app/layout.tsx",
-      "file_type": "code",
-      "norm_label": "loginpage()",
-      "source_file": "app/(auth)/login/page.tsx",
       "source_location": "L9"
     },
     {
@@ -2392,30 +2794,6 @@
       "source_location": "L37"
     },
     {
-      "id": "components_auth_login_form_loginform",
-      "label": "LoginForm()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "app/layout.tsx",
-      "file_type": "code",
-      "norm_label": "loginform()",
-      "source_file": "components/auth/login-form.tsx",
-      "source_location": "L29"
-    },
-    {
-      "id": "components_auth_login_form_loginform_onsubmit",
-      "label": "onSubmit()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "app/layout.tsx",
-      "file_type": "code",
-      "norm_label": "onsubmit()",
-      "source_file": "components/auth/login-form.tsx",
-      "source_location": "L41"
-    },
-    {
       "id": "components_auth_signup_form_signupform",
       "label": "SignupForm()",
       "_callable": true,
@@ -2425,7 +2803,7 @@
       "file_type": "code",
       "norm_label": "signupform()",
       "source_file": "components/auth/signup-form.tsx",
-      "source_location": "L29"
+      "source_location": "L30"
     },
     {
       "id": "components_auth_signup_form_signupform_onsubmit",
@@ -2437,7 +2815,7 @@
       "file_type": "code",
       "norm_label": "onsubmit()",
       "source_file": "components/auth/signup-form.tsx",
-      "source_location": "L43"
+      "source_location": "L44"
     },
     {
       "id": "providers_index_providers",
@@ -2512,30 +2890,6 @@
       "source_location": "L22"
     },
     {
-      "id": "components_data_table_data_table_empty_datatableempty",
-      "label": "DataTableEmpty()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "dropdown-menu.tsx",
-      "file_type": "code",
-      "norm_label": "datatableempty()",
-      "source_file": "components/data-table/data-table-empty.tsx",
-      "source_location": "L10"
-    },
-    {
-      "id": "components_data_table_data_table_error_datatableerror",
-      "label": "DataTableError()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "dropdown-menu.tsx",
-      "file_type": "code",
-      "norm_label": "datatableerror()",
-      "source_file": "components/data-table/data-table-error.tsx",
-      "source_location": "L7"
-    },
-    {
       "id": "components_data_table_data_table_export_datatableexport",
       "label": "DataTableExport()",
       "_callable": true,
@@ -2558,30 +2912,6 @@
       "norm_label": "handleexport()",
       "source_file": "components/data-table/data-table-export.tsx",
       "source_location": "L30"
-    },
-    {
-      "id": "components_data_table_data_table_toolbar_datatabletoolbar",
-      "label": "DataTableToolbar()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "dropdown-menu.tsx",
-      "file_type": "code",
-      "norm_label": "datatabletoolbar()",
-      "source_file": "components/data-table/data-table-toolbar.tsx",
-      "source_location": "L28"
-    },
-    {
-      "id": "components_layout_app_topbar_apptopbar",
-      "label": "AppTopbar()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "dropdown-menu.tsx",
-      "file_type": "code",
-      "norm_label": "apptopbar()",
-      "source_file": "components/layout/app-topbar.tsx",
-      "source_location": "L17"
     },
     {
       "id": "components_ui_avatar_avatar",
@@ -2654,18 +2984,6 @@
       "norm_label": "avatarimage()",
       "source_file": "components/ui/avatar.tsx",
       "source_location": "L27"
-    },
-    {
-      "id": "components_ui_button_button",
-      "label": "Button()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "dropdown-menu.tsx",
-      "file_type": "code",
-      "norm_label": "button()",
-      "source_file": "components/ui/button.tsx",
-      "source_location": "L42"
     },
     {
       "id": "components_ui_dropdown_menu_dropdownmenu",
@@ -2859,6 +3177,28 @@
       "source_location": "L1"
     },
     {
+      "id": "app_auth_login_page",
+      "label": "login/page.tsx",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "login/page.tsx",
+      "source_file": "app/(auth)/login/page.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "app_auth_login_page_metadata",
+      "label": "metadata",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "metadata",
+      "source_file": "app/(auth)/login/page.tsx",
+      "source_location": "L5"
+    },
+    {
       "id": "components_auth_forgot_password_form",
       "label": "forgot-password-form.tsx",
       "_origin": "ast",
@@ -2890,6 +3230,39 @@
       "norm_label": "signup-form.tsx",
       "source_file": "components/auth/signup-form.tsx",
       "source_location": "L1"
+    },
+    {
+      "id": "components_data_table_data_table_toolbar",
+      "label": "data-table-toolbar.tsx",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "data-table-toolbar.tsx",
+      "source_file": "components/data-table/data-table-toolbar.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "components_ui_button",
+      "label": "button.tsx",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "button.tsx",
+      "source_file": "components/ui/button.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "components_ui_button_buttonvariants",
+      "label": "buttonVariants",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "buttonvariants",
+      "source_file": "components/ui/button.tsx",
+      "source_location": "L5"
     },
     {
       "id": "components_ui_card",
@@ -3921,6 +4294,50 @@
       "source_location": "L1"
     },
     {
+      "id": "components_backoffice_users_users_columns",
+      "label": "users-columns.tsx",
+      "_origin": "ast",
+      "community": 19,
+      "community_name": "users-table.tsx",
+      "file_type": "code",
+      "norm_label": "users-columns.tsx",
+      "source_file": "components/backoffice/users/users-columns.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "components_backoffice_users_users_columns_columnhelper",
+      "label": "columnHelper",
+      "_origin": "ast",
+      "community": 19,
+      "community_name": "users-table.tsx",
+      "file_type": "code",
+      "norm_label": "columnhelper",
+      "source_file": "components/backoffice/users/users-columns.tsx",
+      "source_location": "L9"
+    },
+    {
+      "id": "components_backoffice_users_users_columns_createdatformatter",
+      "label": "createdAtFormatter",
+      "_origin": "ast",
+      "community": 19,
+      "community_name": "users-table.tsx",
+      "file_type": "code",
+      "norm_label": "createdatformatter",
+      "source_file": "components/backoffice/users/users-columns.tsx",
+      "source_location": "L11"
+    },
+    {
+      "id": "components_backoffice_users_users_columns_userscolumns",
+      "label": "usersColumns",
+      "_origin": "ast",
+      "community": 19,
+      "community_name": "users-table.tsx",
+      "file_type": "code",
+      "norm_label": "userscolumns",
+      "source_file": "components/backoffice/users/users-columns.tsx",
+      "source_location": "L24"
+    },
+    {
       "id": "components_backoffice_users_users_table",
       "label": "users-table.tsx",
       "_origin": "ast",
@@ -4183,17 +4600,6 @@
       "norm_label": "types/users.ts",
       "source_file": "types/users.ts",
       "source_location": "L1"
-    },
-    {
-      "id": "ref_exceljs",
-      "label": "exceljs",
-      "_origin": "ast",
-      "community": 19,
-      "community_name": "users-table.tsx",
-      "file_type": "concept",
-      "norm_label": "exceljs",
-      "source_file": "package.json",
-      "source_location": "L22"
     },
     {
       "id": "ref_nuqs",
@@ -4469,6 +4875,17 @@
       "norm_label": "eslint-config-next",
       "source_file": "package.json",
       "source_location": "L40"
+    },
+    {
+      "id": "ref_exceljs",
+      "label": "exceljs",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "package.json",
+      "file_type": "concept",
+      "norm_label": "exceljs",
+      "source_file": "package.json",
+      "source_location": "L22"
     },
     {
       "id": "ref_gsap",
@@ -7279,50 +7696,6 @@
       "source_location": "L1"
     },
     {
-      "id": "components_backoffice_users_users_columns",
-      "label": "users-columns.tsx",
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "data-table.tsx",
-      "file_type": "code",
-      "norm_label": "users-columns.tsx",
-      "source_file": "components/backoffice/users/users-columns.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "components_backoffice_users_users_columns_columnhelper",
-      "label": "columnHelper",
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "data-table.tsx",
-      "file_type": "code",
-      "norm_label": "columnhelper",
-      "source_file": "components/backoffice/users/users-columns.tsx",
-      "source_location": "L9"
-    },
-    {
-      "id": "components_backoffice_users_users_columns_createdatformatter",
-      "label": "createdAtFormatter",
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "data-table.tsx",
-      "file_type": "code",
-      "norm_label": "createdatformatter",
-      "source_file": "components/backoffice/users/users-columns.tsx",
-      "source_location": "L11"
-    },
-    {
-      "id": "components_backoffice_users_users_columns_userscolumns",
-      "label": "usersColumns",
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "data-table.tsx",
-      "file_type": "code",
-      "norm_label": "userscolumns",
-      "source_file": "components/backoffice/users/users-columns.tsx",
-      "source_location": "L24"
-    },
-    {
       "id": "components_data_table_data_table",
       "label": "data-table.tsx",
       "_origin": "ast",
@@ -7342,6 +7715,28 @@
       "file_type": "code",
       "norm_label": "data-table-column-header.tsx",
       "source_file": "components/data-table/data-table-column-header.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "components_data_table_data_table_empty",
+      "label": "data-table-empty.tsx",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "data-table.tsx",
+      "file_type": "code",
+      "norm_label": "data-table-empty.tsx",
+      "source_file": "components/data-table/data-table-empty.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "components_data_table_data_table_error",
+      "label": "data-table-error.tsx",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "data-table.tsx",
+      "file_type": "code",
+      "norm_label": "data-table-error.tsx",
+      "source_file": "components/data-table/data-table-error.tsx",
       "source_location": "L1"
     },
     {
@@ -7538,15 +7933,147 @@
       "source_location": "L1"
     },
     {
-      "id": "react_query_devtools",
-      "label": "@tanstack/react-query-devtools",
+      "id": "app_api_auth_login_route",
+      "label": "login/route.ts",
       "_origin": "ast",
-      "community": 6,
-      "community_name": "app/layout.tsx",
-      "confidence": "EXTRACTED",
+      "community": 56,
+      "community_name": "proxy.ts",
       "file_type": "code",
-      "norm_label": "@tanstack/react-query-devtools",
-      "source_file": "@tanstack/react-query-devtools"
+      "norm_label": "login/route.ts",
+      "source_file": "app/api/auth/login/route.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "app_api_auth_logout_route",
+      "label": "logout/route.ts",
+      "_origin": "ast",
+      "community": 56,
+      "community_name": "proxy.ts",
+      "file_type": "code",
+      "norm_label": "logout/route.ts",
+      "source_file": "app/api/auth/logout/route.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "app_api_auth_refresh_route",
+      "label": "refresh/route.ts",
+      "_origin": "ast",
+      "community": 56,
+      "community_name": "proxy.ts",
+      "file_type": "code",
+      "norm_label": "refresh/route.ts",
+      "source_file": "app/api/auth/refresh/route.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "app_api_auth_register_route",
+      "label": "register/route.ts",
+      "_origin": "ast",
+      "community": 56,
+      "community_name": "proxy.ts",
+      "file_type": "code",
+      "norm_label": "register/route.ts",
+      "source_file": "app/api/auth/register/route.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "lib_auth_api",
+      "label": "api.ts",
+      "_origin": "ast",
+      "community": 56,
+      "community_name": "proxy.ts",
+      "file_type": "code",
+      "norm_label": "api.ts",
+      "source_file": "lib/auth/api.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "lib_auth_constants",
+      "label": "constants.ts",
+      "_origin": "ast",
+      "community": 56,
+      "community_name": "proxy.ts",
+      "file_type": "code",
+      "norm_label": "constants.ts",
+      "source_file": "lib/auth/constants.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "lib_auth_constants_access_token_cookie",
+      "label": "ACCESS_TOKEN_COOKIE",
+      "_origin": "ast",
+      "community": 56,
+      "community_name": "proxy.ts",
+      "file_type": "code",
+      "norm_label": "access_token_cookie",
+      "source_file": "lib/auth/constants.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "lib_auth_constants_refresh_token_cookie",
+      "label": "REFRESH_TOKEN_COOKIE",
+      "_origin": "ast",
+      "community": 56,
+      "community_name": "proxy.ts",
+      "file_type": "code",
+      "norm_label": "refresh_token_cookie",
+      "source_file": "lib/auth/constants.ts",
+      "source_location": "L2"
+    },
+    {
+      "id": "lib_auth_session",
+      "label": "session.ts",
+      "_origin": "ast",
+      "community": 56,
+      "community_name": "proxy.ts",
+      "file_type": "code",
+      "norm_label": "session.ts",
+      "source_file": "lib/auth/session.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "proxy",
+      "label": "proxy.ts",
+      "_origin": "ast",
+      "community": 56,
+      "community_name": "proxy.ts",
+      "file_type": "code",
+      "norm_label": "proxy.ts",
+      "source_file": "proxy.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "proxy_auth_pages",
+      "label": "AUTH_PAGES",
+      "_origin": "ast",
+      "community": 56,
+      "community_name": "proxy.ts",
+      "file_type": "code",
+      "norm_label": "auth_pages",
+      "source_file": "proxy.ts",
+      "source_location": "L10"
+    },
+    {
+      "id": "proxy_config",
+      "label": "config",
+      "_origin": "ast",
+      "community": 56,
+      "community_name": "proxy.ts",
+      "file_type": "code",
+      "norm_label": "config",
+      "source_file": "proxy.ts",
+      "source_location": "L99"
+    },
+    {
+      "id": "proxy_protected_prefixes",
+      "label": "PROTECTED_PREFIXES",
+      "_origin": "ast",
+      "community": 56,
+      "community_name": "proxy.ts",
+      "file_type": "code",
+      "norm_label": "protected_prefixes",
+      "source_file": "proxy.ts",
+      "source_location": "L12"
     },
     {
       "id": "app_auth_forgot_password_page",
@@ -7568,28 +8095,6 @@
       "file_type": "code",
       "norm_label": "metadata",
       "source_file": "app/(auth)/forgot-password/page.tsx",
-      "source_location": "L4"
-    },
-    {
-      "id": "app_auth_login_page",
-      "label": "login/page.tsx",
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "app/layout.tsx",
-      "file_type": "code",
-      "norm_label": "login/page.tsx",
-      "source_file": "app/(auth)/login/page.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "app_auth_login_page_metadata",
-      "label": "metadata",
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "app/layout.tsx",
-      "file_type": "code",
-      "norm_label": "metadata",
-      "source_file": "app/(auth)/login/page.tsx",
       "source_location": "L4"
     },
     {
@@ -8220,28 +8725,6 @@
       "source_location": "L1"
     },
     {
-      "id": "components_data_table_data_table_empty",
-      "label": "data-table-empty.tsx",
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "dropdown-menu.tsx",
-      "file_type": "code",
-      "norm_label": "data-table-empty.tsx",
-      "source_file": "components/data-table/data-table-empty.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "components_data_table_data_table_error",
-      "label": "data-table-error.tsx",
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "dropdown-menu.tsx",
-      "file_type": "code",
-      "norm_label": "data-table-error.tsx",
-      "source_file": "components/data-table/data-table-error.tsx",
-      "source_location": "L1"
-    },
-    {
       "id": "components_data_table_data_table_export",
       "label": "data-table-export.tsx",
       "_origin": "ast",
@@ -8250,17 +8733,6 @@
       "file_type": "code",
       "norm_label": "data-table-export.tsx",
       "source_file": "components/data-table/data-table-export.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "components_data_table_data_table_toolbar",
-      "label": "data-table-toolbar.tsx",
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "dropdown-menu.tsx",
-      "file_type": "code",
-      "norm_label": "data-table-toolbar.tsx",
-      "source_file": "components/data-table/data-table-toolbar.tsx",
       "source_location": "L1"
     },
     {
@@ -8286,28 +8758,6 @@
       "source_location": "L1"
     },
     {
-      "id": "components_ui_button",
-      "label": "button.tsx",
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "dropdown-menu.tsx",
-      "file_type": "code",
-      "norm_label": "button.tsx",
-      "source_file": "components/ui/button.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "components_ui_button_buttonvariants",
-      "label": "buttonVariants",
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "dropdown-menu.tsx",
-      "file_type": "code",
-      "norm_label": "buttonvariants",
-      "source_file": "components/ui/button.tsx",
-      "source_location": "L5"
-    },
-    {
       "id": "components_ui_dropdown_menu",
       "label": "dropdown-menu.tsx",
       "_origin": "ast",
@@ -8320,6 +8770,102 @@
     }
   ],
   "links": [
+    {
+      "source": "app_api_auth_login_route_post",
+      "target": "lib_auth_session_setsessioncookies",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "app/api/auth/login/route.ts",
+      "source_location": "L20",
+      "weight": 1.0
+    },
+    {
+      "source": "app_api_auth_logout_route_post",
+      "target": "lib_auth_session_clearsessioncookies",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "app/api/auth/logout/route.ts",
+      "source_location": "L17",
+      "weight": 1.0
+    },
+    {
+      "source": "app_api_auth_logout_route_post",
+      "target": "lib_auth_session_getrefreshtoken",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "app/api/auth/logout/route.ts",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "app_api_auth_logout_route_post",
+      "target": "lib_auth_api_apifetch",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "app/api/auth/logout/route.ts",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "app_api_auth_refresh_route_post",
+      "target": "lib_auth_session_getrefreshtoken",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "app/api/auth/refresh/route.ts",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "app_api_auth_refresh_route_post",
+      "target": "lib_auth_session_clearsessioncookies",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "app/api/auth/refresh/route.ts",
+      "source_location": "L18",
+      "weight": 1.0
+    },
+    {
+      "source": "app_api_auth_refresh_route_post",
+      "target": "lib_auth_session_setsessioncookies",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "app/api/auth/refresh/route.ts",
+      "source_location": "L30",
+      "weight": 1.0
+    },
+    {
+      "source": "app_api_auth_register_route_post",
+      "target": "lib_auth_session_setsessioncookies",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "app/api/auth/register/route.ts",
+      "source_location": "L20",
+      "weight": 1.0
+    },
     {
       "source": "app_api_users_export_route_get",
       "target": "lib_users_query_sortusers",
@@ -8753,6 +9299,54 @@
       "weight": 1.0
     },
     {
+      "source": "lib_auth_api_apifetch",
+      "target": "lib_auth_constants_getapibaseurl",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "lib/auth/api.ts",
+      "source_location": "L23",
+      "weight": 1.0
+    },
+    {
+      "source": "lib_auth_api_apifetch",
+      "target": "lib_auth_api_apiclienterror",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "lib/auth/api.ts",
+      "source_location": "L41",
+      "weight": 1.0
+    },
+    {
+      "source": "lib_auth_session_setsessioncookies",
+      "target": "lib_auth_constants_accesscookieoptions",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "lib/auth/session.ts",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "lib_auth_session_setsessioncookies",
+      "target": "lib_auth_constants_refreshcookieoptions",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "lib/auth/session.ts",
+      "source_location": "L17",
+      "weight": 1.0
+    },
+    {
       "source": "lib_navigation_findactivenavitem",
       "target": "lib_navigation_flattennavitems",
       "relation": "calls",
@@ -8813,6 +9407,102 @@
       "weight": 1.0
     },
     {
+      "source": "proxy_applysessioncookies",
+      "target": "lib_auth_constants_accesscookieoptions",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "proxy.ts",
+      "source_location": "L49",
+      "weight": 1.0
+    },
+    {
+      "source": "proxy_applysessioncookies",
+      "target": "lib_auth_constants_refreshcookieoptions",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "proxy.ts",
+      "source_location": "L54",
+      "weight": 1.0
+    },
+    {
+      "source": "proxy_proxy",
+      "target": "proxy_isprotected",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "proxy.ts",
+      "source_location": "L68",
+      "weight": 1.0
+    },
+    {
+      "source": "proxy_proxy",
+      "target": "proxy_rotatetokens",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "proxy.ts",
+      "source_location": "L74",
+      "weight": 1.0
+    },
+    {
+      "source": "proxy_proxy",
+      "target": "proxy_applysessioncookies",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "proxy.ts",
+      "source_location": "L77",
+      "weight": 1.0
+    },
+    {
+      "source": "proxy_proxy",
+      "target": "proxy_clearsessioncookies",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "proxy.ts",
+      "source_location": "L83",
+      "weight": 1.0
+    },
+    {
+      "source": "proxy_proxy",
+      "target": "proxy_isauthpage",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "proxy.ts",
+      "source_location": "L92",
+      "weight": 1.0
+    },
+    {
+      "source": "proxy_rotatetokens",
+      "target": "lib_auth_constants_getapibaseurl",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "proxy.ts",
+      "source_location": "L32",
+      "weight": 1.0
+    },
+    {
       "source": "services_users_exportusers",
       "target": "services_users_toquery",
       "relation": "calls",
@@ -8846,6 +9536,18 @@
       "context": "call",
       "source_file": "components/data-table/data-table-export.tsx",
       "source_location": "L30",
+      "weight": 1.0
+    },
+    {
+      "source": "components_layout_app_topbar_apptopbar",
+      "target": "components_layout_app_topbar_apptopbar_handlelogout",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "components/layout/app-topbar.tsx",
+      "source_location": "L29",
       "weight": 1.0
     },
     {
@@ -8920,6 +9622,174 @@
       "deferred": true,
       "source_file": "providers/query-provider.tsx",
       "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "app_api_auth_login_route",
+      "target": "lib_auth_api_apiclienterror",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "app/api/auth/login/route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "app_api_auth_login_route",
+      "target": "lib_auth_api_apifetch",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "app/api/auth/login/route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "app_api_auth_login_route",
+      "target": "lib_auth_session_setsessioncookies",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "app/api/auth/login/route.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "app_api_auth_logout_route",
+      "target": "lib_auth_api_apifetch",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "app/api/auth/logout/route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "app_api_auth_logout_route",
+      "target": "lib_auth_session_clearsessioncookies",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "app/api/auth/logout/route.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "app_api_auth_logout_route",
+      "target": "lib_auth_session_getrefreshtoken",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "app/api/auth/logout/route.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "app_api_auth_refresh_route",
+      "target": "lib_auth_api_apiclienterror",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "app/api/auth/refresh/route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "app_api_auth_refresh_route",
+      "target": "lib_auth_api_apifetch",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "app/api/auth/refresh/route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "app_api_auth_refresh_route",
+      "target": "lib_auth_session_clearsessioncookies",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "app/api/auth/refresh/route.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "app_api_auth_refresh_route",
+      "target": "lib_auth_session_getrefreshtoken",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "app/api/auth/refresh/route.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "app_api_auth_refresh_route",
+      "target": "lib_auth_session_setsessioncookies",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "app/api/auth/refresh/route.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "app_api_auth_register_route",
+      "target": "lib_auth_api_apiclienterror",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "app/api/auth/register/route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "app_api_auth_register_route",
+      "target": "lib_auth_api_apifetch",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "app/api/auth/register/route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "app_api_auth_register_route",
+      "target": "lib_auth_session_setsessioncookies",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "app/api/auth/register/route.ts",
+      "source_location": "L3",
       "weight": 1.0
     },
     {
@@ -9063,7 +9933,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "app/(auth)/login/page.tsx",
-      "source_location": "L1",
+      "source_location": "L2",
       "weight": 1.0
     },
     {
@@ -10611,7 +11481,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "components/layout/app-topbar.tsx",
-      "source_location": "L14",
+      "source_location": "L15",
       "weight": 1.0
     },
     {
@@ -10623,7 +11493,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "components/layout/app-topbar.tsx",
-      "source_location": "L15",
+      "source_location": "L16",
       "weight": 1.0
     },
     {
@@ -10635,7 +11505,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "components/layout/app-topbar.tsx",
-      "source_location": "L6",
+      "source_location": "L7",
       "weight": 1.0
     },
     {
@@ -10647,7 +11517,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "components/layout/app-topbar.tsx",
-      "source_location": "L7",
+      "source_location": "L8",
       "weight": 1.0
     },
     {
@@ -10659,7 +11529,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "components/layout/app-topbar.tsx",
-      "source_location": "L7",
+      "source_location": "L8",
       "weight": 1.0
     },
     {
@@ -10671,7 +11541,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "components/layout/app-topbar.tsx",
-      "source_location": "L8",
+      "source_location": "L9",
       "weight": 1.0
     },
     {
@@ -10683,7 +11553,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "components/layout/app-topbar.tsx",
-      "source_location": "L8",
+      "source_location": "L9",
       "weight": 1.0
     },
     {
@@ -10695,7 +11565,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "components/layout/app-topbar.tsx",
-      "source_location": "L8",
+      "source_location": "L9",
       "weight": 1.0
     },
     {
@@ -10707,7 +11577,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "components/layout/app-topbar.tsx",
-      "source_location": "L8",
+      "source_location": "L9",
       "weight": 1.0
     },
     {
@@ -11068,6 +11938,66 @@
       "context": "import",
       "source_file": "hooks/use-users.ts",
       "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "lib_auth_api",
+      "target": "lib_auth_constants_getapibaseurl",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "lib/auth/api.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "lib_auth_session",
+      "target": "lib_auth_constants_access_token_cookie",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "lib/auth/session.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "lib_auth_session",
+      "target": "lib_auth_constants_accesscookieoptions",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "lib/auth/session.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "lib_auth_session",
+      "target": "lib_auth_constants_refresh_token_cookie",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "lib/auth/session.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "lib_auth_session",
+      "target": "lib_auth_constants_refreshcookieoptions",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "lib/auth/session.ts",
+      "source_location": "L2",
       "weight": 1.0
     },
     {
@@ -11635,6 +12565,66 @@
       "weight": 1.0
     },
     {
+      "source": "proxy",
+      "target": "lib_auth_constants_access_token_cookie",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "proxy.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "proxy",
+      "target": "lib_auth_constants_accesscookieoptions",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "proxy.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "proxy",
+      "target": "lib_auth_constants_getapibaseurl",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "proxy.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "proxy",
+      "target": "lib_auth_constants_refresh_token_cookie",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "proxy.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "proxy",
+      "target": "lib_auth_constants_refreshcookieoptions",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "proxy.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
       "source": "services_users",
       "target": "types_users_usersexportparams",
       "relation": "imports",
@@ -11668,6 +12658,102 @@
       "context": "import",
       "source_file": "services/users.ts",
       "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "app_api_auth_login_route",
+      "target": "lib_auth_api",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "app/api/auth/login/route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "app_api_auth_login_route",
+      "target": "lib_auth_session",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "app/api/auth/login/route.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "app_api_auth_logout_route",
+      "target": "lib_auth_api",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "app/api/auth/logout/route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "app_api_auth_logout_route",
+      "target": "lib_auth_session",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "app/api/auth/logout/route.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "app_api_auth_refresh_route",
+      "target": "lib_auth_api",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "app/api/auth/refresh/route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "app_api_auth_refresh_route",
+      "target": "lib_auth_session",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "app/api/auth/refresh/route.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "app_api_auth_register_route",
+      "target": "lib_auth_api",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "app/api/auth/register/route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "app_api_auth_register_route",
+      "target": "lib_auth_session",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "app/api/auth/register/route.ts",
+      "source_location": "L3",
       "weight": 1.0
     },
     {
@@ -11806,7 +12892,7 @@
     },
     {
       "source": "app_auth_login_page",
-      "target": "components_auth_login_form",
+      "target": "ref_react",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -11818,7 +12904,7 @@
     },
     {
       "source": "app_auth_login_page",
-      "target": "ref_next",
+      "target": "components_auth_login_form",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -11826,6 +12912,18 @@
       "context": "import",
       "source_file": "app/(auth)/login/page.tsx",
       "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "app_auth_login_page",
+      "target": "ref_next",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "app/(auth)/login/page.tsx",
+      "source_location": "L3",
       "weight": 1.0
     },
     {
@@ -13177,7 +14275,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "components/layout/app-topbar.tsx",
-      "source_location": "L14",
+      "source_location": "L15",
       "weight": 1.0
     },
     {
@@ -13189,7 +14287,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "components/layout/app-topbar.tsx",
-      "source_location": "L15",
+      "source_location": "L16",
       "type_only": true,
       "weight": 1.0
     },
@@ -13202,7 +14300,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "components/layout/app-topbar.tsx",
-      "source_location": "L5",
+      "source_location": "L6",
       "weight": 1.0
     },
     {
@@ -13214,7 +14312,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "components/layout/app-topbar.tsx",
-      "source_location": "L6",
+      "source_location": "L7",
       "weight": 1.0
     },
     {
@@ -13226,7 +14324,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "components/layout/app-topbar.tsx",
-      "source_location": "L7",
+      "source_location": "L8",
       "weight": 1.0
     },
     {
@@ -13238,7 +14336,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "components/layout/app-topbar.tsx",
-      "source_location": "L8",
+      "source_location": "L9",
       "weight": 1.0
     },
     {
@@ -14110,6 +15208,30 @@
       "weight": 1.0
     },
     {
+      "source": "lib_auth_api",
+      "target": "lib_auth_constants",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "lib/auth/api.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "lib_auth_session",
+      "target": "lib_auth_constants",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "lib/auth/session.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
       "source": "lib_navigation",
       "target": "types_navigation",
       "relation": "imports_from",
@@ -14259,6 +15381,18 @@
       "weight": 1.0
     },
     {
+      "source": "proxy",
+      "target": "lib_auth_constants",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "proxy.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
       "source": "services_users",
       "target": "types_users",
       "relation": "imports_from",
@@ -14354,6 +15488,83 @@
       "confidence_score": 1.0,
       "source_file": "AGENTS.md",
       "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "app_api_auth_login_route",
+      "target": "app_api_auth_login_route_post",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "app/api/auth/login/route.ts",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "app_api_auth_login_route",
+      "target": "app_api_auth_login_route_loginresponse",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "app/api/auth/login/route.ts",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "app_api_auth_logout_route",
+      "target": "app_api_auth_logout_route_post",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "app/api/auth/logout/route.ts",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "app_api_auth_refresh_route",
+      "target": "app_api_auth_refresh_route_post",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "app/api/auth/refresh/route.ts",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "app_api_auth_refresh_route",
+      "target": "app_api_auth_refresh_route_refreshresponse",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "app/api/auth/refresh/route.ts",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "app_api_auth_register_route",
+      "target": "app_api_auth_register_route_post",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "app/api/auth/register/route.ts",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "app_api_auth_register_route",
+      "target": "app_api_auth_register_route_registerresponse",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "app/api/auth/register/route.ts",
+      "source_location": "L5",
       "weight": 1.0
     },
     {
@@ -14457,24 +15668,24 @@
     },
     {
       "source": "app_auth_login_page",
-      "target": "app_auth_login_page_metadata",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "app/(auth)/login/page.tsx",
-      "source_location": "L4",
-      "weight": 1.0
-    },
-    {
-      "source": "app_auth_login_page",
       "target": "app_auth_login_page_loginpage",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/(auth)/login/page.tsx",
-      "source_location": "L9",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "app_auth_login_page",
+      "target": "app_auth_login_page_metadata",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "app/(auth)/login/page.tsx",
+      "source_location": "L5",
       "weight": 1.0
     },
     {
@@ -14925,7 +16136,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "components/auth/login-form.tsx",
-      "source_location": "L29",
+      "source_location": "L30",
       "weight": 1.0
     },
     {
@@ -14936,7 +16147,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "components/auth/signup-form.tsx",
-      "source_location": "L29",
+      "source_location": "L30",
       "weight": 1.0
     },
     {
@@ -15541,7 +16752,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "components/layout/app-topbar.tsx",
-      "source_location": "L17",
+      "source_location": "L18",
       "weight": 1.0
     },
     {
@@ -17712,6 +18923,149 @@
       "weight": 1.0
     },
     {
+      "source": "lib_auth_api",
+      "target": "lib_auth_api_apifetch",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/auth/api.ts",
+      "source_location": "L19",
+      "weight": 1.0
+    },
+    {
+      "source": "lib_auth_api",
+      "target": "lib_auth_api_apierrorbody",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/auth/api.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "lib_auth_api",
+      "target": "lib_auth_api_apiclienterror",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/auth/api.ts",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "lib_auth_constants",
+      "target": "lib_auth_constants_access_token_cookie",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/auth/constants.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "lib_auth_constants",
+      "target": "lib_auth_constants_accesscookieoptions",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/auth/constants.ts",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "lib_auth_constants",
+      "target": "lib_auth_constants_refresh_token_cookie",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/auth/constants.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "lib_auth_constants",
+      "target": "lib_auth_constants_refreshcookieoptions",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/auth/constants.ts",
+      "source_location": "L22",
+      "weight": 1.0
+    },
+    {
+      "source": "lib_auth_constants",
+      "target": "lib_auth_constants_getapibaseurl",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/auth/constants.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "lib_auth_session",
+      "target": "lib_auth_session_setsessioncookies",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/auth/session.ts",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "lib_auth_session",
+      "target": "lib_auth_session_clearsessioncookies",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/auth/session.ts",
+      "source_location": "L20",
+      "weight": 1.0
+    },
+    {
+      "source": "lib_auth_session",
+      "target": "lib_auth_session_getaccesstoken",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/auth/session.ts",
+      "source_location": "L26",
+      "weight": 1.0
+    },
+    {
+      "source": "lib_auth_session",
+      "target": "lib_auth_session_getrefreshtoken",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/auth/session.ts",
+      "source_location": "L31",
+      "weight": 1.0
+    },
+    {
+      "source": "lib_auth_session",
+      "target": "lib_auth_session_sessiontokens",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/auth/session.ts",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
       "source": "lib_navigation",
       "target": "lib_navigation_findactivenavitem",
       "relation": "contains",
@@ -18545,6 +19899,105 @@
       "confidence_score": 1.0,
       "source_file": "providers/query-provider.tsx",
       "source_location": "L32",
+      "weight": 1.0
+    },
+    {
+      "source": "proxy",
+      "target": "proxy_auth_pages",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "proxy.ts",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "proxy",
+      "target": "proxy_protected_prefixes",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "proxy.ts",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "proxy",
+      "target": "proxy_isauthpage",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "proxy.ts",
+      "source_location": "L21",
+      "weight": 1.0
+    },
+    {
+      "source": "proxy",
+      "target": "proxy_isprotected",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "proxy.ts",
+      "source_location": "L25",
+      "weight": 1.0
+    },
+    {
+      "source": "proxy",
+      "target": "proxy_rotatetokens",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "proxy.ts",
+      "source_location": "L31",
+      "weight": 1.0
+    },
+    {
+      "source": "proxy",
+      "target": "proxy_applysessioncookies",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "proxy.ts",
+      "source_location": "L42",
+      "weight": 1.0
+    },
+    {
+      "source": "proxy",
+      "target": "proxy_clearsessioncookies",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "proxy.ts",
+      "source_location": "L58",
+      "weight": 1.0
+    },
+    {
+      "source": "proxy",
+      "target": "proxy_proxy",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "proxy.ts",
+      "source_location": "L63",
+      "weight": 1.0
+    },
+    {
+      "source": "proxy",
+      "target": "proxy_config",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "proxy.ts",
+      "source_location": "L99",
       "weight": 1.0
     },
     {
@@ -20429,13 +21882,15 @@
       "weight": 1.0
     },
     {
-      "source": "providers_query_provider",
-      "target": "react_query_devtools",
-      "relation": "dynamic_import",
+      "source": "lib_auth_api_apiclienterror",
+      "target": "lib_auth_api_apiclienterror_constructor",
+      "relation": "method",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
-      "source_file": "providers/query-provider.tsx"
+      "source_file": "lib/auth/api.ts",
+      "source_location": "L8",
+      "weight": 1.0
     },
     {
       "source": "components_auth_forgot_password_form_forgotpasswordform",
@@ -20458,7 +21913,7 @@
       "confidence_score": 0.85,
       "context": "argument",
       "source_file": "components/auth/login-form.tsx",
-      "source_location": "L65",
+      "source_location": "L86",
       "weight": 1.0
     },
     {
@@ -20470,7 +21925,7 @@
       "confidence_score": 0.85,
       "context": "argument",
       "source_file": "components/auth/signup-form.tsx",
-      "source_location": "L67",
+      "source_location": "L90",
       "weight": 1.0
     },
     {
@@ -20571,5 +22026,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "3aadc8b23a785ec448d12c7904a21877270fabcf"
+  "built_at_commit": "87223385c79a0ef0f82e6573d6f9286603ead104"
 }

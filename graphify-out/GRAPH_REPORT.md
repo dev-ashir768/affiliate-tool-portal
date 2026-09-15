@@ -1,16 +1,16 @@
 # Graph Report - affiliate-tool-portal  (2026-09-15)
 
 ## Corpus Check
-- 123 files · ~215,222 words
+- 131 files · ~216,548 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 710 nodes · 1064 edges · 56 communities (28 shown, 5 thin omitted)
+- 748 nodes · 1150 edges · 57 communities (29 shown, 5 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 11 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `3aadc8b2`
+- Built from commit: `87223385`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -48,59 +48,60 @@
 - README.md
 - task-10-brief.md
 - AGENTS.md
+- proxy.ts
 
 ## God Nodes (most connected - your core abstractions)
-1. `react` - 28 edges
+1. `react` - 29 edges
 2. `cn` - 27 edges
 3. `Button()` - 17 edges
 4. `compilerOptions` - 16 edges
 5. `lucide-react` - 15 edges
 6. `Production DataTable Design` - 14 edges
 7. `Task 10 Report: Manual verification pass` - 12 edges
-8. `@tanstack/react-table` - 11 edges
-9. `File structure` - 11 edges
-10. `Shopify-style App Shell Design` - 9 edges
+8. `File structure` - 11 edges
+9. `@tanstack/react-table` - 11 edges
+10. `setSessionCookies()` - 9 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `IconRailFlyout()` --calls--> `isNavItemActive()`  [EXTRACTED]
-  components/layout/nav-item.tsx → lib/navigation.ts
-- `GET()` --calls--> `filterUsers()`  [EXTRACTED]
-  app/api/users/export/route.ts → lib/users/query.ts
-- `GET()` --calls--> `sortUsers()`  [EXTRACTED]
-  app/api/users/export/route.ts → lib/users/query.ts
-- `GET()` --calls--> `usersToCsv()`  [EXTRACTED]
-  app/api/users/export/route.ts → lib/users/query.ts
-- `GET()` --calls--> `filterSortPaginateUsers()`  [EXTRACTED]
-  app/api/users/route.ts → lib/users/query.ts
+- `POST()` --calls--> `setSessionCookies()`  [EXTRACTED]
+  app/api/auth/login/route.ts → lib/auth/session.ts
+- `POST()` --calls--> `setSessionCookies()`  [EXTRACTED]
+  app/api/auth/register/route.ts → lib/auth/session.ts
+- `POST()` --calls--> `apiFetch()`  [EXTRACTED]
+  app/api/auth/logout/route.ts → lib/auth/api.ts
+- `POST()` --calls--> `clearSessionCookies()`  [EXTRACTED]
+  app/api/auth/logout/route.ts → lib/auth/session.ts
+- `POST()` --calls--> `getRefreshToken()`  [EXTRACTED]
+  app/api/auth/logout/route.ts → lib/auth/session.ts
 
 ## Import Cycles
 - None detected.
 
-## Communities (56 total, 5 thin omitted)
+## Communities (57 total, 5 thin omitted)
 
 ### Community 1 - "react"
-Cohesion: 0.08
-Nodes (35): Card(), CardContent(), CardFooter(), CardHeader(), CardTitle(), Field(), FieldDescription(), FieldError() (+27 more)
+Cohesion: 0.07
+Nodes (40): metadata, LoginForm(), DataTableToolbarProps, Button(), buttonVariants, Card(), CardContent(), CardFooter() (+32 more)
 
 ### Community 2 - "package.json"
 Cohesion: 0.05
-Nodes (38): Props, AuthWrapper(), Props, devDependencies, eslint, eslint-config-next, shadcn, tailwindcss (+30 more)
+Nodes (39): Props, AuthWrapper(), Props, devDependencies, eslint, eslint-config-next, shadcn, tailwindcss (+31 more)
 
 ### Community 3 - "components.json"
 Cohesion: 0.09
 Nodes (21): aliases, components, hooks, lib, ui, utils, iconLibrary, menuAccent (+13 more)
 
 ### Community 4 - "app-shell.tsx"
-Cohesion: 0.08
-Nodes (25): Props, Props, AppPageHeader(), AppShell(), getDesktopServerSnapshot(), getDesktopSnapshot(), subscribeDesktop(), AppSidebar() (+17 more)
+Cohesion: 0.07
+Nodes (30): Props, Props, AppPageHeader(), AppShell(), getDesktopServerSnapshot(), getDesktopSnapshot(), subscribeDesktop(), AppSidebar() (+22 more)
 
 ### Community 5 - "data-table.tsx"
 Cohesion: 0.08
-Nodes (35): columnHelper, createdAtFormatter, statusVariant(), usersColumns, cycleSorting(), DataTableColumnHeader(), DataTableColumnHeaderProps, DataTable() (+27 more)
+Nodes (36): cycleSorting(), DataTableColumnHeader(), DataTableColumnHeaderProps, DataTable(), DataTableComponentProps, DataTableHeaderCell(), DataTableEmpty(), Props (+28 more)
 
 ### Community 6 - "app/layout.tsx"
-Cohesion: 0.06
-Nodes (20): metadata, metadata, metadata, geistMono, geistSans, metadata, spaceGrotesk, ForgotPasswordForm() (+12 more)
+Cohesion: 0.08
+Nodes (18): metadata, metadata, geistMono, geistSans, metadata, spaceGrotesk, ForgotPasswordForm(), SignupForm() (+10 more)
 
 ### Community 7 - "compilerOptions"
 Cohesion: 0.11
@@ -111,8 +112,8 @@ Cohesion: 0.09
 Nodes (22): dependencies, @base-ui/react, class-variance-authority, cn, exceljs, gsap, @gsap/react, @hello-pangea/dnd (+14 more)
 
 ### Community 9 - "dropdown-menu.tsx"
-Cohesion: 0.07
-Nodes (24): DataTableColumnVisibility(), DataTableColumnVisibilityProps, getColumnLabel(), DataTableEmpty(), Props, DataTableError(), Props, DataTableExport() (+16 more)
+Cohesion: 0.09
+Nodes (15): DataTableColumnVisibility(), DataTableColumnVisibilityProps, getColumnLabel(), DataTableExport(), DataTableExportProps, Avatar(), AvatarFallback(), DropdownMenu() (+7 more)
 
 ### Community 11 - "Shopify-style App Shell Design"
 Cohesion: 0.11
@@ -127,12 +128,12 @@ Cohesion: 0.15
 Nodes (9): DataTablePagination(), DataTablePaginationProps, DEFAULT_PAGE_SIZE_OPTIONS, getPaginationItems(), PaginationItem, SelectContent(), SelectItem(), SelectTrigger() (+1 more)
 
 ### Community 15 - "nav-item.tsx"
-Cohesion: 0.13
-Nodes (19): ICONS, NavIcon(), IconRailFlyout(), clearCloseTimer(), hide(), show(), applyTheme(), getServerSnapshot() (+11 more)
+Cohesion: 0.15
+Nodes (15): ICONS, NavIcon(), applyTheme(), getServerSnapshot(), getSnapshot(), subscribe(), ThemeToggle(), toggle() (+7 more)
 
 ### Community 19 - "users-table.tsx"
 Cohesion: 0.07
-Nodes (42): GET(), runtime, GET(), parseParams(), runtime, searchParamsParsers, UsersTable(), downloadBlob() (+34 more)
+Nodes (45): GET(), runtime, GET(), parseParams(), runtime, columnHelper, createdAtFormatter, statusVariant() (+37 more)
 
 ### Community 24 - "Task 7 Report: Toolbar pieces (header, visibility, pagination, export, toolbar)"
 Cohesion: 0.11
@@ -190,25 +191,29 @@ Nodes (7): Also, Final DataTable review fixes, Important, Merge-blocking minors,
 Cohesion: 0.50
 Nodes (3): Deploy on Vercel, Getting Started, Learn More
 
+### Community 56 - "proxy.ts"
+Cohesion: 0.12
+Nodes (28): LoginResponse, POST(), POST(), POST(), RefreshResponse, POST(), RegisterResponse, ApiClientError (+20 more)
+
 ## Knowledge Gaps
-- **300 isolated node(s):** `npx`, `metadata`, `Props`, `metadata`, `metadata` (+295 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 421 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **308 isolated node(s):** `metadata`, `LoginResponse`, `RefreshResponse`, `RegisterResponse`, `ApiErrorBody` (+303 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 431 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **5 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `react` connect `react` to `dialog.tsx`, `package.json`, `app-shell.tsx`, `data-table.tsx`, `app/layout.tsx`, `dropdown-menu.tsx`, `data-table-pagination.tsx`, `nav-item.tsx`, `users-table.tsx`?**
-  _High betweenness centrality (0.113) - this node is a cross-community bridge._
+  _High betweenness centrality (0.105) - this node is a cross-community bridge._
 - **Why does `cn` connect `react` to `dialog.tsx`, `package.json`, `app-shell.tsx`, `data-table.tsx`, `app/layout.tsx`, `dropdown-menu.tsx`, `progress.tsx`, `data-table-pagination.tsx`, `nav-item.tsx`?**
-  _High betweenness centrality (0.061) - this node is a cross-community bridge._
+  _High betweenness centrality (0.055) - this node is a cross-community bridge._
 - **Why does `dependencies` connect `dependencies` to `package.json`?**
-  _High betweenness centrality (0.034) - this node is a cross-community bridge._
-- **What connects `npx`, `metadata`, `Props` to the rest of the system?**
-  _300 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _High betweenness centrality (0.031) - this node is a cross-community bridge._
+- **What connects `metadata`, `LoginResponse`, `RefreshResponse` to the rest of the system?**
+  _308 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `react` be split into smaller, more focused modules?**
-  _Cohesion score 0.07740112994350283 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06749482401656315 - nodes in this community are weakly interconnected._
 - **Should `package.json` be split into smaller, more focused modules?**
-  _Cohesion score 0.04994192799070848 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.048726467331118496 - nodes in this community are weakly interconnected._
 - **Should `components.json` be split into smaller, more focused modules?**
   _Cohesion score 0.09090909090909091 - nodes in this community are weakly interconnected._
