@@ -14,7 +14,7 @@ import {
   type Header,
   type HeaderGroup,
 } from "@tanstack/react-table";
-import { GripVertical } from "lucide-react";
+import { Grip } from "lucide-react";
 import { cn } from "cn";
 import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header";
 import { DataTableEmpty } from "@/components/data-table/data-table-empty";
@@ -105,8 +105,10 @@ function DataTableHeaderCell<TData extends object>({
   const canResize = enableColumnResizing && header.column.getCanResize();
   const showDragHandle =
     enableColumnOrdering && dragHandle != null && !header.isPlaceholder;
+  const totalSize = header.getContext().table.getTotalSize();
   const sizeStyle = {
-    width: header.getSize(),
+    width: `${(header.getSize() / totalSize) * 100}%`,
+    minWidth: header.column.columnDef.minSize ?? 80,
     ...(dragHandle?.draggableProps.style ?? {}),
   };
 
@@ -117,19 +119,19 @@ function DataTableHeaderCell<TData extends object>({
       aria-sort={getAriaSort(header)}
       {...dragHandle?.draggableProps}
       style={sizeStyle}
-      className="group/th relative"
+      className="group/th relative h-9 px-3 bg-gray-200"
     >
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-1.5">
         {showDragHandle ? (
           <span
-            className="inline-flex size-6 shrink-0 cursor-grab items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground active:cursor-grabbing"
+            className="inline-flex size-5 shrink-0 cursor-grab items-center justify-center text-muted-foreground/60 hover:text-foreground active:cursor-grabbing"
             aria-label="Reorder column"
             {...dragHandle?.dragHandleProps}
             onPointerDown={(event) => {
               event.stopPropagation();
             }}
           >
-            <GripVertical className="size-3.5" />
+            <Grip className="size-3.5" />
           </span>
         ) : null}
         {header.isPlaceholder ? null : isCustomColumnHeader(header) ? (
@@ -232,6 +234,7 @@ export function DataTable<TData extends object>({
   onRetry,
   onExport,
   onRefresh,
+  onFiltersClick,
   enableColumnResizing,
   enableColumnOrdering = false,
   pageSizeOptions,
@@ -297,12 +300,10 @@ export function DataTable<TData extends object>({
   const visibleColumnCount = Math.max(table.getVisibleLeafColumns().length, 1);
   const headerGroups = table.getHeaderGroups();
 
+  const totalSize = Math.max(table.getTotalSize(), 1);
+
   const tableGrid = (
-    <Table
-      aria-label={ariaLabel}
-      className="table-fixed"
-      style={{ width: table.getTotalSize() }}
-    >
+    <Table aria-label={ariaLabel} className="w-full table-fixed">
       <TableHeader>
         {headerGroups.map((headerGroup) => (
           <DataTableHeaderRow
@@ -325,11 +326,15 @@ export function DataTable<TData extends object>({
           </TableRow>
         ) : (
           rows.map((row) => (
-            <TableRow key={row.id}>
+            <TableRow key={row.id} className="hover:bg-muted/40">
               {row.getVisibleCells().map((cell) => (
                 <TableCell
                   key={cell.id}
-                  style={{ width: cell.column.getSize() }}
+                  style={{
+                    width: `${(cell.column.getSize() / totalSize) * 100}%`,
+                    minWidth: cell.column.columnDef.minSize ?? 80,
+                  }}
+                  className="p-3 text-sm text-foreground"
                 >
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </TableCell>
@@ -348,13 +353,14 @@ export function DataTable<TData extends object>({
   );
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex w-full flex-col gap-3 bg-card rounded-xl overflow-hidden py-3">
       <DataTableToolbar
         table={table}
         search={search}
         onSearchChange={onSearchChange}
         onRefresh={onRefresh}
         onExport={onExport}
+        onFiltersClick={onFiltersClick}
         isFetching={isFetching}
       />
 

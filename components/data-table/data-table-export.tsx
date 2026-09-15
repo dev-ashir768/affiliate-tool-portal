@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { LoaderCircle } from "lucide-react";
+import { Download, LoaderCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -9,6 +9,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type { DataTableExportFormat } from "@/components/data-table/types";
 
 export type DataTableExportProps = {
@@ -42,17 +47,32 @@ export function DataTableExport({
   return (
     <div className="flex flex-col items-end gap-1">
       <DropdownMenu>
-        <DropdownMenuTrigger
-          disabled={triggerDisabled}
-          render={
-            <Button type="button" variant="outline" size="sm" />
-          }
-        >
-          {exporting ? (
-            <LoaderCircle className="animate-spin" aria-hidden />
-          ) : null}
-          Export
-        </DropdownMenuTrigger>
+        <Tooltip>
+          <TooltipTrigger
+            delay={200}
+            render={
+              <DropdownMenuTrigger
+                disabled={triggerDisabled}
+                render={
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="size-9"
+                    aria-label="Export"
+                  />
+                }
+              />
+            }
+          >
+            {exporting ? (
+              <LoaderCircle className="size-4 animate-spin" aria-hidden />
+            ) : (
+              <Download className="size-4" />
+            )}
+          </TooltipTrigger>
+          <TooltipContent side="bottom">Export</TooltipContent>
+        </Tooltip>
         <DropdownMenuContent align="end" className="w-36">
           <DropdownMenuItem
             disabled={exporting}

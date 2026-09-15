@@ -51,6 +51,7 @@ export type DataTableProps<TData extends object> = {
   onRetry?: () => void;
   onExport?: (format: DataTableExportFormat) => Promise<void>;
   onRefresh?: () => void;
+  onFiltersClick?: () => void;
   enableColumnResizing?: boolean;
   enableColumnOrdering?: boolean;
   pageSizeOptions?: number[];

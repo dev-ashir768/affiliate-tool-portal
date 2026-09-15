@@ -89,36 +89,34 @@ export function UsersTable() {
   };
 
   return (
-    <div className="rounded-lg border border-border bg-card p-4">
-      <DataTable
-        tableId="backoffice-users"
-        columns={usersColumns}
-        data={query.data?.data ?? []}
-        totalCount={totalCount}
-        pagination={pagination}
-        onPaginationChange={onPaginationChange}
-        sorting={sorting}
-        onSortingChange={onSortingChange}
-        search={params.search}
-        onSearchChange={onSearchChange}
-        isLoading={query.isLoading}
-        isFetching={query.isFetching}
-        isError={query.isError}
-        onRetry={() => void query.refetch()}
-        onRefresh={() => void query.refetch()}
-        onExport={async (format) => {
-          const blob = await exportMutation.mutateAsync({
-            format,
-            search: listParams.search,
-            sortBy: listParams.sortBy,
-            sortOrder: listParams.sortOrder,
-          });
-          downloadBlob(blob, format === "csv" ? "users.csv" : "users.xlsx");
-        }}
-        enableColumnOrdering
-        pageSizeOptions={[10, 20, 50, 100]}
-        getRowId={(row) => row.id}
-      />
-    </div>
+    <DataTable
+      tableId="backoffice-users"
+      columns={usersColumns}
+      data={query.data?.data ?? []}
+      totalCount={totalCount}
+      pagination={pagination}
+      onPaginationChange={onPaginationChange}
+      sorting={sorting}
+      onSortingChange={onSortingChange}
+      search={params.search}
+      onSearchChange={onSearchChange}
+      isLoading={query.isLoading}
+      isFetching={query.isFetching}
+      isError={query.isError}
+      onRetry={() => void query.refetch()}
+      onRefresh={() => void query.refetch()}
+      onExport={async (format) => {
+        const blob = await exportMutation.mutateAsync({
+          format,
+          search: listParams.search,
+          sortBy: listParams.sortBy,
+          sortOrder: listParams.sortOrder,
+        });
+        downloadBlob(blob, format === "csv" ? "users.csv" : "users.xlsx");
+      }}
+      enableColumnOrdering
+      pageSizeOptions={[10, 20, 50, 100]}
+      getRowId={(row) => row.id}
+    />
   );
 }

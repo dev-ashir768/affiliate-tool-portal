@@ -44,7 +44,7 @@ export function DataTablePagination<TData extends object>({
   const items = getPaginationItems(currentPage, Math.max(pageCount, 0));
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3">
+    <div className="flex flex-wrap items-center justify-between gap-3 px-3 pt-3 border-t border-border">
       <p className="text-sm text-muted-foreground">
         Showing {from}–{to} of {totalCount}
       </p>

@@ -1,6 +1,7 @@
 "use client";
 
 import type { Column, Table } from "@tanstack/react-table";
+import { Columns3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -10,11 +11,14 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type { DataTableFeatures } from "@/components/data-table/types";
 
-export type DataTableColumnVisibilityProps<
-  TData extends object,
-> = {
+export type DataTableColumnVisibilityProps<TData extends object> = {
   table: Table<DataTableFeatures, TData>;
   disabled?: boolean;
 };
@@ -28,9 +32,10 @@ function getColumnLabel<TData extends object>(
   return typeof header === "string" && header.length > 0 ? header : column.id;
 }
 
-export function DataTableColumnVisibility<
-  TData extends object,
->({ table, disabled }: DataTableColumnVisibilityProps<TData>) {
+export function DataTableColumnVisibility<TData extends object>({
+  table,
+  disabled,
+}: DataTableColumnVisibilityProps<TData>) {
   const hideableColumns = table
     .getAllLeafColumns()
     .filter((column) => column.getCanHide());
@@ -39,12 +44,28 @@ export function DataTableColumnVisibility<
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger
-        disabled={disabled}
-        render={<Button type="button" variant="outline" size="sm" />}
-      >
-        Columns
-      </DropdownMenuTrigger>
+      <Tooltip>
+        <TooltipTrigger
+          delay={200}
+          render={
+            <DropdownMenuTrigger
+              disabled={disabled}
+              render={
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="size-9"
+                  aria-label="Toggle columns"
+                />
+              }
+            />
+          }
+        >
+          <Columns3 className="size-4" />
+        </TooltipTrigger>
+        <TooltipContent side="bottom">Columns</TooltipContent>
+      </Tooltip>
       <DropdownMenuContent align="end" className="w-48">
         <DropdownMenuGroup>
           <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>

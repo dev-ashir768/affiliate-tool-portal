@@ -44,14 +44,14 @@ export function DataTableColumnHeader<
           type="button"
           variant="ghost"
           size="sm"
-          className="-ml-1.5 h-7 gap-1 px-1.5 font-medium"
+          className="h-8 gap-1.5 px-1 font-semibold text-foreground hover:bg-transparent"
           onClick={() => cycleSorting(column)}
         >
           <span className="truncate">{title}</span>
-          <SortIcon className="size-3.5 text-muted-foreground" />
+          <SortIcon className="size-3.5 shrink-0 text-muted-foreground/70" />
         </Button>
       ) : (
-        <span className="truncate px-1.5 text-sm font-medium">{title}</span>
+        <span className="truncate px-1 text-sm font-semibold">{title}</span>
       )}
     </div>
   );

@@ -39,7 +39,7 @@ export function AppShell({
   const isDesktop = useSyncExternalStore(
     subscribeDesktop,
     getDesktopSnapshot,
-    getDesktopServerSnapshot
+    getDesktopServerSnapshot,
   );
   const sections = data?.sections ?? [];
   // Expanded → hamburger; collapsed / mobile sheet open → X
@@ -92,9 +92,9 @@ export function AppShell({
 
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-tr-2xl bg-muted">
           <AppPageHeader sections={sections} pathname={pathname} />
-          <main className="flex-1 overflow-y-auto px-4 pt-2 pb-4">
+          <div className="min-w-0 flex-1 overflow-y-auto px-4 pt-2 pb-4">
             {children}
-          </main>
+          </div>
         </div>
       </div>
     </div>

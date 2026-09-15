@@ -3,6 +3,7 @@
 import { createColumnHelper } from "@tanstack/react-table";
 import { DataTableColumnHeader } from "@/components/data-table";
 import type { DataTableFeatures } from "@/components/data-table/types";
+import { cn } from "cn";
 import { Badge } from "@/components/ui/badge";
 import type { User, UserStatus } from "@/types/users";
 
@@ -15,10 +16,14 @@ const createdAtFormatter = new Intl.DateTimeFormat("en-US", {
   timeZone: "UTC",
 });
 
-function statusVariant(status: UserStatus) {
-  if (status === "active") return "default" as const;
-  if (status === "invited") return "secondary" as const;
-  return "outline" as const;
+function statusBadgeClass(status: UserStatus) {
+  if (status === "active") {
+    return "border-transparent bg-primary text-primary-foreground";
+  }
+  if (status === "invited") {
+    return "border-transparent bg-foreground text-background";
+  }
+  return "border-border bg-transparent text-muted-foreground";
 }
 
 export const usersColumns = columnHelper.columns([
@@ -48,7 +53,17 @@ export const usersColumns = columnHelper.columns([
     meta: { label: "Status" },
     cell: (info) => {
       const status = info.getValue();
-      return <Badge variant={statusVariant(status)}>{status}</Badge>;
+      return (
+        <Badge
+          variant="outline"
+          className={cn(
+            "rounded-full px-2.5 py-0.5 font-medium capitalize",
+            statusBadgeClass(status),
+          )}
+        >
+          {status}
+        </Badge>
+      );
     },
   }),
   columnHelper.accessor("shop", {

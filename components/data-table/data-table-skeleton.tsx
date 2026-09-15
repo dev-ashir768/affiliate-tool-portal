@@ -19,9 +19,9 @@ export function DataTableSkeleton({
   return (
     <Table>
       <TableHeader>
-        <TableRow>
+        <TableRow className="bg-gray-200 ">
           {Array.from({ length: columnCount }).map((_, i) => (
-            <TableHead key={i}>
+            <TableHead key={i} className="px-4">
               <Skeleton className="h-4 w-24" />
             </TableHead>
           ))}
@@ -31,7 +31,7 @@ export function DataTableSkeleton({
         {Array.from({ length: rowCount }).map((_, r) => (
           <TableRow key={r}>
             {Array.from({ length: columnCount }).map((_, c) => (
-              <TableCell key={c}>
+              <TableCell key={c} className="p-4">
                 <Skeleton className="h-4 w-full" />
               </TableCell>
             ))}
