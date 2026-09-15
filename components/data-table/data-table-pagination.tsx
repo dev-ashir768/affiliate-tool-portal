@@ -62,7 +62,7 @@ export function DataTablePagination<TData extends object>({
           >
             <SelectTrigger
               size="sm"
-              className="w-[4.5rem]"
+              className="w-18"
               aria-label="Rows per page"
             >
               <SelectValue />

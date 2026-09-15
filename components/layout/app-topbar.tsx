@@ -31,7 +31,9 @@ export function AppTopbar({
           variant="ghost"
           size="icon"
           onClick={onMenuClick}
-          aria-label={showCloseIcon ? "Expand navigation" : "Collapse navigation"}
+          aria-label={
+            showCloseIcon ? "Expand navigation" : "Collapse navigation"
+          }
           aria-expanded={!showCloseIcon}
           className="text-topbar-foreground hover:bg-topbar-accent hover:text-topbar-accent-foreground"
         >
@@ -62,7 +64,7 @@ export function AppTopbar({
             placeholder="Search menus..."
             readOnly
             aria-label="Search menus"
-            className="h-9 w-full rounded-lg border-0 bg-topbar-accent pr-16 pl-9 text-sm text-topbar-accent-foreground placeholder:text-topbar-foreground/60 outline-none focus-visible:ring-2 focus-visible:ring-topbar-foreground/30"
+            className="h-9 w-full rounded-lg border-0 bg-topbar-accent pr-16 pl-9 text-sm placeholder:text-topbar-foreground/60 outline-none focus-visible:ring-2 focus-visible:ring-topbar-foreground/30"
           />
           <kbd className="pointer-events-none absolute right-2.5 rounded border border-topbar-border bg-topbar-accent px-1.5 py-0.5 text-[10px] font-medium text-topbar-foreground/70">
             Ctrl + K
@@ -101,9 +103,12 @@ export function AppTopbar({
             </div>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem className="cursor-pointer">Profile</DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer">Logout</DropdownMenuItem>
-            
+            <DropdownMenuItem className="cursor-pointer">
+              Profile
+            </DropdownMenuItem>
+            <DropdownMenuItem className="cursor-pointer">
+              Logout
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

@@ -124,7 +124,7 @@ function DataTableHeaderCell<TData extends object>({
       <div className="flex items-center gap-1.5">
         {showDragHandle ? (
           <span
-            className="inline-flex size-5 shrink-0 cursor-grab items-center justify-center text-muted-foreground/60 hover:text-foreground active:cursor-grabbing"
+            className="inline-flex size-5 shrink-0 cursor-grab items-center justify-center text-muted-foreground/60 hover:text-foreground"
             aria-label="Reorder column"
             {...dragHandle?.dragHandleProps}
             onPointerDown={(event) => {
