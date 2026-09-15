@@ -304,7 +304,7 @@ export function DataTable<TData extends object>({
 
   const tableGrid = (
     <Table aria-label={ariaLabel} className="w-full table-fixed">
-      <TableHeader>
+      <TableHeader className="bg-gray-200">
         {headerGroups.map((headerGroup) => (
           <DataTableHeaderRow
             key={headerGroup.id}

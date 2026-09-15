@@ -19,7 +19,7 @@ export function DataTableSkeleton({
   return (
     <Table>
       <TableHeader>
-        <TableRow className="bg-gray-200 ">
+        <TableRow className="bg-gray-200">
           {Array.from({ length: columnCount }).map((_, i) => (
             <TableHead key={i} className="px-4">
               <Skeleton className="h-4 w-24" />
