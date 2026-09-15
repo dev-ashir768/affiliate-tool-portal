@@ -25,9 +25,10 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "../ui/button";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function SignupForm() {
-  // =============================== State Variables ===============================
+  const router = useRouter();
   const signupForm = useForm<SignupFormSchemaType>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
@@ -42,7 +43,29 @@ export default function SignupForm() {
 
   async function onSubmit(data: SignupFormSchemaType) {
     signupForm.clearErrors("root");
-    console.log(data);
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: data.email,
+          password: data.password,
+          name: data.username,
+          organizationName: `${data.username}'s workspace`,
+        }),
+      });
+      const payload = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        signupForm.setError("root", {
+          message: payload?.error?.message ?? "Sign up failed",
+        });
+        return;
+      }
+      router.replace("/home");
+      router.refresh();
+    } catch {
+      signupForm.setError("root", { message: "Unable to reach the server" });
+    }
   }
 
   return (

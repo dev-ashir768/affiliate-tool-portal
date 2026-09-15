@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { BellIcon, MenuIcon, SearchIcon, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -23,6 +24,17 @@ export function AppTopbar({
   onMenuClick: () => void;
   showCloseIcon: boolean;
 }) {
+  const router = useRouter();
+
+  async function handleLogout() {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } finally {
+      router.replace("/login");
+      router.refresh();
+    }
+  }
+
   return (
     <header className="flex h-14 shrink-0 items-center justify-between gap-2 bg-topbar px-2 text-topbar-foreground">
       <div className="flex items-center gap-2">
@@ -106,7 +118,12 @@ export function AppTopbar({
             <DropdownMenuItem className="cursor-pointer">
               Profile
             </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer">
+            <DropdownMenuItem
+              className="cursor-pointer"
+              onClick={() => {
+                void handleLogout();
+              }}
+            >
               Logout
             </DropdownMenuItem>
           </DropdownMenuContent>

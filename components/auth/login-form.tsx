@@ -25,9 +25,11 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "../ui/button";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function LoginForm() {
-  // =============================== State Variables ===============================
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const loginForm = useForm<LoginFormSchemaType>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -37,10 +39,29 @@ export default function LoginForm() {
   });
 
   const isSubmitting = loginForm.formState.isSubmitting;
+  const formError = loginForm.formState.errors.root;
 
   async function onSubmit(data: LoginFormSchemaType) {
     loginForm.clearErrors("root");
-    console.log(data);
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      const payload = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        loginForm.setError("root", {
+          message: payload?.error?.message ?? "Login failed",
+        });
+        return;
+      }
+      const next = searchParams.get("next") || "/home";
+      router.replace(next.startsWith("/") ? next : "/home");
+      router.refresh();
+    } catch {
+      loginForm.setError("root", { message: "Unable to reach the server" });
+    }
   }
 
   return (
@@ -107,6 +128,7 @@ export default function LoginForm() {
                   </Field>
                 )}
               />
+              {formError && <FieldError errors={[formError]} />}
             </FieldGroup>
           </form>
         </CardContent>
