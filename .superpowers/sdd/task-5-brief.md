@@ -1,140 +1,52 @@
-﻿### Task 5: Zustand preferences store
+﻿### Task 5: Portal BFF navigation + useNavigation
 
 **Files:**
-- Create: `components/data-table/store/data-table-preferences-store.ts`
-- Create: `components/data-table/hooks/use-data-table-preferences.ts`
+- Create: `affiliate-tool-portal/app/api/navigation/[area]/route.ts`
+- Create: `affiliate-tool-portal/services/navigation.ts`
+- Modify: `affiliate-tool-portal/hooks/use-navigation.ts`
+- Modify: `affiliate-tool-portal/types/auth.ts` (platformMembership, redirectTo)
 
 **Interfaces:**
-- Consumes: TanStack visibility/order/sizing state shapes
-- Produces: `useDataTablePreferences(tableId)` â†’ `{ columnVisibility, columnOrder, columnSizing, setColumnVisibility, setColumnOrder, setColumnSizing }`
+- BFF reads access token; `apiFetch(/api/v1/navigation/${area}, { accessToken })`
+- Hook fetches `/api/navigation/${area}` with credentials
 
-- [ ] **Step 1: Store**
-
-```ts
-// components/data-table/store/data-table-preferences-store.ts
-"use client";
-
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
-import type {
-  ColumnOrderState,
-  ColumnSizingState,
-  VisibilityState,
-} from "@tanstack/react-table";
-
-export type TablePreferences = {
-  columnVisibility: VisibilityState;
-  columnOrder: ColumnOrderState;
-  columnSizing: ColumnSizingState;
-};
-
-type PreferencesState = {
-  byTable: Record<string, TablePreferences>;
-  setPreferences: (
-    tableId: string,
-    patch: Partial<TablePreferences>,
-  ) => void;
-};
-
-const emptyPrefs = (): TablePreferences => ({
-  columnVisibility: {},
-  columnOrder: [],
-  columnSizing: {},
-});
-
-export const useDataTablePreferencesStore = create<PreferencesState>()(
-  persist(
-    (set) => ({
-      byTable: {},
-      setPreferences: (tableId, patch) =>
-        set((state) => ({
-          byTable: {
-            ...state.byTable,
-            [tableId]: {
-              ...emptyPrefs(),
-              ...state.byTable[tableId],
-              ...patch,
-            },
-          },
-        })),
-    }),
-    { name: "datatable-preferences" },
-  ),
-);
-```
-
-- [ ] **Step 2: Hook**
+- [ ] **Step 1: Implement BFF route**
 
 ```ts
-// components/data-table/hooks/use-data-table-preferences.ts
-"use client";
-
-import { useCallback } from "react";
-import type {
-  ColumnOrderState,
-  ColumnSizingState,
-  OnChangeFn,
-  VisibilityState,
-} from "@tanstack/react-table";
-import {
-  useDataTablePreferencesStore,
-  type TablePreferences,
-} from "../store/data-table-preferences-store";
-
-const empty: TablePreferences = {
-  columnVisibility: {},
-  columnOrder: [],
-  columnSizing: {},
-};
-
-export function useDataTablePreferences(tableId: string) {
-  const prefs = useDataTablePreferencesStore(
-    (s) => s.byTable[tableId] ?? empty,
-  );
-  const setPreferences = useDataTablePreferencesStore((s) => s.setPreferences);
-
-  const setColumnVisibility: OnChangeFn<VisibilityState> = useCallback(
-    (updater) => {
-      const prev = prefs.columnVisibility;
-      const next = typeof updater === "function" ? updater(prev) : updater;
-      setPreferences(tableId, { columnVisibility: next });
-    },
-    [prefs.columnVisibility, setPreferences, tableId],
-  );
-
-  const setColumnOrder: OnChangeFn<ColumnOrderState> = useCallback(
-    (updater) => {
-      const prev = prefs.columnOrder;
-      const next = typeof updater === "function" ? updater(prev) : updater;
-      setPreferences(tableId, { columnOrder: next });
-    },
-    [prefs.columnOrder, setPreferences, tableId],
-  );
-
-  const setColumnSizing: OnChangeFn<ColumnSizingState> = useCallback(
-    (updater) => {
-      const prev = prefs.columnSizing;
-      const next = typeof updater === "function" ? updater(prev) : updater;
-      setPreferences(tableId, { columnSizing: next });
-    },
-    [prefs.columnSizing, setPreferences, tableId],
-  );
-
-  return {
-    ...prefs,
-    setColumnVisibility,
-    setColumnOrder,
-    setColumnSizing,
-  };
+export async function GET(_req: Request, ctx: { params: Promise<{ area: string }> }) {
+  const { area } = await ctx.params;
+  if (area !== "dashboard" && area !== "backoffice") {
+    return NextResponse.json({ error: { code: "VALIDATION_ERROR", message: "Invalid area" } }, { status: 400 });
+  }
+  const accessToken = await getAccessToken();
+  if (!accessToken) return NextResponse.json({ error: { code: "UNAUTHORIZED", message: "Not authenticated" } }, { status: 401 });
+  try {
+    const data = await apiFetch(`/api/v1/navigation/${area}`, { accessToken });
+    return NextResponse.json(data);
+  } catch (err) { /* ApiClientError mapping like /me */ }
 }
 ```
 
-- [ ] **Step 3: Commit**
+- [ ] **Step 2: Point useNavigation at BFF**
+
+```ts
+async function fetchNavigation(area: NavArea): Promise<NavResponse> {
+  const res = await fetch(`/api/navigation/${area}`, { credentials: "include" });
+  if (!res.ok) throw new Error("Couldn't load navigation");
+  return res.json();
+}
+```
+
+Keep static JSON files as fallback only if you must â€” **preferred: remove usage entirely** (files may remain unused).
+
+- [ ] **Step 3: Manual check** â€” logged-in merchant loads dashboard shell without error.
+
+- [ ] **Step 4: Commit (portal)**
 
 ```bash
-git add components/data-table/store components/data-table/hooks
-git commit -m "feat: add Zustand DataTable preferences persistence"
+git commit -m "feat: load navigation from API BFF instead of static JSON"
 ```
 
 ---
+
 

@@ -1,22 +1,22 @@
 # Graph Report - affiliate-tool-portal  (2026-09-17)
 
 ## Corpus Check
-- 164 files · ~221,335 words
+- 180 files · ~225,017 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 943 nodes · 1388 edges · 86 communities (50 shown, 9 thin omitted)
-- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 11 edges (avg confidence: 0.85)
+- 912 nodes · 1558 edges · 75 communities (42 shown, 8 thin omitted)
+- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 15 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `9e23d4ad`
+- Built from commit: `e5fe088a`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
 - Portal Auth E2E — Design
-- react
+- invite-member-dialog.tsx
 - package.json
 - components.json
 - app-shell.tsx
@@ -25,7 +25,7 @@
 - compilerOptions
 - dependencies
 - data-table-toolbar.tsx
-- Slice 2 Task 3 Report: Team DataTable + invite dialog
+- members/route.ts
 - Shopify-style App Shell Design
 - Production DataTable Design
 - data-table-pagination.tsx
@@ -50,71 +50,62 @@
 - README.md
 - task-10-brief.md
 - AGENTS.md
+- services/orgs.ts
 - proxy.ts
 - Tiksly Complete SaaS — Master Design (Portal)
 - 2026-09-17-saas-slice-1-platform-nav.md
 - devDependencies
-- Slice 2 Task 1 Report: Authenticated BFF helper + org current GET/PATCH
+- 2026-09-17-saas-slice-2-merchant-team.md
 - Slice 1 Task 5 Report: Portal BFF navigation + useNavigation
 - auth-wrapper.tsx
-- Slice 2 Task 2 Report: Members list BFF + client hooks
+- badge.tsx
 - Slice 1 Task 7 Report: Stub pages for new nav hrefs
 - scripts
-- Slice 2 Task 4 Report: Accept invite page + BFF
-- Slice 2 Task 2 — Members list BFF + client hooks
-- Slice 2 Task 5 Report: Org settings form
-- Slice 2 Task 3 — Team page DataTable + invite dialog
-- Slice 2 Task 4 — Accept invite page
-- next
-- Slice 2 Task 5 — Org settings form on `/settings`
-- signup/page.tsx
-- Slice 2 Task 1 Spec Review: Org current BFF
-- Slice 2 Task 2 Spec Review: Members BFF + hooks
-- Slice 2 Task 3 Spec Review: Team page + invites
-- Slice 2 Task 4 Spec Review: Accept invite
-- Slice 2 Task 5 Spec Review: Org settings form
-- slice2-task-1-brief.md
+- members-table.tsx
+- types/orgs.ts
+- @tanstack/react-query
+- InviteMemberDialog
 
 ## God Nodes (most connected - your core abstractions)
-1. `react` - 30 edges
-2. `cn` - 29 edges
-3. `Button()` - 17 edges
-4. `lucide-react` - 16 edges
+1. `react` - 35 edges
+2. `cn` - 30 edges
+3. `Button()` - 20 edges
+4. `lucide-react` - 17 edges
 5. `compilerOptions` - 16 edges
-6. `Production DataTable Design` - 14 edges
-7. `Task 10 Report: Manual verification pass` - 12 edges
-8. `@tanstack/react-table` - 11 edges
-9. `File structure` - 11 edges
-10. `apiFetch()` - 10 edges
+6. `ApiClientError` - 14 edges
+7. `Production DataTable Design` - 14 edges
+8. `apiFetch()` - 13 edges
+9. `@tanstack/react-table` - 13 edges
+10. `Task 10 Report: Manual verification pass` - 12 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `POST()` --calls--> `setSessionCookies()`  [EXTRACTED]
-  app/api/auth/login/route.ts → lib/auth/session.ts
-- `GET()` --calls--> `getAccessToken()`  [EXTRACTED]
-  app/api/auth/me/route.ts → lib/auth/session.ts
-- `POST()` --calls--> `setSessionCookies()`  [EXTRACTED]
-  app/api/auth/register/route.ts → lib/auth/session.ts
-- `GET()` --calls--> `getAccessToken()`  [EXTRACTED]
-  app/api/navigation/[area]/route.ts → lib/auth/session.ts
-- `onSubmit()` --calls--> `resolvePostAuthRedirect()`  [EXTRACTED]
-  components/auth/login-form.tsx → lib/auth/access-token.ts
+- `OrgSettingsForm()` --calls--> `useMe()`  [EXTRACTED]
+  components/settings/org-settings-form.tsx → hooks/use-me.ts
+- `AcceptInviteForm()` --calls--> `useMe()`  [EXTRACTED]
+  components/invites/accept-invite-form.tsx → hooks/use-me.ts
+- `onAcceptAsSession()` --calls--> `acceptInvite()`  [EXTRACTED]
+  components/invites/accept-invite-form.tsx → services/orgs.ts
+- `onSubmitNewUser()` --calls--> `acceptInvite()`  [EXTRACTED]
+  components/invites/accept-invite-form.tsx → services/orgs.ts
+- `useAcceptInvite()` --calls--> `acceptInvite()`  [EXTRACTED]
+  hooks/use-accept-invite.ts → services/orgs.ts
 
 ## Import Cycles
 - None detected.
 
-## Communities (86 total, 9 thin omitted)
+## Communities (75 total, 8 thin omitted)
 
 ### Community 0 - "Portal Auth E2E — Design"
 Cohesion: 0.33
 Nodes (5): Changes, Decisions, Goal, Out of scope, Portal Auth E2E — Design
 
-### Community 1 - "react"
-Cohesion: 0.06
-Nodes (40): metadata, LoginForm(), onSubmit(), Button(), buttonVariants, Card(), CardContent(), CardFooter() (+32 more)
+### Community 1 - "invite-member-dialog.tsx"
+Cohesion: 0.07
+Nodes (48): metadata, LoginForm(), onSubmit(), Props, Button(), buttonVariants, Card(), CardContent() (+40 more)
 
 ### Community 2 - "package.json"
-Cohesion: 0.11
-Nodes (17): name, private, version, @base-ui/react, eslint, eslint-config-next, @hookform/resolvers, react-dom (+9 more)
+Cohesion: 0.10
+Nodes (19): name, private, version, @base-ui/react, eslint, eslint-config-next, exceljs, @hello-pangea/dnd (+11 more)
 
 ### Community 3 - "components.json"
 Cohesion: 0.09
@@ -122,15 +113,15 @@ Nodes (21): aliases, components, hooks, lib, ui, utils, iconLibrary, menuAccent 
 
 ### Community 4 - "app-shell.tsx"
 Cohesion: 0.07
-Nodes (29): Props, Props, AppPageHeader(), AppShell(), getDesktopServerSnapshot(), getDesktopSnapshot(), subscribeDesktop(), AppSidebar() (+21 more)
+Nodes (28): Props, Props, AppPageHeader(), AppShell(), getDesktopServerSnapshot(), getDesktopSnapshot(), subscribeDesktop(), AppSidebar() (+20 more)
 
 ### Community 5 - "data-table.tsx"
-Cohesion: 0.07
-Nodes (36): cycleSorting(), DataTableColumnHeader(), DataTableColumnHeaderProps, DataTable(), DataTableComponentProps, DataTableHeaderCell(), DataTableEmpty(), Props (+28 more)
+Cohesion: 0.08
+Nodes (30): DataTable(), DataTableComponentProps, DataTableHeaderCell(), DataTableEmpty(), Props, DataTableError(), Props, getAriaSort() (+22 more)
 
 ### Community 6 - "app/layout.tsx"
-Cohesion: 0.09
-Nodes (19): geistMono, geistSans, metadata, spaceGrotesk, useMe(), Props, Providers(), handleMutationError() (+11 more)
+Cohesion: 0.07
+Nodes (20): metadata, metadata, Props, metadata, geistMono, geistSans, metadata, spaceGrotesk (+12 more)
 
 ### Community 7 - "compilerOptions"
 Cohesion: 0.11
@@ -141,12 +132,12 @@ Cohesion: 0.09
 Nodes (22): dependencies, @base-ui/react, class-variance-authority, cn, exceljs, gsap, @gsap/react, @hello-pangea/dnd (+14 more)
 
 ### Community 9 - "data-table-toolbar.tsx"
-Cohesion: 0.07
-Nodes (33): DataTableColumnVisibility(), DataTableColumnVisibilityProps, getColumnLabel(), DataTableExport(), DataTableExportProps, DataTableToolbarProps, DataTableExportFormat, DataTableFeatures (+25 more)
+Cohesion: 0.06
+Nodes (38): cycleSorting(), DataTableColumnHeader(), DataTableColumnHeaderProps, DataTableColumnVisibility(), DataTableColumnVisibilityProps, getColumnLabel(), DataTableExport(), DataTableExportProps (+30 more)
 
-### Community 10 - "Slice 2 Task 3 Report: Team DataTable + invite dialog"
-Cohesion: 0.17
-Nodes (11): Concerns, Files Touched, Slice 2 Task 3 Report: Team DataTable + invite dialog, Step 1: Invites BFF POST, Step 2: Columns + table, Step 3: Invite dialog, Step 4: Team page, Step 5: Commit (+3 more)
+### Community 10 - "members/route.ts"
+Cohesion: 0.24
+Nodes (11): filterMembers(), filterSortPaginateMembers(), GET(), mapMember(), parseParams(), runtime, SEARCH_FIELDS, SORT_FIELDS (+3 more)
 
 ### Community 11 - "Shopify-style App Shell Design"
 Cohesion: 0.11
@@ -165,8 +156,8 @@ Cohesion: 0.17
 Nodes (11): Concerns, Files, Slice 1 Task 6 Report: Login redirectTo + proxy area guards, Step 1: `readAccessClaims` + env note, Step 2: BFF + forms, Step 3: `proxy.ts` area checks, Step 4: Manual E2E, Step 5: Commit (+3 more)
 
 ### Community 19 - "users-table.tsx"
-Cohesion: 0.06
-Nodes (48): GET(), runtime, GET(), parseParams(), runtime, columnHelper, createdAtFormatter, statusBadgeClass() (+40 more)
+Cohesion: 0.07
+Nodes (44): GET(), runtime, GET(), parseParams(), runtime, columnHelper, createdAtFormatter, statusBadgeClass() (+36 more)
 
 ### Community 24 - "Task 7 Report: Toolbar pieces (header, visibility, pagination, export, toolbar)"
 Cohesion: 0.11
@@ -224,17 +215,17 @@ Nodes (7): Also, Final DataTable review fixes, Important, Merge-blocking minors,
 Cohesion: 0.50
 Nodes (3): Deploy on Vercel, Getting Started, Learn More
 
+### Community 44 - "services/orgs.ts"
+Cohesion: 0.26
+Nodes (7): OrgSettingsForm(), useOrg(), usePatchOrg(), fetchCurrentOrg(), patchCurrentOrg(), CreateInviteSchemaType, PatchCurrentOrgSchemaType
+
 ### Community 56 - "proxy.ts"
-Cohesion: 0.09
-Nodes (41): LoginResponse, POST(), POST(), GET(), POST(), RefreshResponse, POST(), RegisterResponse (+33 more)
+Cohesion: 0.06
+Nodes (55): LoginResponse, POST(), POST(), GET(), POST(), RefreshResponse, POST(), RegisterResponse (+47 more)
 
 ### Community 64 - "devDependencies"
 Cohesion: 0.20
 Nodes (10): devDependencies, eslint, eslint-config-next, shadcn, tailwindcss, @tailwindcss/postcss, @types/node, @types/react (+2 more)
-
-### Community 65 - "Slice 2 Task 1 Report: Authenticated BFF helper + org current GET/PATCH"
-Cohesion: 0.18
-Nodes (10): Concerns, Files Touched, Slice 2 Task 1 Report: Authenticated BFF helper + org current GET/PATCH, Step 1: `authenticatedApiFetch`, Step 2: Types + validations, Step 3: BFF route, Step 4: Commit, Steps Completed (+2 more)
 
 ### Community 66 - "Slice 1 Task 5 Report: Portal BFF navigation + useNavigation"
 Cohesion: 0.18
@@ -244,9 +235,9 @@ Nodes (10): Concerns, Files, Slice 1 Task 5 Report: Portal BFF navigation + useN
 Cohesion: 0.29
 Nodes (5): Props, AuthWrapper(), Props, gsap, @gsap/react
 
-### Community 68 - "Slice 2 Task 2 Report: Members list BFF + client hooks"
-Cohesion: 0.18
-Nodes (10): Concerns, Files Touched, Slice 2 Task 2 Report: Members list BFF + client hooks, Step 1: Types, Step 2: BFF route, Step 3: Client services + hooks, Step 4: Commit, Steps Completed (+2 more)
+### Community 68 - "badge.tsx"
+Cohesion: 0.24
+Nodes (5): Badge(), badgeVariants, TabsList(), tabsListVariants, class-variance-authority
 
 ### Community 69 - "Slice 1 Task 7 Report: Stub pages for new nav hrefs"
 Cohesion: 0.29
@@ -256,73 +247,41 @@ Nodes (6): Files Created, Slice 1 Task 7 Report: Stub pages for new nav hrefs, S
 Cohesion: 0.40
 Nodes (5): scripts, build, dev, lint, start
 
-### Community 72 - "Slice 2 Task 4 Report: Accept invite page + BFF"
-Cohesion: 0.18
-Nodes (10): Concerns, Files Touched, Slice 2 Task 4 Report: Accept invite page + BFF, Step 1: Contract check, Step 2: BFF + types/validation/service/hook, Step 3: UI, Step 4: Commit, Steps Completed (+2 more)
+### Community 71 - "members-table.tsx"
+Cohesion: 0.24
+Nodes (8): MembersTable(), searchParamsParsers, SORT_FIELDS, useMembersQuery(), nuqs, fetchMembers(), toQuery(), MembersListParams
 
-### Community 73 - "Slice 2 Task 2 — Members list BFF + client hooks"
-Cohesion: 0.20
-Nodes (9): BFF GET, Client, Commit, Files, Goal, Report, Slice 2 Task 2 — Members list BFF + client hooks, Types (+1 more)
+### Community 72 - "types/orgs.ts"
+Cohesion: 0.24
+Nodes (9): columnHelper, membersColumns, statusBadgeClass(), AcceptInviteResponse, CreateInviteResponse, OrganizationCurrent, OrgMember, OrgMemberRole (+1 more)
 
-### Community 74 - "Slice 2 Task 5 Report: Org settings form"
-Cohesion: 0.20
-Nodes (9): Concerns, Files Touched, Slice 2 Task 5 Report: Org settings form, Step 1: Org settings form, Step 2: Settings page, Step 3: Commit, Steps Completed, Summary (+1 more)
+### Community 73 - "@tanstack/react-query"
+Cohesion: 0.32
+Nodes (7): AcceptInviteForm(), onAcceptAsSession(), onSubmitNewUser(), useAcceptInvite(), @tanstack/react-query, acceptInvite(), AcceptInviteSchemaType
 
-### Community 75 - "Slice 2 Task 3 — Team page DataTable + invite dialog"
-Cohesion: 0.22
-Nodes (8): Commit, Files, Goal, Invite BFF POST, Report, Slice 2 Task 3 — Team page DataTable + invite dialog, UI, Workspace
-
-### Community 76 - "Slice 2 Task 4 — Accept invite page"
-Cohesion: 0.22
-Nodes (8): BFF POST, Commit, Files, Goal, Report, Slice 2 Task 4 — Accept invite page, UI, Workspace
-
-### Community 77 - "next"
-Cohesion: 0.25
-Nodes (4): metadata, ForgotPasswordForm(), nextConfig, next
-
-### Community 78 - "Slice 2 Task 5 — Org settings form on `/settings`"
-Cohesion: 0.25
-Nodes (7): Commit, Files, Goal, Report, Slice 2 Task 5 — Org settings form on `/settings`, UI, Workspace
-
-### Community 80 - "Slice 2 Task 1 Spec Review: Org current BFF"
+### Community 74 - "InviteMemberDialog"
 Cohesion: 0.40
-Nodes (4): Checklist, Error handling vs `app/api/auth/me/route.ts`, Notes (non-blocking), Slice 2 Task 1 Spec Review: Org current BFF
-
-### Community 81 - "Slice 2 Task 2 Spec Review: Members BFF + hooks"
-Cohesion: 0.50
-Nodes (3): Checklist, Notes (non-blocking), Slice 2 Task 2 Spec Review: Members BFF + hooks
-
-### Community 82 - "Slice 2 Task 3 Spec Review: Team page + invites"
-Cohesion: 0.50
-Nodes (3): Checklist, Notes (non-blocking), Slice 2 Task 3 Spec Review: Team page + invites
-
-### Community 83 - "Slice 2 Task 4 Spec Review: Accept invite"
-Cohesion: 0.50
-Nodes (3): Checklist, Notes (non-blocking), Slice 2 Task 4 Spec Review: Accept invite
-
-### Community 84 - "Slice 2 Task 5 Spec Review: Org settings form"
-Cohesion: 0.50
-Nodes (3): Checklist, Notes (non-blocking), Slice 2 Task 5 Spec Review: Org settings form
+Nodes (5): InviteMemberDialog(), handleOpenChange(), onSubmit(), resetDialogState(), createInvite()
 
 ## Knowledge Gaps
-- **419 isolated node(s):** `npx`, `metadata`, `Props`, `metadata`, `metadata` (+414 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 573 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **9 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **354 isolated node(s):** `Props`, `UpstreamMember`, `OrgMemberRole`, `DataTablePaginationProps`, `PaginationItem` (+349 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 491 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **8 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `react` connect `react` to `package.json`, `auth-wrapper.tsx`, `app-shell.tsx`, `data-table.tsx`, `app/layout.tsx`, `data-table-toolbar.tsx`, `data-table-pagination.tsx`, `users-table.tsx`?**
-  _High betweenness centrality (0.070) - this node is a cross-community bridge._
-- **Why does `cn` connect `react` to `package.json`, `app-shell.tsx`, `data-table.tsx`, `app/layout.tsx`, `data-table-toolbar.tsx`, `data-table-pagination.tsx`, `users-table.tsx`, `progress.tsx`?**
-  _High betweenness centrality (0.052) - this node is a cross-community bridge._
+- **Why does `react` connect `invite-member-dialog.tsx` to `package.json`, `auth-wrapper.tsx`, `app-shell.tsx`, `data-table.tsx`, `app/layout.tsx`, `members-table.tsx`, `data-table-toolbar.tsx`, `data-table-pagination.tsx`, `users-table.tsx`?**
+  _High betweenness centrality (0.100) - this node is a cross-community bridge._
+- **Why does `cn` connect `invite-member-dialog.tsx` to `package.json`, `app-shell.tsx`, `data-table.tsx`, `badge.tsx`, `app/layout.tsx`, `types/orgs.ts`, `data-table-toolbar.tsx`, `data-table-pagination.tsx`, `users-table.tsx`, `progress.tsx`?**
+  _High betweenness centrality (0.057) - this node is a cross-community bridge._
 - **Why does `dependencies` connect `dependencies` to `package.json`?**
-  _High betweenness centrality (0.022) - this node is a cross-community bridge._
-- **What connects `npx`, `metadata`, `Props` to the rest of the system?**
-  _419 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `react` be split into smaller, more focused modules?**
-  _Cohesion score 0.055501460564751706 - nodes in this community are weakly interconnected._
+  _High betweenness centrality (0.028) - this node is a cross-community bridge._
+- **What connects `Props`, `UpstreamMember`, `OrgMemberRole` to the rest of the system?**
+  _354 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `invite-member-dialog.tsx` be split into smaller, more focused modules?**
+  _Cohesion score 0.0680517916290274 - nodes in this community are weakly interconnected._
 - **Should `package.json` be split into smaller, more focused modules?**
-  _Cohesion score 0.1111111111111111 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.1 - nodes in this community are weakly interconnected._
 - **Should `components.json` be split into smaller, more focused modules?**
   _Cohesion score 0.09090909090909091 - nodes in this community are weakly interconnected._
