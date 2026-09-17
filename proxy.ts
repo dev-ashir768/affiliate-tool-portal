@@ -15,6 +15,9 @@ const AUTH_PAGES = new Set(["/login", "/signup", "/forgot-password"]);
 
 const DASHBOARD_PREFIXES = [
   "/home",
+  "/shops",
+  "/team",
+  "/billing",
   "/settings",
   "/products",
   "/orders",
@@ -192,6 +195,12 @@ export const config = {
     "/forgot-password",
     "/home",
     "/home/:path*",
+    "/shops",
+    "/shops/:path*",
+    "/team",
+    "/team/:path*",
+    "/billing",
+    "/billing/:path*",
     "/settings",
     "/settings/:path*",
     "/products",

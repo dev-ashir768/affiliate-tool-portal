@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { BellIcon, MenuIcon, SearchIcon, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -33,17 +34,17 @@ export function AppTopbar({
   showCloseIcon: boolean;
 }) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { data: me } = useMe();
   const displayName = me?.user.name ?? "Account";
-  const displayRole =
-    me?.memberships.find((m) => m.organization.id === me.currentOrganizationId)
-      ?.role ?? me?.memberships[0]?.role ?? "…";
+  const subtitle = me?.user.email ?? "…";
   const initials = initialsFromName(displayName);
 
   async function handleLogout() {
     try {
       await fetch("/api/auth/logout", { method: "POST" });
     } finally {
+      queryClient.removeQueries({ queryKey: ["auth", "me"] });
       router.replace("/login");
       router.refresh();
     }
@@ -125,9 +126,7 @@ export function AppTopbar({
               <p className="text-sm font-semibold text-topbar-foreground">
                 {displayName}
               </p>
-              <p className="text-xs text-topbar-foreground/70">
-                {me?.user.email ?? displayRole}
-              </p>
+              <p className="text-xs text-topbar-foreground/70">{subtitle}</p>
             </div>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">

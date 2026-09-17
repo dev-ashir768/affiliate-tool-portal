@@ -44,6 +44,13 @@ export function defaultRedirectForClaims(claims: {
   return claims.platformRole ? "/backoffice/users" : "/home";
 }
 
+/** Relative path only — blocks open redirects (`//`, `/\`, `\`, etc.). */
+const SAFE_RELATIVE_PATH = /^\/[a-zA-Z0-9/_-]*$/;
+
+function isSafeRelativePath(path: string): boolean {
+  return SAFE_RELATIVE_PATH.test(path) && !path.includes("\\");
+}
+
 /**
  * Staff may only follow `next` under /backoffice; merchants only non-backoffice.
  */
@@ -53,14 +60,14 @@ export function resolvePostAuthRedirect(opts: {
   platformRole: string | null;
 }): string {
   const fallback =
-    opts.redirectTo && opts.redirectTo.startsWith("/")
+    opts.redirectTo && isSafeRelativePath(opts.redirectTo)
       ? opts.redirectTo
       : opts.platformRole
         ? "/backoffice/users"
         : "/home";
 
   const next = opts.next;
-  if (!next || !next.startsWith("/") || next.startsWith("//")) {
+  if (!next || !isSafeRelativePath(next)) {
     return fallback;
   }
 
