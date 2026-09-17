@@ -16,18 +16,26 @@ export class ApiClientError extends Error {
   }
 }
 
+export type ApiFetchOptions = RequestInit & {
+  accessToken?: string;
+};
+
 export async function apiFetch<T>(
   path: string,
-  init: RequestInit = {}
+  init: ApiFetchOptions = {}
 ): Promise<T> {
+  const { accessToken, ...requestInit } = init;
   const url = `${getApiBaseUrl()}${path.startsWith("/") ? path : `/${path}`}`;
-  const headers = new Headers(init.headers);
-  if (init.body && !headers.has("Content-Type")) {
+  const headers = new Headers(requestInit.headers);
+  if (requestInit.body && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
+  }
+  if (accessToken) {
+    headers.set("Authorization", `Bearer ${accessToken}`);
   }
 
   const res = await fetch(url, {
-    ...init,
+    ...requestInit,
     headers,
     credentials: "include",
   });

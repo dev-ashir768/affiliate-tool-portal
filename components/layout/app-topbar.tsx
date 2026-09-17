@@ -13,7 +13,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
+import { useMe } from "@/hooks/use-me";
 import type { NavBrand } from "@/types/navigation";
+
+function initialsFromName(name: string) {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  if (parts.length === 1) return parts[0]!.slice(0, 2).toUpperCase();
+  return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase();
+}
 
 export function AppTopbar({
   brand,
@@ -25,6 +33,12 @@ export function AppTopbar({
   showCloseIcon: boolean;
 }) {
   const router = useRouter();
+  const { data: me } = useMe();
+  const displayName = me?.user.name ?? "Account";
+  const displayRole =
+    me?.memberships.find((m) => m.organization.id === me.currentOrganizationId)
+      ?.role ?? me?.memberships[0]?.role ?? "…";
+  const initials = initialsFromName(displayName);
 
   async function handleLogout() {
     try {
@@ -104,14 +118,16 @@ export function AppTopbar({
           >
             <Avatar className="size-8 rounded-full">
               <AvatarFallback className="rounded-full bg-topbar-accent text-xs text-topbar-accent-foreground">
-                TK
+                {initials}
               </AvatarFallback>
             </Avatar>
             <div className="hidden text-left leading-tight sm:block">
               <p className="text-sm font-semibold text-topbar-foreground">
-                Tiksly Admin
+                {displayName}
               </p>
-              <p className="text-xs text-topbar-foreground/70">Super Admin</p>
+              <p className="text-xs text-topbar-foreground/70">
+                {me?.user.email ?? displayRole}
+              </p>
             </div>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
