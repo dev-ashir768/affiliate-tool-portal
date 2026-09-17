@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useMemo } from "react";
+import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Field,
@@ -31,13 +31,11 @@ function ResetPasswordFormInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token") ?? "";
+  const [done, setDone] = useState(false);
 
   const form = useForm<ResetPasswordFormSchemaType>({
     resolver: zodResolver(resetPasswordSchema),
-    defaultValues: useMemo(
-      () => ({ token, password: "" }),
-      [token],
-    ),
+    defaultValues: { token, password: "" },
   });
 
   async function onSubmit(data: ResetPasswordFormSchemaType) {
@@ -52,7 +50,8 @@ function ResetPasswordFormInner() {
       if (!res.ok) {
         throw new Error(json?.error?.message ?? "Reset failed");
       }
-      router.push("/login");
+      setDone(true);
+      window.setTimeout(() => router.push("/login"), 1500);
     } catch (err) {
       form.setError("root", {
         message: err instanceof Error ? err.message : "Failed to reset password",
@@ -87,7 +86,7 @@ function ResetPasswordFormInner() {
       <CardHeader className="flex flex-col items-center">
         <Image
           src="/images/brandings/logo.png"
-          alt="logo"
+          alt="Tiksly"
           width={100}
           height={60}
           className="mb-4"
@@ -95,46 +94,54 @@ function ResetPasswordFormInner() {
         <CardTitle className="text-2xl font-bold">Set a new password</CardTitle>
       </CardHeader>
       <CardContent>
-        <form
-          id="reset-password-form"
-          noValidate
-          onSubmit={form.handleSubmit(onSubmit)}
-        >
-          <input type="hidden" {...form.register("token")} />
-          <FieldGroup>
-            <Controller
-              name="password"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid || undefined}>
-                  <FieldLabel htmlFor={field.name}>New password</FieldLabel>
-                  <Input
-                    id={field.name}
-                    {...field}
-                    type="password"
-                    autoComplete="new-password"
-                    aria-invalid={fieldState.invalid || undefined}
-                  />
-                  {fieldState.error ? (
-                    <FieldError errors={[fieldState.error]} />
-                  ) : null}
-                </Field>
-              )}
-            />
-            {formError ? <FieldError errors={[formError]} /> : null}
-          </FieldGroup>
-        </form>
+        {done ? (
+          <p className="text-sm text-muted-foreground">
+            Password updated. Redirecting to login…
+          </p>
+        ) : (
+          <form
+            id="reset-password-form"
+            noValidate
+            onSubmit={form.handleSubmit(onSubmit)}
+          >
+            <input type="hidden" {...form.register("token")} />
+            <FieldGroup>
+              <Controller
+                name="password"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid || undefined}>
+                    <FieldLabel htmlFor={field.name}>New password</FieldLabel>
+                    <Input
+                      id={field.name}
+                      {...field}
+                      type="password"
+                      autoComplete="new-password"
+                      aria-invalid={fieldState.invalid || undefined}
+                    />
+                    {fieldState.error ? (
+                      <FieldError errors={[fieldState.error]} />
+                    ) : null}
+                  </Field>
+                )}
+              />
+              {formError ? <FieldError errors={[formError]} /> : null}
+            </FieldGroup>
+          </form>
+        )}
       </CardContent>
       <CardFooter className="bg-white border-0">
         <Field>
-          <Button
-            type="submit"
-            size="lg"
-            form="reset-password-form"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "Saving…" : "Update password"}
-          </Button>
+          {!done ? (
+            <Button
+              type="submit"
+              size="lg"
+              form="reset-password-form"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Saving…" : "Update password"}
+            </Button>
+          ) : null}
           <FieldDescription className="text-center">
             <Link href="/login">Back to login</Link>
           </FieldDescription>
@@ -146,7 +153,9 @@ function ResetPasswordFormInner() {
 
 export default function ResetPasswordForm() {
   return (
-    <Suspense fallback={<div className="text-sm text-muted-foreground">Loading…</div>}>
+    <Suspense
+      fallback={<div className="text-sm text-muted-foreground">Loading…</div>}
+    >
       <ResetPasswordFormInner />
     </Suspense>
   );

@@ -22,7 +22,8 @@ export default function CrawlerPage() {
       <CardHeader>
         <CardTitle>Crawler</CardTitle>
         <CardDescription>
-          {query.data?.note ?? "Crawler console scaffolding — coming later"}
+          Crawler controls are scaffolded. Job scheduling and run history come in
+          a later release.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-1 text-sm">

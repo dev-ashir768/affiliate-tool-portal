@@ -22,8 +22,8 @@ export default function ProxiesPage() {
       <CardHeader>
         <CardTitle>Proxies</CardTitle>
         <CardDescription>
-          {query.data?.meta.note ??
-            "Proxy management scaffolding — coming later"}
+          Proxy pool management is scaffolded for ops. Full allocation and health
+          checks ship in a later release.
         </CardDescription>
       </CardHeader>
       <CardContent className="text-sm text-muted-foreground">

@@ -11,12 +11,18 @@ import {
   readAccessClaims,
 } from "@/lib/auth/access-token";
 
-const AUTH_PAGES = new Set([
-  "/login",
-  "/signup",
-  "/forgot-password",
-  "/reset-password",
-]);
+const AUTH_PAGES = new Set(["/login", "/signup", "/forgot-password"]);
+
+/** Auth flows that must stay reachable even when a session cookie exists. */
+const AUTH_TOKEN_PAGES = new Set(["/reset-password"]);
+
+function isInvitePath(pathname: string) {
+  return pathname === "/invite" || pathname.startsWith("/invite/");
+}
+
+function isAuthTokenPage(pathname: string) {
+  return AUTH_TOKEN_PAGES.has(pathname) || isInvitePath(pathname);
+}
 
 const DASHBOARD_PREFIXES = [
   "/home",
@@ -190,6 +196,11 @@ export async function proxy(request: NextRequest) {
     }
   }
 
+  // Logged-in users may still open reset/invite links without being bounced home.
+  if (isAuthTokenPage(pathname)) {
+    return NextResponse.next();
+  }
+
   return NextResponse.next();
 }
 
@@ -199,6 +210,8 @@ export const config = {
     "/signup",
     "/forgot-password",
     "/reset-password",
+    "/invite",
+    "/invite/:path*",
     "/home",
     "/home/:path*",
     "/shops",

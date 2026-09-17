@@ -19,6 +19,7 @@ export function usePatchOrg() {
     mutationFn: (body: PatchCurrentOrgSchemaType) => patchCurrentOrg(body),
     onSuccess: (data) => {
       queryClient.setQueryData(["org", "current"], data);
+      void queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
     },
   });
 }

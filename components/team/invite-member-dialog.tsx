@@ -38,7 +38,7 @@ import {
 
 export function InviteMemberDialog() {
   const queryClient = useQueryClient();
-  const { data: me } = useMe();
+  const { data: me, isLoading: meLoading } = useMe();
   const [open, setOpen] = useState(false);
   const [inviteLink, setInviteLink] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -103,6 +103,15 @@ export function InviteMemberDialog() {
     } catch {
       form.setError("root", { message: "Unable to copy link" });
     }
+  }
+
+  if (meLoading) {
+    return (
+      <Button type="button" disabled>
+        <UserPlusIcon data-icon="inline-start" />
+        Invite member
+      </Button>
+    );
   }
 
   if (!canInvite) {

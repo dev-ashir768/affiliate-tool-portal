@@ -4,6 +4,7 @@ import { createColumnHelper } from "@tanstack/react-table";
 import { DataTableColumnHeader } from "@/components/data-table";
 import type { DataTableFeatures } from "@/components/data-table/types";
 import { Badge } from "@/components/ui/badge";
+import { StaffRowActions } from "@/components/backoffice/staff/staff-row-actions";
 import type {
   PlatformMembershipStatus,
   PlatformStaff,
@@ -72,5 +73,12 @@ export const staffColumns = columnHelper.columns([
     ),
     meta: { label: "Created" },
     cell: (info) => createdAtFormatter.format(new Date(info.getValue())),
+  }),
+  columnHelper.display({
+    id: "actions",
+    header: () => <span className="sr-only">Actions</span>,
+    enableHiding: false,
+    enableSorting: false,
+    cell: ({ row }) => <StaffRowActions staff={row.original} />,
   }),
 ]);

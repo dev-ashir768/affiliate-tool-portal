@@ -9,6 +9,7 @@ import {
   Globe,
   Home,
   Package,
+  ScrollText,
   Settings,
   ShoppingCart,
   Store,
@@ -28,6 +29,7 @@ const ICONS: Record<string, LucideIcon> = {
   CreditCard,
   Building2,
   BadgeDollarSign,
+  ScrollText,
 };
 
 export function NavIcon({
