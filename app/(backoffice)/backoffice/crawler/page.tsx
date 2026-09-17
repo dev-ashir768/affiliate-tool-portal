@@ -22,13 +22,13 @@ export default function CrawlerPage() {
       <CardHeader>
         <CardTitle>Crawler</CardTitle>
         <CardDescription>
-          Crawler controls are scaffolded. Job scheduling and run history come in
-          a later release.
+          Shop-verify worker queue status. Dedicated crawl runs ship next; use
+          merchant shop verify for bot jobs today.
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-1 text-sm">
+      <CardContent className="space-y-2 text-sm text-muted-foreground">
         {query.isError ? (
-          <p className="text-destructive">
+          <p className="text-destructive" role="alert">
             {query.error instanceof Error
               ? query.error.message
               : "Unable to load crawler status"}
@@ -37,11 +37,18 @@ export default function CrawlerPage() {
           <>
             <p>
               Status:{" "}
-              <span className="font-medium">{query.data?.status ?? "—"}</span>
+              <span className="font-medium text-foreground">
+                {query.data?.status ?? "—"}
+              </span>
             </p>
-            <p className="text-muted-foreground">
-              Last run: {query.data?.lastRunAt ?? "Never"}
+            <p>Queue: {query.data?.queue ?? "shop-verify"}</p>
+            <p>
+              Last run:{" "}
+              {query.data?.lastRunAt
+                ? new Date(query.data.lastRunAt).toLocaleString()
+                : "Never"}
             </p>
+            {query.data?.note ? <p>{query.data.note}</p> : null}
           </>
         )}
       </CardContent>

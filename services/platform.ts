@@ -1,14 +1,19 @@
 import type {
   BillingOverview,
+  PlatformCrawlerStatus,
   PlatformListParams,
   PlatformOrgDetail,
   PlatformOrgListResponse,
+  PlatformProxy,
+  PlatformProxyListResponse,
   PlatformShopListResponse,
   PlatformStaff,
   PlatformStaffListResponse,
 } from "@/types/platform";
 import type {
+  CreateProxySchemaType,
   CreateStaffSchemaType,
+  PatchProxySchemaType,
   PatchStaffSchemaType,
 } from "@/validations/platform.validations";
 
@@ -82,10 +87,13 @@ export async function fetchPlatformOrganization(
   id: string,
   signal?: AbortSignal,
 ): Promise<PlatformOrgDetail> {
-  const res = await fetch(`/api/platform/organizations/${encodeURIComponent(id)}`, {
-    credentials: "include",
-    signal,
-  });
+  const res = await fetch(
+    `/api/platform/organizations/${encodeURIComponent(id)}`,
+    {
+      credentials: "include",
+      signal,
+    },
+  );
   return (await parseJson(res)) as PlatformOrgDetail;
 }
 
@@ -111,25 +119,49 @@ export async function fetchBillingOverview(
   return (await parseJson(res)) as BillingOverview;
 }
 
-export async function fetchPlatformProxies(signal?: AbortSignal) {
-  const res = await fetch("/api/platform/proxies", {
+export async function fetchPlatformProxies(
+  params: PlatformListParams = { page: 1, pageSize: 50 },
+  signal?: AbortSignal,
+): Promise<PlatformProxyListResponse> {
+  const qs = toQuery(params);
+  const res = await fetch(`/api/platform/proxies?${qs}`, {
     credentials: "include",
     signal,
   });
-  return parseJson(res) as Promise<{
-    items: unknown[];
-    meta: { total: number; note: string };
-  }>;
+  return (await parseJson(res)) as PlatformProxyListResponse;
 }
 
-export async function fetchPlatformCrawler(signal?: AbortSignal) {
+export async function createPlatformProxy(
+  body: CreateProxySchemaType,
+): Promise<PlatformProxy> {
+  const res = await fetch("/api/platform/proxies", {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  return (await parseJson(res)) as PlatformProxy;
+}
+
+export async function patchPlatformProxy(
+  id: string,
+  body: PatchProxySchemaType,
+): Promise<PlatformProxy> {
+  const res = await fetch(`/api/platform/proxies/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  return (await parseJson(res)) as PlatformProxy;
+}
+
+export async function fetchPlatformCrawler(
+  signal?: AbortSignal,
+): Promise<PlatformCrawlerStatus> {
   const res = await fetch("/api/platform/crawler", {
     credentials: "include",
     signal,
   });
-  return parseJson(res) as Promise<{
-    status: string;
-    lastRunAt: string | null;
-    note: string;
-  }>;
+  return (await parseJson(res)) as PlatformCrawlerStatus;
 }

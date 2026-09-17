@@ -109,3 +109,33 @@ export type BillingOverview = {
   subscriptionsByStatus: Array<{ status: string; count: number }>;
   mrrCents: number;
 };
+
+export type ProxyStatus = "AVAILABLE" | "IN_USE" | "DISABLED" | "BANNED";
+export type ProxyProtocol = "HTTP" | "HTTPS" | "SOCKS5";
+
+export type PlatformProxy = {
+  id: string;
+  label: string;
+  host: string;
+  port: number;
+  protocol: ProxyProtocol;
+  username: string | null;
+  hasPassword: boolean;
+  region: string | null;
+  status: ProxyStatus;
+  lastCheckedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type PlatformProxyListResponse = {
+  data: PlatformProxy[];
+  meta: PlatformListMeta;
+};
+
+export type PlatformCrawlerStatus = {
+  status: string;
+  lastRunAt: string | null;
+  queue?: string;
+  note: string;
+};

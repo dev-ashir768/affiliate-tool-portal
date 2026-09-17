@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  createPlatformProxy,
   createPlatformStaff,
   fetchBillingOverview,
   fetchPlatformCrawler,
@@ -10,11 +11,14 @@ import {
   fetchPlatformProxies,
   fetchPlatformShops,
   fetchPlatformStaff,
+  patchPlatformProxy,
   patchPlatformStaff,
 } from "@/services/platform";
 import type { PlatformListParams } from "@/types/platform";
 import type {
+  CreateProxySchemaType,
   CreateStaffSchemaType,
+  PatchProxySchemaType,
   PatchStaffSchemaType,
 } from "@/validations/platform.validations";
 
@@ -89,11 +93,39 @@ export function useBillingOverview() {
   });
 }
 
-export function usePlatformProxies() {
+export function usePlatformProxies(
+  params: PlatformListParams = { page: 1, pageSize: 50 },
+) {
   return useQuery({
-    queryKey: ["platform", "proxies"],
-    queryFn: ({ signal }) => fetchPlatformProxies(signal),
+    queryKey: ["platform", "proxies", params],
+    queryFn: ({ signal }) => fetchPlatformProxies(params, signal),
     retry: false,
+  });
+}
+
+export function useCreatePlatformProxy() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: CreateProxySchemaType) => createPlatformProxy(body),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["platform", "proxies"] });
+    },
+  });
+}
+
+export function usePatchPlatformProxy() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      id,
+      body,
+    }: {
+      id: string;
+      body: PatchProxySchemaType;
+    }) => patchPlatformProxy(id, body),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["platform", "proxies"] });
+    },
   });
 }
 
