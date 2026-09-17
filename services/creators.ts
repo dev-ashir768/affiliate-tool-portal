@@ -16,6 +16,7 @@ export async function fetchCreators(signal?: AbortSignal) {
 export async function createCreator(body: {
   handle: string;
   displayName?: string | null;
+  contactEmail?: string | null;
   region?: "US" | "UK" | null;
   stage?: string;
   notes?: string | null;
@@ -34,6 +35,7 @@ export async function patchCreator(
   body: Partial<{
     handle: string;
     displayName: string | null;
+    contactEmail: string | null;
     stage: string;
     notes: string | null;
   }>,
@@ -74,6 +76,19 @@ export async function createCreatorList(body: {
     body: JSON.stringify(body),
   });
   return (await parseJson(res)) as CreatorList;
+}
+
+export async function addCreatorToList(listId: string, creatorId: string) {
+  const res = await fetch(
+    `/api/creators/lists/${encodeURIComponent(listId)}/members`,
+    {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ creatorId }),
+    },
+  );
+  return parseJson(res);
 }
 
 export async function fetchCampaigns(signal?: AbortSignal) {

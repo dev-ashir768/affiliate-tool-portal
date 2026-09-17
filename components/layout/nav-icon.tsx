@@ -9,6 +9,7 @@ import {
   Globe,
   Home,
   Megaphone,
+  Mail,
   Package,
   ScrollText,
   Settings,
@@ -34,6 +35,7 @@ const ICONS: Record<string, LucideIcon> = {
   ScrollText,
   Sparkles,
   Megaphone,
+  Mail,
 };
 
 export function NavIcon({

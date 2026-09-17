@@ -12,6 +12,7 @@ export type Creator = {
   platform: string;
   handle: string;
   displayName: string | null;
+  contactEmail: string | null;
   region: string | null;
   followerCount: number | null;
   notes: string | null;
@@ -38,4 +39,27 @@ export type Campaign = {
   deadline: string | null;
   createdAt: string;
   updatedAt: string;
+};
+
+export type OutreachTemplate = {
+  id: string;
+  name: string;
+  subject: string;
+  bodyText: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type OutreachMessage = {
+  id: string;
+  templateId: string | null;
+  campaignId: string | null;
+  creatorId: string;
+  creatorHandle: string | null;
+  toEmail: string | null;
+  subject: string;
+  status: string;
+  lastError: string | null;
+  sentAt: string | null;
+  createdAt: string;
 };
