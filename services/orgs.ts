@@ -1,10 +1,12 @@
 import type {
+  AcceptInviteResponse,
   CreateInviteResponse,
   MembersListParams,
   MembersListResponse,
   OrganizationCurrent,
 } from "@/types/orgs";
 import type {
+  AcceptInviteSchemaType,
   CreateInviteSchemaType,
   PatchCurrentOrgSchemaType,
 } from "@/validations/org.validations";
@@ -80,4 +82,21 @@ export async function createInvite(
     throw new Error(data?.error?.message ?? "Failed to create invite");
   }
   return data as CreateInviteResponse;
+}
+
+export async function acceptInvite(
+  token: string,
+  body: AcceptInviteSchemaType = {},
+): Promise<AcceptInviteResponse> {
+  const res = await fetch(`/api/orgs/invites/${encodeURIComponent(token)}/accept`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data?.error?.message ?? "Failed to accept invite");
+  }
+  return data as AcceptInviteResponse;
 }

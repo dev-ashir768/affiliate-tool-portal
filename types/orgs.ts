@@ -44,3 +44,19 @@ export type CreateInviteResponse = {
     inviteExpiresAt: string | null;
   };
 };
+
+export type AcceptInviteResponse = {
+  membership: {
+    id: string;
+    role: OrgMemberRole;
+    status: OrgMemberStatus;
+    organizationId: string;
+  };
+  user: {
+    id: string;
+    email: string;
+    name: string;
+  };
+  /** Set by BFF: session present → /home; else → /login */
+  redirectTo: string;
+};
