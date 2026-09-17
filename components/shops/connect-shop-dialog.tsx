@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { StoreIcon } from "lucide-react";
+import { CheckIcon, CopyIcon, StoreIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -50,6 +50,10 @@ export function ConnectShopDialog({
   const { data: me } = useMe();
   const connect = useConnectShop();
   const [open, setOpen] = useState(false);
+  const [connectedBotEmail, setConnectedBotEmail] = useState<string | null>(
+    null,
+  );
+  const [copied, setCopied] = useState(false);
 
   const orgRole = useMemo(() => {
     if (!me?.currentOrganizationId) return null;
@@ -76,15 +80,33 @@ export function ConnectShopDialog({
     if (!next) {
       form.reset({ region: "US" });
       form.clearErrors();
+      setConnectedBotEmail(null);
+      setCopied(false);
+    }
+  }
+
+  async function copyBotEmail(email: string) {
+    try {
+      await navigator.clipboard.writeText(email);
+      setCopied(true);
+      toast.success("Bot email copied");
+      window.setTimeout(() => setCopied(false), 1500);
+    } catch {
+      toast.error("Could not copy email");
     }
   }
 
   async function onSubmit(data: ConnectShopSchemaType) {
     form.clearErrors("root");
     try {
-      await connect.mutateAsync(data);
-      toast.success("Shop connect started");
-      handleOpenChange(false);
+      const shop = await connect.mutateAsync(data);
+      const email = shop.botEmail;
+      setConnectedBotEmail(email);
+      toast.success(
+        email
+          ? `Shop connected — invite ${email} in Seller Center`
+          : "Shop connect started",
+      );
     } catch (err) {
       if (err instanceof ShopsApiError && err.code === "PLAN_LIMIT") {
         onPlanLimit?.();
@@ -114,70 +136,107 @@ export function ConnectShopDialog({
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Connect a shop</DialogTitle>
+          <DialogTitle>
+            {connectedBotEmail ? "Invite your bot" : "Connect a shop"}
+          </DialogTitle>
           <DialogDescription>
-            Reserve a bot identity for TikTok Shop in the selected region.
-            {disabledReason ? ` ${disabledReason}` : null}
+            {connectedBotEmail
+              ? "Send a TikTok Shop collaborator invite to this bot email, then run Verify."
+              : "Reserve a bot identity for TikTok Shop in the selected region."}
+            {!connectedBotEmail && disabledReason
+              ? ` ${disabledReason}`
+              : null}
           </DialogDescription>
         </DialogHeader>
-        <form
-          id="connect-shop-form"
-          noValidate
-          onSubmit={form.handleSubmit(onSubmit)}
-        >
-          <FieldGroup>
-            <Controller
-              control={form.control}
-              name="region"
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid || undefined}>
-                  <FieldLabel htmlFor="shop-region">Region</FieldLabel>
-                  <Select
-                    value={field.value}
-                    onValueChange={(value) => {
-                      if (value === "US" || value === "UK") {
-                        field.onChange(value);
-                      }
-                    }}
-                    disabled={isSubmitting || disabled}
-                  >
-                    <SelectTrigger
-                      id="shop-region"
-                      className="w-full"
-                      aria-invalid={fieldState.invalid || undefined}
-                    >
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="US">United States</SelectItem>
-                      <SelectItem value="UK">United Kingdom</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {fieldState.invalid ? (
-                    <FieldError errors={[fieldState.error]} />
-                  ) : null}
-                </Field>
+
+        {connectedBotEmail ? (
+          <div className="space-y-3">
+            <p className="rounded-lg border border-border bg-muted/40 px-3 py-2 font-mono text-sm break-all">
+              {connectedBotEmail}
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={() => void copyBotEmail(connectedBotEmail)}
+            >
+              {copied ? (
+                <CheckIcon data-icon="inline-start" />
+              ) : (
+                <CopyIcon data-icon="inline-start" />
               )}
-            />
-            {formError ? <FieldError errors={[formError]} /> : null}
-          </FieldGroup>
-        </form>
+              {copied ? "Copied" : "Copy bot email"}
+            </Button>
+          </div>
+        ) : (
+          <form
+            id="connect-shop-form"
+            noValidate
+            onSubmit={form.handleSubmit(onSubmit)}
+          >
+            <FieldGroup>
+              <Controller
+                control={form.control}
+                name="region"
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid || undefined}>
+                    <FieldLabel htmlFor="shop-region">Region</FieldLabel>
+                    <Select
+                      value={field.value}
+                      onValueChange={(value) => {
+                        if (value === "US" || value === "UK") {
+                          field.onChange(value);
+                        }
+                      }}
+                      disabled={isSubmitting || disabled}
+                    >
+                      <SelectTrigger
+                        id="shop-region"
+                        className="w-full"
+                        aria-invalid={fieldState.invalid || undefined}
+                      >
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="US">United States</SelectItem>
+                        <SelectItem value="UK">United Kingdom</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {fieldState.invalid ? (
+                      <FieldError errors={[fieldState.error]} />
+                    ) : null}
+                  </Field>
+                )}
+              />
+              {formError ? <FieldError errors={[formError]} /> : null}
+            </FieldGroup>
+          </form>
+        )}
+
         <DialogFooter>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => handleOpenChange(false)}
-            disabled={isSubmitting}
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            form="connect-shop-form"
-            disabled={isSubmitting || disabled}
-          >
-            {isSubmitting ? "Connecting…" : "Connect"}
-          </Button>
+          {connectedBotEmail ? (
+            <Button type="button" onClick={() => handleOpenChange(false)}>
+              Done
+            </Button>
+          ) : (
+            <>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => handleOpenChange(false)}
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                form="connect-shop-form"
+                disabled={isSubmitting || disabled}
+              >
+                {isSubmitting ? "Connecting…" : "Connect"}
+              </Button>
+            </>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

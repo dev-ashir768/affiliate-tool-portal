@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { toast } from "sonner";
 import {
   Card,
   CardDescription,
@@ -19,6 +20,7 @@ import {
   useShops,
   useVerifyShop,
 } from "@/hooks/use-shops";
+import type { ShopStatus } from "@/types/shops";
 
 export function ShopsPageContent() {
   const meQuery = useMe();
@@ -28,6 +30,7 @@ export function ShopsPageContent() {
   const disconnect = useDisconnectShop();
   const [actionError, setActionError] = useState<string | null>(null);
   const [showUpgradeHint, setShowUpgradeHint] = useState(false);
+  const prevStatus = useRef<Record<string, ShopStatus>>({});
 
   const orgRole = useMemo(() => {
     const me = meQuery.data;
@@ -49,14 +52,31 @@ export function ShopsPageContent() {
   const isLoading =
     meQuery.isLoading || orgQuery.isLoading || shopsQuery.isLoading;
 
+  useEffect(() => {
+    for (const shop of shops) {
+      const prev = prevStatus.current[shop.id];
+      if (prev === "VERIFYING" && shop.status === "ACTIVE") {
+        toast.success(
+          `${shop.displayName ?? shop.botEmail ?? "Shop"} verified`,
+        );
+      }
+      if (prev === "VERIFYING" && shop.status === "FAILED") {
+        toast.error(shop.statusReason ?? "Shop verification failed");
+      }
+      prevStatus.current[shop.id] = shop.status;
+    }
+  }, [shops]);
+
   async function handleVerify(id: string) {
     setActionError(null);
     try {
       await verify.mutateAsync(id);
+      toast.message("Verification started");
     } catch (err) {
-      setActionError(
-        err instanceof Error ? err.message : "Failed to start verification",
-      );
+      const message =
+        err instanceof Error ? err.message : "Failed to start verification";
+      setActionError(message);
+      toast.error(message);
     }
   }
 
@@ -64,10 +84,12 @@ export function ShopsPageContent() {
     setActionError(null);
     try {
       await disconnect.mutateAsync(id);
+      toast.success("Shop disconnected");
     } catch (err) {
-      setActionError(
-        err instanceof Error ? err.message : "Failed to disconnect shop",
-      );
+      const message =
+        err instanceof Error ? err.message : "Failed to disconnect shop";
+      setActionError(message);
+      toast.error(message);
     }
   }
 

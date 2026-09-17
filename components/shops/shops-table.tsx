@@ -84,7 +84,10 @@ export function ShopsTable({
                     {shop.displayName ?? shop.externalShopId ?? "Unnamed shop"}
                   </div>
                   {shop.statusReason ? (
-                    <p className="mt-0.5 max-w-xs truncate text-xs text-muted-foreground">
+                    <p
+                      className="mt-0.5 max-w-sm whitespace-normal break-words text-xs text-muted-foreground"
+                      title={shop.statusReason}
+                    >
                       {shop.statusReason}
                     </p>
                   ) : null}
