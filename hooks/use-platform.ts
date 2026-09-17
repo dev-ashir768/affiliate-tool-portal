@@ -16,6 +16,7 @@ import {
   patchAdminNavItem,
   patchPlatformProxy,
   patchPlatformStaff,
+  runPlatformCrawlerDryCheck,
 } from "@/services/platform";
 import type { PlatformListParams, PlatformRole } from "@/types/platform";
 import type {
@@ -136,7 +137,19 @@ export function usePlatformCrawler() {
   return useQuery({
     queryKey: ["platform", "crawler"],
     queryFn: ({ signal }) => fetchPlatformCrawler(signal),
+    refetchInterval: (q) =>
+      q.state.data?.status === "RUNNING" ? 2_000 : false,
     retry: false,
+  });
+}
+
+export function useRunPlatformCrawlerDryCheck() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: runPlatformCrawlerDryCheck,
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["platform", "crawler"] });
+    },
   });
 }
 

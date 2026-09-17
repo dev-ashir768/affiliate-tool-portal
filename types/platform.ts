@@ -134,10 +134,25 @@ export type PlatformProxyListResponse = {
 };
 
 export type PlatformCrawlerStatus = {
-  status: string;
+  status: "IDLE" | "RUNNING" | "DEGRADED" | string;
   lastRunAt: string | null;
+  lastJobId?: string | null;
+  lastJobState?: string | null;
   queue?: string;
+  counts?: {
+    waiting: number;
+    active: number;
+    completed: number;
+    failed: number;
+    delayed: number;
+  };
   note: string;
+};
+
+export type PlatformCrawlerRunResult = {
+  jobId: string;
+  queue: string;
+  status: "QUEUED";
 };
 
 export type AdminNavItem = {

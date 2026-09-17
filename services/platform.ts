@@ -2,6 +2,7 @@ import type {
   AdminNavItem,
   AdminNavResponse,
   BillingOverview,
+  PlatformCrawlerRunResult,
   PlatformCrawlerStatus,
   PlatformListParams,
   PlatformOrgDetail,
@@ -167,6 +168,14 @@ export async function fetchPlatformCrawler(
     signal,
   });
   return (await parseJson(res)) as PlatformCrawlerStatus;
+}
+
+export async function runPlatformCrawlerDryCheck(): Promise<PlatformCrawlerRunResult> {
+  const res = await fetch("/api/platform/crawler/run", {
+    method: "POST",
+    credentials: "include",
+  });
+  return (await parseJson(res)) as PlatformCrawlerRunResult;
 }
 
 export async function fetchAdminNavigation(
