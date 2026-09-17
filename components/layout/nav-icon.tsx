@@ -8,10 +8,12 @@ import {
   CreditCard,
   Globe,
   Home,
+  Megaphone,
   Package,
   ScrollText,
   Settings,
   ShoppingCart,
+  Sparkles,
   Store,
   Users,
 } from "lucide-react";
@@ -30,6 +32,8 @@ const ICONS: Record<string, LucideIcon> = {
   Building2,
   BadgeDollarSign,
   ScrollText,
+  Sparkles,
+  Megaphone,
 };
 
 export function NavIcon({
