@@ -4,7 +4,13 @@ import { setSessionCookies } from "@/lib/auth/session";
 
 type LoginResponse = {
   user: { id: string; email: string; name: string };
-  organizationId: string;
+  organizationId: string | null;
+  platformMembership?: {
+    id: string;
+    role: string;
+    status: string;
+  } | null;
+  redirectTo: string;
   accessToken: string;
   refreshToken: string;
 };
@@ -25,6 +31,8 @@ export async function POST(request: Request) {
     return NextResponse.json({
       user: data.user,
       organizationId: data.organizationId,
+      platformMembership: data.platformMembership ?? null,
+      redirectTo: data.redirectTo,
     });
   } catch (err) {
     if (err instanceof ApiClientError) {

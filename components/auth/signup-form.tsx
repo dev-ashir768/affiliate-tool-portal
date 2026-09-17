@@ -61,7 +61,12 @@ export default function SignupForm() {
         });
         return;
       }
-      router.replace("/home");
+      const dest =
+        typeof payload?.redirectTo === "string" &&
+        payload.redirectTo.startsWith("/")
+          ? payload.redirectTo
+          : "/home";
+      router.replace(dest);
       router.refresh();
     } catch {
       signupForm.setError("root", { message: "Unable to reach the server" });

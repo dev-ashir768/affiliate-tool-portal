@@ -6,26 +6,37 @@ import {
   getApiBaseUrl,
   refreshCookieOptions,
 } from "@/lib/auth/constants";
+import {
+  defaultRedirectForClaims,
+  readAccessClaims,
+} from "@/lib/auth/access-token";
 
 const AUTH_PAGES = new Set(["/login", "/signup", "/forgot-password"]);
 
-const PROTECTED_PREFIXES = [
+const DASHBOARD_PREFIXES = [
   "/home",
   "/settings",
   "/products",
   "/orders",
   "/analytics",
-  "/backoffice",
 ];
 
 function isAuthPage(pathname: string) {
   return AUTH_PAGES.has(pathname);
 }
 
-function isProtected(pathname: string) {
-  return PROTECTED_PREFIXES.some(
+function isBackoffice(pathname: string) {
+  return pathname === "/backoffice" || pathname.startsWith("/backoffice/");
+}
+
+function isDashboard(pathname: string) {
+  return DASHBOARD_PREFIXES.some(
     (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
   );
+}
+
+function isProtected(pathname: string) {
+  return isBackoffice(pathname) || isDashboard(pathname);
 }
 
 async function rotateTokens(refreshToken: string) {
@@ -60,37 +71,115 @@ function clearSessionCookies(response: NextResponse) {
   response.cookies.delete(REFRESH_TOKEN_COOKIE);
 }
 
+function redirectToLogin(request: NextRequest, pathname: string) {
+  const loginUrl = new URL("/login", request.url);
+  loginUrl.searchParams.set("next", pathname);
+  return NextResponse.redirect(loginUrl);
+}
+
+/**
+ * Area guards after a session token is available.
+ * - /backoffice/* requires platformRole
+ * - dashboard paths require orgId (merchant session)
+ * - staff-only (platformRole && !orgId) on dashboard → /backoffice/users
+ */
+function enforceAreaAccess(
+  request: NextRequest,
+  accessToken: string,
+  response: NextResponse
+): NextResponse {
+  const claims = readAccessClaims(accessToken);
+  if (!claims) {
+    const login = redirectToLogin(request, request.nextUrl.pathname);
+    clearSessionCookies(login);
+    return login;
+  }
+
+  const { pathname } = request.nextUrl;
+  const isStaff = Boolean(claims.platformRole);
+  const isMerchant = Boolean(claims.orgId);
+
+  if (isBackoffice(pathname)) {
+    if (!isStaff) {
+      // Merchant (or session without platform role) → home
+      return NextResponse.redirect(new URL("/home", request.url));
+    }
+    return response;
+  }
+
+  if (isDashboard(pathname)) {
+    if (isStaff && !isMerchant) {
+      return NextResponse.redirect(new URL("/backoffice/users", request.url));
+    }
+    if (!isMerchant) {
+      const login = redirectToLogin(request, pathname);
+      clearSessionCookies(login);
+      return login;
+    }
+    return response;
+  }
+
+  return response;
+}
+
+function redirectAuthedAwayFromAuth(
+  request: NextRequest,
+  accessToken: string
+): NextResponse {
+  const claims = readAccessClaims(accessToken);
+  const dest = claims
+    ? defaultRedirectForClaims(claims)
+    : "/home";
+  return NextResponse.redirect(new URL(dest, request.url));
+}
+
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const accessToken = request.cookies.get(ACCESS_TOKEN_COOKIE)?.value;
+  let accessToken = request.cookies.get(ACCESS_TOKEN_COOKIE)?.value;
   const refreshToken = request.cookies.get(REFRESH_TOKEN_COOKIE)?.value;
 
   if (isProtected(pathname)) {
-    if (accessToken) {
-      return NextResponse.next();
-    }
+    let sessionResponse: NextResponse | null = null;
 
-    if (refreshToken) {
+    if (!accessToken && refreshToken) {
       const tokens = await rotateTokens(refreshToken);
       if (tokens) {
-        const response = NextResponse.next();
-        applySessionCookies(response, tokens);
-        return response;
+        accessToken = tokens.accessToken;
+        sessionResponse = NextResponse.next();
+        applySessionCookies(sessionResponse, tokens);
+      } else {
+        const login = redirectToLogin(request, pathname);
+        clearSessionCookies(login);
+        return login;
       }
-      const loginUrl = new URL("/login", request.url);
-      loginUrl.searchParams.set("next", pathname);
-      const response = NextResponse.redirect(loginUrl);
-      clearSessionCookies(response);
-      return response;
     }
 
-    const loginUrl = new URL("/login", request.url);
-    loginUrl.searchParams.set("next", pathname);
-    return NextResponse.redirect(loginUrl);
+    if (!accessToken) {
+      return redirectToLogin(request, pathname);
+    }
+
+    const base = sessionResponse ?? NextResponse.next();
+    return enforceAreaAccess(request, accessToken, base);
   }
 
   if (isAuthPage(pathname) && (accessToken || refreshToken)) {
-    return NextResponse.redirect(new URL("/home", request.url));
+    if (!accessToken && refreshToken) {
+      const tokens = await rotateTokens(refreshToken);
+      if (tokens) {
+        const response = redirectAuthedAwayFromAuth(
+          request,
+          tokens.accessToken
+        );
+        applySessionCookies(response, tokens);
+        return response;
+      }
+      const response = NextResponse.next();
+      clearSessionCookies(response);
+      return response;
+    }
+    if (accessToken) {
+      return redirectAuthedAwayFromAuth(request, accessToken);
+    }
   }
 
   return NextResponse.next();

@@ -26,6 +26,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "../ui/button";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { resolvePostAuthRedirect } from "@/lib/auth/access-token";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -56,8 +57,19 @@ export default function LoginForm() {
         });
         return;
       }
-      const next = searchParams.get("next") || "/home";
-      router.replace(next.startsWith("/") ? next : "/home");
+      const next = searchParams.get("next");
+      const platformRole =
+        payload?.platformMembership?.role ??
+        (typeof payload?.redirectTo === "string" &&
+        payload.redirectTo.startsWith("/backoffice")
+          ? "STAFF"
+          : null);
+      const dest = resolvePostAuthRedirect({
+        next,
+        redirectTo: payload?.redirectTo ?? null,
+        platformRole,
+      });
+      router.replace(dest);
       router.refresh();
     } catch {
       loginForm.setError("root", { message: "Unable to reach the server" });

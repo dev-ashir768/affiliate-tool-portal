@@ -5,6 +5,8 @@ import { setSessionCookies } from "@/lib/auth/session";
 type RegisterResponse = {
   user: { id: string; email: string; name: string };
   organization: { id: string; name: string; slug: string };
+  platformMembership?: null;
+  redirectTo: string;
   accessToken: string;
   refreshToken: string;
 };
@@ -25,6 +27,8 @@ export async function POST(request: Request) {
     return NextResponse.json({
       user: data.user,
       organization: data.organization,
+      platformMembership: data.platformMembership ?? null,
+      redirectTo: data.redirectTo ?? "/home",
     });
   } catch (err) {
     if (err instanceof ApiClientError) {
