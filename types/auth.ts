@@ -17,8 +17,15 @@ export type MeMembership = {
   };
 };
 
+export type PlatformMembership = {
+  role: "SUPERADMIN" | "FINANCE" | "OPS";
+  status: "ACTIVE" | "DISABLED";
+};
+
 export type MeResponse = {
   user: MeUser;
-  currentOrganizationId: string;
+  currentOrganizationId: string | null;
+  platformMembership: PlatformMembership | null;
   memberships: MeMembership[];
+  redirectTo: string;
 };

@@ -1,8 +1,11 @@
 import type { LucideIcon } from "lucide-react";
 import {
+  BadgeDollarSign,
   BarChart3,
   Bot,
+  Building2,
   Circle,
+  CreditCard,
   Globe,
   Home,
   Package,
@@ -22,6 +25,9 @@ const ICONS: Record<string, LucideIcon> = {
   Store,
   Globe,
   Bot,
+  CreditCard,
+  Building2,
+  BadgeDollarSign,
 };
 
 export function NavIcon({
