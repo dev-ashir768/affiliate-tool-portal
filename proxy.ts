@@ -152,6 +152,28 @@ export async function proxy(request: NextRequest) {
   let accessToken = request.cookies.get(ACCESS_TOKEN_COOKIE)?.value;
   const refreshToken = request.cookies.get(REFRESH_TOKEN_COOKIE)?.value;
 
+  // App entry: never show the Next.js starter — send users to login or their area.
+  if (pathname === "/") {
+    if (!accessToken && refreshToken) {
+      const tokens = await rotateTokens(refreshToken);
+      if (tokens) {
+        const response = redirectAuthedAwayFromAuth(
+          request,
+          tokens.accessToken
+        );
+        applySessionCookies(response, tokens);
+        return response;
+      }
+      const login = NextResponse.redirect(new URL("/login", request.url));
+      clearSessionCookies(login);
+      return login;
+    }
+    if (accessToken) {
+      return redirectAuthedAwayFromAuth(request, accessToken);
+    }
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+
   if (isProtected(pathname)) {
     let sessionResponse: NextResponse | null = null;
 
@@ -206,6 +228,7 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
+    "/",
     "/login",
     "/signup",
     "/forgot-password",
