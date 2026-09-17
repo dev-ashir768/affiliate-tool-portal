@@ -92,8 +92,20 @@ export type PlatformShopListResponse = {
 
 export type BillingOverview = {
   organizationCount: number;
+  freeOrganizationCount: number;
+  paidOrganizationCount: number;
+  activeSubscriptionCount: number;
+  pastDueCount: number;
+  trialingCount: number;
+  avgMrrPerPaidOrgCents: number;
   orgsByPlan: Array<{ planCode: string; planName: string; count: number }>;
+  revenueByPlan: Array<{
+    planCode: string;
+    planName: string;
+    orgCount: number;
+    monthlyPriceCents: number;
+    mrrCents: number;
+  }>;
   subscriptionsByStatus: Array<{ status: string; count: number }>;
   mrrCents: number;
-  paidOrganizationCount: number;
 };

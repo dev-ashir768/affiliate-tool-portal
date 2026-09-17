@@ -11,7 +11,12 @@ import {
   readAccessClaims,
 } from "@/lib/auth/access-token";
 
-const AUTH_PAGES = new Set(["/login", "/signup", "/forgot-password"]);
+const AUTH_PAGES = new Set([
+  "/login",
+  "/signup",
+  "/forgot-password",
+  "/reset-password",
+]);
 
 const DASHBOARD_PREFIXES = [
   "/home",
@@ -193,6 +198,7 @@ export const config = {
     "/login",
     "/signup",
     "/forgot-password",
+    "/reset-password",
     "/home",
     "/home/:path*",
     "/shops",
