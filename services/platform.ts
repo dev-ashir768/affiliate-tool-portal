@@ -1,4 +1,6 @@
 import type {
+  AdminNavItem,
+  AdminNavResponse,
   BillingOverview,
   PlatformCrawlerStatus,
   PlatformListParams,
@@ -6,6 +8,7 @@ import type {
   PlatformOrgListResponse,
   PlatformProxy,
   PlatformProxyListResponse,
+  PlatformRole,
   PlatformShopListResponse,
   PlatformStaff,
   PlatformStaffListResponse,
@@ -164,4 +167,59 @@ export async function fetchPlatformCrawler(
     signal,
   });
   return (await parseJson(res)) as PlatformCrawlerStatus;
+}
+
+export async function fetchAdminNavigation(
+  area: "dashboard" | "backoffice",
+  signal?: AbortSignal,
+): Promise<AdminNavResponse> {
+  const res = await fetch(
+    `/api/platform/navigation?area=${encodeURIComponent(area)}`,
+    { credentials: "include", signal },
+  );
+  return (await parseJson(res)) as AdminNavResponse;
+}
+
+export async function createAdminNavItem(body: {
+  sectionId: string;
+  key: string;
+  label: string;
+  href: string;
+  icon: string;
+  sortOrder?: number;
+  badge?: string | null;
+  enabled?: boolean;
+  allowedPlatformRoles?: PlatformRole[];
+}): Promise<AdminNavItem> {
+  const res = await fetch("/api/platform/navigation/items", {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  return (await parseJson(res)) as AdminNavItem;
+}
+
+export async function patchAdminNavItem(
+  id: string,
+  body: Partial<{
+    label: string;
+    href: string;
+    icon: string;
+    sortOrder: number;
+    badge: string | null;
+    enabled: boolean;
+    allowedPlatformRoles: PlatformRole[];
+  }>,
+): Promise<AdminNavItem> {
+  const res = await fetch(
+    `/api/platform/navigation/items/${encodeURIComponent(id)}`,
+    {
+      method: "PATCH",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    },
+  );
+  return (await parseJson(res)) as AdminNavItem;
 }

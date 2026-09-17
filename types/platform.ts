@@ -139,3 +139,29 @@ export type PlatformCrawlerStatus = {
   queue?: string;
   note: string;
 };
+
+export type AdminNavItem = {
+  id: string;
+  key: string;
+  label: string;
+  href: string;
+  icon: string;
+  sortOrder: number;
+  badge: string | null;
+  enabled: boolean;
+  allowedPlatformRoles: PlatformRole[];
+  allowedOrgRoles: string[];
+};
+
+export type AdminNavSection = {
+  id: string;
+  key: string;
+  label: string | null;
+  sortOrder: number;
+  items: AdminNavItem[];
+};
+
+export type AdminNavResponse = {
+  area: "dashboard" | "backoffice";
+  sections: AdminNavSection[];
+};

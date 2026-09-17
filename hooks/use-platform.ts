@@ -2,8 +2,10 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  createAdminNavItem,
   createPlatformProxy,
   createPlatformStaff,
+  fetchAdminNavigation,
   fetchBillingOverview,
   fetchPlatformCrawler,
   fetchPlatformOrganization,
@@ -11,10 +13,11 @@ import {
   fetchPlatformProxies,
   fetchPlatformShops,
   fetchPlatformStaff,
+  patchAdminNavItem,
   patchPlatformProxy,
   patchPlatformStaff,
 } from "@/services/platform";
-import type { PlatformListParams } from "@/types/platform";
+import type { PlatformListParams, PlatformRole } from "@/types/platform";
 import type {
   CreateProxySchemaType,
   CreateStaffSchemaType,
@@ -134,5 +137,49 @@ export function usePlatformCrawler() {
     queryKey: ["platform", "crawler"],
     queryFn: ({ signal }) => fetchPlatformCrawler(signal),
     retry: false,
+  });
+}
+
+export function useAdminNavigation(area: "dashboard" | "backoffice") {
+  return useQuery({
+    queryKey: ["platform", "navigation", area],
+    queryFn: ({ signal }) => fetchAdminNavigation(area, signal),
+    retry: false,
+  });
+}
+
+export function useCreateAdminNavItem() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: createAdminNavItem,
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["platform", "navigation"] });
+      void qc.invalidateQueries({ queryKey: ["navigation"] });
+    },
+  });
+}
+
+export function usePatchAdminNavItem() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      id,
+      body,
+    }: {
+      id: string;
+      body: Partial<{
+        label: string;
+        href: string;
+        icon: string;
+        sortOrder: number;
+        badge: string | null;
+        enabled: boolean;
+        allowedPlatformRoles: PlatformRole[];
+      }>;
+    }) => patchAdminNavItem(id, body),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["platform", "navigation"] });
+      void qc.invalidateQueries({ queryKey: ["navigation"] });
+    },
   });
 }

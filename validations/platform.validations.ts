@@ -23,8 +23,8 @@ export type PatchStaffSchemaType = z.infer<typeof patchStaffSchema>;
 export const createProxySchema = z.object({
   label: z.string().trim().min(1).max(120),
   host: z.string().trim().min(1).max(255),
-  port: z.coerce.number().int().min(1).max(65535),
-  protocol: z.enum(["HTTP", "HTTPS", "SOCKS5"]).default("HTTP"),
+  port: z.number().int().min(1).max(65535),
+  protocol: z.enum(["HTTP", "HTTPS", "SOCKS5"]),
   username: z.string().trim().max(120).optional().nullable(),
   password: z.string().max(256).optional().nullable(),
   region: z.string().trim().max(32).optional().nullable(),

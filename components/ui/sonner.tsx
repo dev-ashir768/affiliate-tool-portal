@@ -37,9 +37,12 @@ function getServerTheme(): NonNullable<ToasterProps["theme"]> {
 }
 
 /** Brand-token overrides — beat Sonner’s default HSL richColors. */
-function brandToastVars(theme: "light" | "dark"): React.CSSProperties {
+function brandToastVars(
+  theme: NonNullable<ToasterProps["theme"]>,
+): React.CSSProperties {
+  const mode = theme === "dark" ? "dark" : "light";
   const warning =
-    theme === "dark"
+    mode === "dark"
       ? {
           "--warning-bg": "oklch(0.28 0.04 85)",
           "--warning-border": "oklch(0.35 0.06 85)",
