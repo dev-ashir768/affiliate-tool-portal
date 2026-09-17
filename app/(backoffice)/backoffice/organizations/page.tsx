@@ -1,10 +1,11 @@
+import { Suspense } from "react";
+import { OrganizationsTable } from "@/components/backoffice/organizations/organizations-table";
+import { DataTableSkeleton } from "@/components/data-table/data-table-skeleton";
+
 export default function OrganizationsPage() {
   return (
-    <div>
-      <div>Organizations</div>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Coming in a later SaaS slice
-      </p>
-    </div>
+    <Suspense fallback={<DataTableSkeleton />}>
+      <OrganizationsTable />
+    </Suspense>
   );
 }

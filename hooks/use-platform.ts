@@ -1,0 +1,106 @@
+"use client";
+
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  createPlatformStaff,
+  fetchBillingOverview,
+  fetchPlatformCrawler,
+  fetchPlatformOrganization,
+  fetchPlatformOrganizations,
+  fetchPlatformProxies,
+  fetchPlatformShops,
+  fetchPlatformStaff,
+  patchPlatformStaff,
+} from "@/services/platform";
+import type { PlatformListParams } from "@/types/platform";
+import type {
+  CreateStaffSchemaType,
+  PatchStaffSchemaType,
+} from "@/validations/platform.validations";
+
+export function usePlatformStaff(params: PlatformListParams) {
+  return useQuery({
+    queryKey: ["platform", "staff", params],
+    queryFn: ({ signal }) => fetchPlatformStaff(params, signal),
+    placeholderData: (prev) => prev,
+    retry: false,
+  });
+}
+
+export function useCreatePlatformStaff() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: CreateStaffSchemaType) => createPlatformStaff(body),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["platform", "staff"] });
+    },
+  });
+}
+
+export function usePatchPlatformStaff() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      id,
+      body,
+    }: {
+      id: string;
+      body: PatchStaffSchemaType;
+    }) => patchPlatformStaff(id, body),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["platform", "staff"] });
+    },
+  });
+}
+
+export function usePlatformOrganizations(params: PlatformListParams) {
+  return useQuery({
+    queryKey: ["platform", "organizations", params],
+    queryFn: ({ signal }) => fetchPlatformOrganizations(params, signal),
+    placeholderData: (prev) => prev,
+    retry: false,
+  });
+}
+
+export function usePlatformOrganization(id: string) {
+  return useQuery({
+    queryKey: ["platform", "organizations", id],
+    queryFn: ({ signal }) => fetchPlatformOrganization(id, signal),
+    enabled: Boolean(id),
+    retry: false,
+  });
+}
+
+export function usePlatformShops(params: PlatformListParams) {
+  return useQuery({
+    queryKey: ["platform", "shops", params],
+    queryFn: ({ signal }) => fetchPlatformShops(params, signal),
+    placeholderData: (prev) => prev,
+    retry: false,
+  });
+}
+
+export function useBillingOverview() {
+  return useQuery({
+    queryKey: ["platform", "billing", "overview"],
+    queryFn: ({ signal }) => fetchBillingOverview(signal),
+    staleTime: 60_000,
+    retry: false,
+  });
+}
+
+export function usePlatformProxies() {
+  return useQuery({
+    queryKey: ["platform", "proxies"],
+    queryFn: ({ signal }) => fetchPlatformProxies(signal),
+    retry: false,
+  });
+}
+
+export function usePlatformCrawler() {
+  return useQuery({
+    queryKey: ["platform", "crawler"],
+    queryFn: ({ signal }) => fetchPlatformCrawler(signal),
+    retry: false,
+  });
+}
