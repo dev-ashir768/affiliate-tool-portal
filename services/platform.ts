@@ -4,6 +4,8 @@ import type {
   BillingOverview,
   PlatformCrawlerRunResult,
   PlatformCrawlerStatus,
+  PlatformCreatorListResponse,
+  PlatformCreatorRow,
   PlatformListParams,
   PlatformOrgDetail,
   PlatformOrgListResponse,
@@ -133,6 +135,55 @@ export async function fetchPlatformProxies(
     signal,
   });
   return (await parseJson(res)) as PlatformProxyListResponse;
+}
+
+export async function fetchPlatformCreators(
+  params: PlatformListParams & { organizationId?: string },
+  signal?: AbortSignal,
+): Promise<PlatformCreatorListResponse> {
+  const qs = toQuery(params);
+  const res = await fetch(`/api/platform/creators?${qs}`, {
+    credentials: "include",
+    signal,
+  });
+  return (await parseJson(res)) as PlatformCreatorListResponse;
+}
+
+export async function createPlatformCreator(body: {
+  organizationId: string;
+  handle: string;
+  displayName?: string | null;
+  contactEmail?: string | null;
+  region?: "US" | "UK" | null;
+  stage?: string;
+  notes?: string | null;
+}): Promise<PlatformCreatorRow> {
+  const res = await fetch("/api/platform/creators", {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  return (await parseJson(res)) as PlatformCreatorRow;
+}
+
+export async function patchPlatformCreator(
+  id: string,
+  body: Partial<{
+    handle: string;
+    displayName: string | null;
+    contactEmail: string | null;
+    stage: string;
+    notes: string | null;
+  }>,
+): Promise<PlatformCreatorRow> {
+  const res = await fetch(`/api/platform/creators/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  return (await parseJson(res)) as PlatformCreatorRow;
 }
 
 export async function createPlatformProxy(

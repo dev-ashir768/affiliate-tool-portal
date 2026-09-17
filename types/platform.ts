@@ -133,6 +133,25 @@ export type PlatformProxyListResponse = {
   meta: PlatformListMeta;
 };
 
+export type PlatformCreatorRow = {
+  id: string;
+  handle: string;
+  displayName: string | null;
+  contactEmail: string | null;
+  region: string | null;
+  followerCount: number | null;
+  notes: string | null;
+  stage: string;
+  createdAt: string;
+  updatedAt: string;
+  organization: { id: string; name: string; slug: string };
+};
+
+export type PlatformCreatorListResponse = {
+  data: PlatformCreatorRow[];
+  meta: PlatformListMeta;
+};
+
 export type PlatformCrawlerStatus = {
   status: "IDLE" | "RUNNING" | "DEGRADED" | string;
   lastRunAt: string | null;

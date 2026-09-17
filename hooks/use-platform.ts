@@ -8,6 +8,9 @@ import {
   fetchAdminNavigation,
   fetchBillingOverview,
   fetchPlatformCrawler,
+  fetchPlatformCreators,
+  createPlatformCreator,
+  patchPlatformCreator,
   fetchPlatformOrganization,
   fetchPlatformOrganizations,
   fetchPlatformProxies,
@@ -140,6 +143,43 @@ export function usePlatformCrawler() {
     refetchInterval: (q) =>
       q.state.data?.status === "RUNNING" ? 2_000 : false,
     retry: false,
+  });
+}
+
+export function usePlatformCreators(
+  params: PlatformListParams & { organizationId?: string },
+) {
+  return useQuery({
+    queryKey: ["platform", "creators", params],
+    queryFn: ({ signal }) => fetchPlatformCreators(params, signal),
+    placeholderData: (prev) => prev,
+    retry: false,
+  });
+}
+
+export function useCreatePlatformCreator() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: createPlatformCreator,
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["platform", "creators"] });
+    },
+  });
+}
+
+export function usePatchPlatformCreator() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      id,
+      body,
+    }: {
+      id: string;
+      body: Parameters<typeof patchPlatformCreator>[1];
+    }) => patchPlatformCreator(id, body),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["platform", "creators"] });
+    },
   });
 }
 
