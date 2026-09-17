@@ -1,9 +1,13 @@
 import type {
+  CreateInviteResponse,
   MembersListParams,
   MembersListResponse,
   OrganizationCurrent,
 } from "@/types/orgs";
-import type { PatchCurrentOrgSchemaType } from "@/validations/org.validations";
+import type {
+  CreateInviteSchemaType,
+  PatchCurrentOrgSchemaType,
+} from "@/validations/org.validations";
 
 function toQuery(params: Record<string, string | number | undefined | null>) {
   const qs = new URLSearchParams();
@@ -60,4 +64,20 @@ export async function fetchMembers(
     throw new Error(data?.error?.message ?? "Unable to load members");
   }
   return data as MembersListResponse;
+}
+
+export async function createInvite(
+  body: CreateInviteSchemaType,
+): Promise<CreateInviteResponse> {
+  const res = await fetch("/api/orgs/current/invites", {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data?.error?.message ?? "Failed to create invite");
+  }
+  return data as CreateInviteResponse;
 }

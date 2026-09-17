@@ -33,3 +33,14 @@ export type MembersListResponse = {
   data: OrgMember[];
   meta: { total: number; page: number; pageSize: number };
 };
+
+export type CreateInviteResponse = {
+  inviteToken: string;
+  membership: {
+    id: string;
+    role: Exclude<OrgMemberRole, "OWNER">;
+    status: OrgMemberStatus;
+    email: string;
+    inviteExpiresAt: string | null;
+  };
+};

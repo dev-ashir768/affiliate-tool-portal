@@ -8,3 +8,10 @@ export const patchCurrentOrgSchema = z.object({
 });
 
 export type PatchCurrentOrgSchemaType = z.infer<typeof patchCurrentOrgSchema>;
+
+export const createInviteSchema = z.object({
+  email: z.string().trim().email({ message: "Enter a valid email" }),
+  role: z.enum(["ADMIN", "MEMBER"]),
+});
+
+export type CreateInviteSchemaType = z.infer<typeof createInviteSchema>;
