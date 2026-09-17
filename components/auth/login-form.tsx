@@ -27,6 +27,7 @@ import { Button } from "../ui/button";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { resolvePostAuthRedirect } from "@/lib/auth/access-token";
+import { toast } from "sonner";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -52,9 +53,9 @@ export default function LoginForm() {
       });
       const payload = await res.json().catch(() => ({}));
       if (!res.ok) {
-        loginForm.setError("root", {
-          message: payload?.error?.message ?? "Login failed",
-        });
+        const message = payload?.error?.message ?? "Login failed";
+        loginForm.setError("root", { message });
+        toast.error(message);
         return;
       }
       const next = searchParams.get("next");
@@ -69,10 +70,13 @@ export default function LoginForm() {
         redirectTo: payload?.redirectTo ?? null,
         platformRole,
       });
+      toast.success("Logged in");
       router.replace(dest);
       router.refresh();
     } catch {
-      loginForm.setError("root", { message: "Unable to reach the server" });
+      const message = "Unable to reach the server";
+      loginForm.setError("root", { message });
+      toast.error(message);
     }
   }
 

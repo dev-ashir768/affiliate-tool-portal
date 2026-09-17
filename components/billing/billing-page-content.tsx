@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -61,11 +62,13 @@ export function BillingPageContent() {
       if (!session.url) {
         throw new Error("Checkout URL was not returned");
       }
+      toast.success("Redirecting to Stripe Checkout");
       window.location.href = session.url;
     } catch (err) {
-      setActionError(
-        err instanceof Error ? err.message : "Failed to start checkout",
-      );
+      const message =
+        err instanceof Error ? err.message : "Failed to start checkout";
+      setActionError(message);
+      toast.error(message);
       setActivePlanCode(null);
     }
   }
@@ -74,11 +77,13 @@ export function BillingPageContent() {
     setActionError(null);
     try {
       const session = await portal.mutateAsync();
+      toast.success("Opening Stripe billing portal");
       window.location.href = session.url;
     } catch (err) {
-      setActionError(
-        err instanceof Error ? err.message : "Failed to open billing portal",
-      );
+      const message =
+        err instanceof Error ? err.message : "Failed to open billing portal";
+      setActionError(message);
+      toast.error(message);
     }
   }
 

@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
@@ -16,6 +17,7 @@ export default function BillingSuccessPage() {
   const queryClient = useQueryClient();
 
   useEffect(() => {
+    toast.success("Payment successful — plan updating");
     void queryClient.invalidateQueries({ queryKey: ["org", "current"] });
     void queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
   }, [queryClient]);

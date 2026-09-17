@@ -29,6 +29,7 @@ import { useRouter } from "next/navigation";
 import { useMe } from "@/hooks/use-me";
 import { acceptInvite } from "@/services/orgs";
 import { useState } from "react";
+import { toast } from "sonner";
 
 type Props = { token: string };
 
@@ -61,12 +62,14 @@ export default function AcceptInviteForm({ token }: Props) {
         typeof result.redirectTo === "string" && result.redirectTo.startsWith("/")
           ? result.redirectTo
           : "/login";
+      toast.success("Invite accepted");
       router.replace(dest);
       router.refresh();
     } catch (err) {
-      form.setError("root", {
-        message: err instanceof Error ? err.message : "Failed to accept invite",
-      });
+      const message =
+        err instanceof Error ? err.message : "Failed to accept invite";
+      form.setError("root", { message });
+      toast.error(message);
     }
   }
 
@@ -79,12 +82,14 @@ export default function AcceptInviteForm({ token }: Props) {
         typeof result.redirectTo === "string" && result.redirectTo.startsWith("/")
           ? result.redirectTo
           : "/home";
+      toast.success("Invite accepted");
       router.replace(dest);
       router.refresh();
     } catch (err) {
-      setSessionError(
-        err instanceof Error ? err.message : "Failed to accept invite",
-      );
+      const message =
+        err instanceof Error ? err.message : "Failed to accept invite";
+      setSessionError(message);
+      toast.error(message);
     } finally {
       setSessionSubmitting(false);
     }

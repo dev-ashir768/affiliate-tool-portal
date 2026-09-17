@@ -89,7 +89,7 @@ export default function AuthWrapper({ children }: Props) {
       </div>
       <div
         ref={panelRef}
-        className="flex h-full w-full flex-col items-center justify-center overflow-hidden bg-white lg:rounded-l-8xl"
+        className="light flex h-full w-full flex-col items-center justify-center overflow-hidden bg-white text-foreground lg:rounded-l-8xl"
       >
         {children}
       </div>

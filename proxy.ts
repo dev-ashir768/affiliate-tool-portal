@@ -10,48 +10,11 @@ import {
   defaultRedirectForClaims,
   readAccessClaims,
 } from "@/lib/auth/access-token";
-
-const AUTH_PAGES = new Set(["/login", "/signup", "/forgot-password"]);
-
-/** Auth flows that must stay reachable even when a session cookie exists. */
-const AUTH_TOKEN_PAGES = new Set(["/reset-password"]);
-
-function isInvitePath(pathname: string) {
-  return pathname === "/invite" || pathname.startsWith("/invite/");
-}
-
-function isAuthTokenPage(pathname: string) {
-  return AUTH_TOKEN_PAGES.has(pathname) || isInvitePath(pathname);
-}
-
-const DASHBOARD_PREFIXES = [
-  "/home",
-  "/shops",
-  "/team",
-  "/billing",
-  "/settings",
-  "/products",
-  "/orders",
-  "/analytics",
-];
-
-function isAuthPage(pathname: string) {
-  return AUTH_PAGES.has(pathname);
-}
-
-function isBackoffice(pathname: string) {
-  return pathname === "/backoffice" || pathname.startsWith("/backoffice/");
-}
-
-function isDashboard(pathname: string) {
-  return DASHBOARD_PREFIXES.some(
-    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
-  );
-}
-
-function isProtected(pathname: string) {
-  return isBackoffice(pathname) || isDashboard(pathname);
-}
+import {
+  classifyRoute,
+  isProtectedRoute,
+  type RouteClass,
+} from "@/lib/auth/route-policy";
 
 async function rotateTokens(refreshToken: string) {
   const res = await fetch(`${getApiBaseUrl()}/api/v1/auth/refresh`, {
@@ -91,15 +54,24 @@ function redirectToLogin(request: NextRequest, pathname: string) {
   return NextResponse.redirect(loginUrl);
 }
 
+function redirectAuthedAwayFromAuth(
+  request: NextRequest,
+  accessToken: string
+): NextResponse {
+  const claims = readAccessClaims(accessToken);
+  const dest = claims ? defaultRedirectForClaims(claims) : "/home";
+  return NextResponse.redirect(new URL(dest, request.url));
+}
+
 /**
  * Area guards after a session token is available.
- * - /backoffice/* requires platformRole
- * - dashboard paths require orgId (merchant session)
- * - staff-only (platformRole && !orgId) on dashboard → /backoffice/users
+ * - staff → requires platformRole
+ * - merchant → requires orgId; staff-only sessions bounce to backoffice
  */
 function enforceAreaAccess(
   request: NextRequest,
   accessToken: string,
+  kind: RouteClass,
   response: NextResponse
 ): NextResponse {
   const claims = readAccessClaims(accessToken);
@@ -113,15 +85,14 @@ function enforceAreaAccess(
   const isStaff = Boolean(claims.platformRole);
   const isMerchant = Boolean(claims.orgId);
 
-  if (isBackoffice(pathname)) {
+  if (kind === "staff") {
     if (!isStaff) {
-      // Merchant (or session without platform role) → home
       return NextResponse.redirect(new URL("/home", request.url));
     }
     return response;
   }
 
-  if (isDashboard(pathname)) {
+  if (kind === "merchant") {
     if (isStaff && !isMerchant) {
       return NextResponse.redirect(new URL("/backoffice/users", request.url));
     }
@@ -136,24 +107,45 @@ function enforceAreaAccess(
   return response;
 }
 
-function redirectAuthedAwayFromAuth(
+async function ensureAccessToken(
   request: NextRequest,
-  accessToken: string
-): NextResponse {
-  const claims = readAccessClaims(accessToken);
-  const dest = claims
-    ? defaultRedirectForClaims(claims)
-    : "/home";
-  return NextResponse.redirect(new URL(dest, request.url));
+  accessToken: string | undefined,
+  refreshToken: string | undefined
+): Promise<{
+  accessToken: string | null;
+  sessionResponse: NextResponse | null;
+  cleared: boolean;
+}> {
+  if (accessToken) {
+    return { accessToken, sessionResponse: null, cleared: false };
+  }
+
+  if (!refreshToken) {
+    return { accessToken: null, sessionResponse: null, cleared: false };
+  }
+
+  const tokens = await rotateTokens(refreshToken);
+  if (!tokens) {
+    return { accessToken: null, sessionResponse: null, cleared: true };
+  }
+
+  const sessionResponse = NextResponse.next();
+  applySessionCookies(sessionResponse, tokens);
+  return {
+    accessToken: tokens.accessToken,
+    sessionResponse,
+    cleared: false,
+  };
 }
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const kind = classifyRoute(pathname);
+
   let accessToken = request.cookies.get(ACCESS_TOKEN_COOKIE)?.value;
   const refreshToken = request.cookies.get(REFRESH_TOKEN_COOKIE)?.value;
 
-  // App entry: never show the Next.js starter — send users to login or their area.
-  if (pathname === "/") {
+  if (kind === "entry") {
     if (!accessToken && refreshToken) {
       const tokens = await rotateTokens(refreshToken);
       if (tokens) {
@@ -174,31 +166,29 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  if (isProtected(pathname)) {
-    let sessionResponse: NextResponse | null = null;
+  if (isProtectedRoute(kind)) {
+    const ensured = await ensureAccessToken(
+      request,
+      accessToken,
+      refreshToken
+    );
+    accessToken = ensured.accessToken ?? undefined;
 
-    if (!accessToken && refreshToken) {
-      const tokens = await rotateTokens(refreshToken);
-      if (tokens) {
-        accessToken = tokens.accessToken;
-        sessionResponse = NextResponse.next();
-        applySessionCookies(sessionResponse, tokens);
-      } else {
-        const login = redirectToLogin(request, pathname);
-        clearSessionCookies(login);
-        return login;
-      }
+    if (ensured.cleared) {
+      const login = redirectToLogin(request, pathname);
+      clearSessionCookies(login);
+      return login;
     }
 
     if (!accessToken) {
       return redirectToLogin(request, pathname);
     }
 
-    const base = sessionResponse ?? NextResponse.next();
-    return enforceAreaAccess(request, accessToken, base);
+    const base = ensured.sessionResponse ?? NextResponse.next();
+    return enforceAreaAccess(request, accessToken, kind, base);
   }
 
-  if (isAuthPage(pathname) && (accessToken || refreshToken)) {
+  if (kind === "guest_auth" && (accessToken || refreshToken)) {
     if (!accessToken && refreshToken) {
       const tokens = await rotateTokens(refreshToken);
       if (tokens) {
@@ -218,40 +208,16 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  // Logged-in users may still open reset/invite links without being bounced home.
-  if (isAuthTokenPage(pathname)) {
-    return NextResponse.next();
-  }
-
+  // token_auth + anything else: pass through
   return NextResponse.next();
 }
 
+/**
+ * Run on all app navigations. Skip API, Next internals, and static assets.
+ */
 export const config = {
   matcher: [
     "/",
-    "/login",
-    "/signup",
-    "/forgot-password",
-    "/reset-password",
-    "/invite",
-    "/invite/:path*",
-    "/home",
-    "/home/:path*",
-    "/shops",
-    "/shops/:path*",
-    "/team",
-    "/team/:path*",
-    "/billing",
-    "/billing/:path*",
-    "/settings",
-    "/settings/:path*",
-    "/products",
-    "/products/:path*",
-    "/orders",
-    "/orders/:path*",
-    "/analytics",
-    "/analytics/:path*",
-    "/backoffice",
-    "/backoffice/:path*",
+    "/((?!api(?:/|$)|_next/static|_next/image|favicon.ico|.*\\..*).*)",
   ],
 };

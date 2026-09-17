@@ -26,6 +26,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "../ui/button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function SignupForm() {
   const router = useRouter();
@@ -56,9 +57,9 @@ export default function SignupForm() {
       });
       const payload = await res.json().catch(() => ({}));
       if (!res.ok) {
-        signupForm.setError("root", {
-          message: payload?.error?.message ?? "Sign up failed",
-        });
+        const message = payload?.error?.message ?? "Sign up failed";
+        signupForm.setError("root", { message });
+        toast.error(message);
         return;
       }
       const dest =
@@ -66,10 +67,13 @@ export default function SignupForm() {
         payload.redirectTo.startsWith("/")
           ? payload.redirectTo
           : "/home";
+      toast.success("Account created");
       router.replace(dest);
       router.refresh();
     } catch {
-      signupForm.setError("root", { message: "Unable to reach the server" });
+      const message = "Unable to reach the server";
+      signupForm.setError("root", { message });
+      toast.error(message);
     }
   }
 

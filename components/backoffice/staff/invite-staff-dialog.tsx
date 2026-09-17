@@ -33,6 +33,7 @@ import {
   createStaffSchema,
   type CreateStaffSchemaType,
 } from "@/validations/platform.validations";
+import { toast } from "sonner";
 
 export function InviteStaffDialog() {
   const createStaff = useCreatePlatformStaff();
@@ -60,11 +61,13 @@ export function InviteStaffDialog() {
     form.clearErrors("root");
     try {
       await createStaff.mutateAsync(data);
+      toast.success("Staff member added");
       handleOpenChange(false);
     } catch (err) {
-      form.setError("root", {
-        message: err instanceof Error ? err.message : "Failed to create staff",
-      });
+      const message =
+        err instanceof Error ? err.message : "Failed to create staff";
+      form.setError("root", { message });
+      toast.error(message);
     }
   }
 

@@ -34,6 +34,7 @@ import {
   connectShopSchema,
   type ConnectShopSchemaType,
 } from "@/validations/shop.validations";
+import { toast } from "sonner";
 
 type ConnectShopDialogProps = {
   disabled?: boolean;
@@ -82,19 +83,21 @@ export function ConnectShopDialog({
     form.clearErrors("root");
     try {
       await connect.mutateAsync(data);
+      toast.success("Shop connect started");
       handleOpenChange(false);
     } catch (err) {
       if (err instanceof ShopsApiError && err.code === "PLAN_LIMIT") {
         onPlanLimit?.();
-        form.setError("root", {
-          message:
-            "Shop limit reached. Upgrade your plan to connect more shops.",
-        });
+        const message =
+          "Shop limit reached. Upgrade your plan to connect more shops.";
+        form.setError("root", { message });
+        toast.error(message);
         return;
       }
-      form.setError("root", {
-        message: err instanceof Error ? err.message : "Failed to connect shop",
-      });
+      const message =
+        err instanceof Error ? err.message : "Failed to connect shop";
+      form.setError("root", { message });
+      toast.error(message);
     }
   }
 

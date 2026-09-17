@@ -25,9 +25,10 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "../ui/button";
 import Link from "next/link";
+import { toast } from "sonner";
 
 export default function ForgotPasswordForm() {
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [sent, setSent] = useState(false);
   const [devResetUrl, setDevResetUrl] = useState<string | null>(null);
 
   const forgotPasswordForm = useForm<ForgotPasswordFormSchemaType>({
@@ -37,7 +38,6 @@ export default function ForgotPasswordForm() {
 
   async function onSubmit(data: ForgotPasswordFormSchemaType) {
     forgotPasswordForm.clearErrors("root");
-    setSuccessMessage(null);
     setDevResetUrl(null);
     try {
       const res = await fetch("/api/auth/forgot-password", {
@@ -49,18 +49,19 @@ export default function ForgotPasswordForm() {
       if (!res.ok) {
         throw new Error(json?.error?.message ?? "Request failed");
       }
-      setSuccessMessage(
+      const message =
         json.message ??
-          "If an account exists for that email, password reset instructions have been sent.",
-      );
+        "If an account exists for that email, password reset instructions have been sent.";
+      toast.success(message);
+      setSent(true);
       if (typeof json.resetUrl === "string") {
         setDevResetUrl(json.resetUrl);
       }
     } catch (err) {
-      forgotPasswordForm.setError("root", {
-        message:
-          err instanceof Error ? err.message : "Failed to request password reset",
-      });
+      const message =
+        err instanceof Error ? err.message : "Failed to request password reset";
+      forgotPasswordForm.setError("root", { message });
+      toast.error(message);
     }
   }
 
@@ -82,11 +83,11 @@ export default function ForgotPasswordForm() {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {successMessage ? (
-          <div className="space-y-3 text-sm">
-            <p>{successMessage}</p>
+        {sent ? (
+          <div className="space-y-3 text-sm text-muted-foreground">
+            <p>Check your email for reset instructions.</p>
             {devResetUrl ? (
-              <p className="rounded-lg bg-muted/50 p-3 font-mono text-xs break-all">
+              <p className="rounded-lg bg-muted/50 p-3 font-mono text-xs break-all text-foreground">
                 Dev reset link:{" "}
                 <Link href={devResetUrl} className="underline">
                   {devResetUrl}
@@ -128,7 +129,7 @@ export default function ForgotPasswordForm() {
       </CardContent>
       <CardFooter className="bg-white border-0">
         <Field>
-          {!successMessage ? (
+          {!sent ? (
             <Button
               type="submit"
               size="lg"

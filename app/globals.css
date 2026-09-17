@@ -2,7 +2,8 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-@custom-variant dark (&:is(.dark *));
+/* Dark utilities skip scoped `.light` islands (e.g. auth panel on white). */
+@custom-variant dark (&:where(.dark, .dark *):not(:where(.light, .light *)));
 
 @theme inline {
   --color-background: var(--background);
@@ -111,6 +112,34 @@
   Active pill stays brand primary.
   Applied via .dark class OR OS prefers-color-scheme: dark
 */
+/* Scoped light surface — restores readable tokens inside dark html */
+.light {
+  color-scheme: light;
+  --background: oklch(0.995 0.002 34.3);
+  --foreground: oklch(0.264 0.006 34.3);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.264 0.006 34.3);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.264 0.006 34.3);
+  --primary: oklch(0.581 0.235 28);
+  --primary-foreground: oklch(0.985 0.015 28);
+  --secondary: oklch(0.264 0.006 34.3);
+  --secondary-foreground: oklch(0.985 0.002 34.3);
+  --muted: oklch(0.955 0.005 34.3);
+  --muted-foreground: oklch(0.52 0.01 34.3);
+  --accent: oklch(0.96 0.02 28);
+  --accent-foreground: oklch(0.264 0.006 34.3);
+  --destructive: oklch(0.55 0.22 25);
+  --border: oklch(0.9 0.008 34.3);
+  --input: oklch(0.9 0.008 34.3);
+  --ring: oklch(0.581 0.235 28);
+  --chart-1: oklch(0.72 0.2 28);
+  --chart-2: oklch(0.581 0.235 28);
+  --chart-3: oklch(0.48 0.19 28);
+  --chart-4: oklch(0.4 0.08 34.3);
+  --chart-5: oklch(0.264 0.006 34.3);
+}
+
 .dark,
 :root:is(.dark) {
   color-scheme: dark;
@@ -212,4 +241,41 @@
   html {
     @apply font-sans;
   }
+}
+
+/* Sonner — map richColors to brand tokens (not default HSL greens/blues) */
+[data-sonner-toaster] {
+  --normal-bg: var(--popover);
+  --normal-bg-hover: var(--accent);
+  --normal-border: var(--border);
+  --normal-border-hover: var(--border);
+  --normal-text: var(--popover-foreground);
+  --border-radius: var(--radius);
+
+  --success-bg: color-mix(in oklch, var(--primary) 12%, var(--popover));
+  --success-border: color-mix(in oklch, var(--primary) 28%, var(--border));
+  --success-text: var(--primary);
+
+  --info-bg: color-mix(in oklch, var(--secondary) 8%, var(--popover));
+  --info-border: color-mix(in oklch, var(--secondary) 20%, var(--border));
+  --info-text: var(--secondary);
+
+  --warning-bg: oklch(0.97 0.04 85);
+  --warning-border: oklch(0.9 0.08 85);
+  --warning-text: oklch(0.5 0.12 55);
+
+  --error-bg: color-mix(in oklch, var(--destructive) 12%, var(--popover));
+  --error-border: color-mix(in oklch, var(--destructive) 28%, var(--border));
+  --error-text: var(--destructive);
+}
+
+.dark [data-sonner-toaster],
+[data-sonner-toaster][data-sonner-theme="dark"] {
+  --warning-bg: oklch(0.28 0.04 85);
+  --warning-border: oklch(0.35 0.06 85);
+  --warning-text: oklch(0.85 0.08 85);
+}
+
+[data-sonner-toast].cn-toast {
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
 }

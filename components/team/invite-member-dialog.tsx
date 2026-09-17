@@ -35,6 +35,7 @@ import {
   createInviteSchema,
   type CreateInviteSchemaType,
 } from "@/validations/org.validations";
+import { toast } from "sonner";
 
 export function InviteMemberDialog() {
   const queryClient = useQueryClient();
@@ -87,10 +88,12 @@ export function InviteMemberDialog() {
         typeof window !== "undefined" ? window.location.origin : "";
       setInviteLink(`${origin}/invite/${result.inviteToken}`);
       void queryClient.invalidateQueries({ queryKey: ["org", "members"] });
+      toast.success("Invite created");
     } catch (err) {
-      form.setError("root", {
-        message: err instanceof Error ? err.message : "Failed to create invite",
-      });
+      const message =
+        err instanceof Error ? err.message : "Failed to create invite";
+      form.setError("root", { message });
+      toast.error(message);
     }
   }
 
@@ -99,9 +102,12 @@ export function InviteMemberDialog() {
     try {
       await navigator.clipboard.writeText(inviteLink);
       setCopied(true);
+      toast.success("Invite link copied");
       window.setTimeout(() => setCopied(false), 2000);
     } catch {
-      form.setError("root", { message: "Unable to copy link" });
+      const message = "Unable to copy link";
+      form.setError("root", { message });
+      toast.error(message);
     }
   }
 

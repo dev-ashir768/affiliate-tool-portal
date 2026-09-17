@@ -26,6 +26,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { toast } from "sonner";
 
 function ResetPasswordFormInner() {
   const router = useRouter();
@@ -51,11 +52,13 @@ function ResetPasswordFormInner() {
         throw new Error(json?.error?.message ?? "Reset failed");
       }
       setDone(true);
+      toast.success("Password updated");
       window.setTimeout(() => router.push("/login"), 1500);
     } catch (err) {
-      form.setError("root", {
-        message: err instanceof Error ? err.message : "Failed to reset password",
-      });
+      const message =
+        err instanceof Error ? err.message : "Failed to reset password";
+      form.setError("root", { message });
+      toast.error(message);
     }
   }
 

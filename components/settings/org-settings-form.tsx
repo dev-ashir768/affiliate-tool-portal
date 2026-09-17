@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Field,
@@ -39,7 +40,6 @@ export function OrgSettingsForm() {
   const meQuery = useMe();
   const orgQuery = useOrg();
   const patchOrg = usePatchOrg();
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const orgRole = useMemo(() => {
     const me = meQuery.data;
@@ -61,7 +61,6 @@ export function OrgSettingsForm() {
   useEffect(() => {
     if (orgQuery.data?.name) {
       form.reset({ name: orgQuery.data.name });
-      setSuccessMessage(null);
     }
   }, [orgQuery.data?.name, form]);
 
@@ -70,15 +69,14 @@ export function OrgSettingsForm() {
 
   async function onSubmit(data: PatchCurrentOrgSchemaType) {
     form.clearErrors("root");
-    setSuccessMessage(null);
     try {
       await patchOrg.mutateAsync(data);
-      setSuccessMessage("Organization name updated.");
+      toast.success("Organization name updated");
     } catch (err) {
-      form.setError("root", {
-        message:
-          err instanceof Error ? err.message : "Failed to update organization",
-      });
+      const message =
+        err instanceof Error ? err.message : "Failed to update organization";
+      form.setError("root", { message });
+      toast.error(message);
     }
   }
 
@@ -173,11 +171,6 @@ export function OrgSettingsForm() {
           />
 
           {formError ? <FieldError errors={[formError]} /> : null}
-          {successMessage ? (
-            <p className="text-sm text-muted-foreground" role="status">
-              {successMessage}
-            </p>
-          ) : null}
 
           {canEditName ? (
             <Field>
