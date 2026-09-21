@@ -11,6 +11,7 @@ import {
   Megaphone,
   Mail,
   Menu,
+  Search,
   Package,
   ScrollText,
   Settings,
@@ -38,6 +39,7 @@ const ICONS: Record<string, LucideIcon> = {
   Megaphone,
   Mail,
   Menu,
+  Search,
 };
 
 export function NavIcon({
