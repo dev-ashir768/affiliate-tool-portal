@@ -7,6 +7,7 @@ import {
   fetchAnalyticsOverview,
   fetchOrders,
   fetchPlatformDiscovery,
+  importPlatformDiscovery,
   saveDiscoveryToCrm,
   searchDiscovery,
 } from "@/services/commerce";
@@ -78,6 +79,17 @@ export function useCreatePlatformDiscovery() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: createPlatformDiscovery,
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["platform", "discovery"] });
+      void qc.invalidateQueries({ queryKey: ["discovery"] });
+    },
+  });
+}
+
+export function useImportPlatformDiscovery() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: importPlatformDiscovery,
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["platform", "discovery"] });
       void qc.invalidateQueries({ queryKey: ["discovery"] });

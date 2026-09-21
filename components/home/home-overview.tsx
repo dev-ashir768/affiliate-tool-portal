@@ -14,12 +14,21 @@ import { useMe } from "@/hooks/use-me";
 import { useOrg } from "@/hooks/use-org";
 import { useShops } from "@/hooks/use-shops";
 import { useMembersQuery } from "@/hooks/use-members";
+import { useAnalyticsOverview } from "@/hooks/use-commerce";
+
+function cents(n: number) {
+  return (n / 100).toLocaleString(undefined, {
+    style: "currency",
+    currency: "USD",
+  });
+}
 
 export function HomeOverview() {
   const meQuery = useMe();
   const orgQuery = useOrg();
   const shopsQuery = useShops();
   const membersQuery = useMembersQuery({ page: 1, pageSize: 1 });
+  const analyticsQuery = useAnalyticsOverview();
 
   const isLoading =
     meQuery.isLoading || orgQuery.isLoading || shopsQuery.isLoading;
@@ -39,6 +48,7 @@ export function HomeOverview() {
   const shops = shopsQuery.data?.shops ?? [];
   const activeShops = shops.filter((s) => s.status !== "DISCONNECTED").length;
   const memberTotal = membersQuery.data?.meta.total;
+  const funnel = analyticsQuery.data?.funnel;
 
   const currentMembership = me?.memberships.find(
     (m) => m.organization.id === me.currentOrganizationId,
@@ -128,6 +138,65 @@ export function HomeOverview() {
               })}
             >
               View billing
+            </Link>
+          </CardContent>
+        </Card>
+
+        <Card size="sm">
+          <CardHeader>
+            <CardDescription>Creators</CardDescription>
+            <CardTitle>{funnel?.creators ?? "—"}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Link
+              href="/creators"
+              className={buttonVariants({
+                variant: "link",
+                className: "h-auto px-0",
+              })}
+            >
+              Open CRM
+            </Link>
+          </CardContent>
+        </Card>
+
+        <Card size="sm">
+          <CardHeader>
+            <CardDescription>Outreach sent</CardDescription>
+            <CardTitle>{funnel?.outreachSent ?? "—"}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Link
+              href="/outreach"
+              className={buttonVariants({
+                variant: "link",
+                className: "h-auto px-0",
+              })}
+            >
+              Send outreach
+            </Link>
+          </CardContent>
+        </Card>
+
+        <Card size="sm">
+          <CardHeader>
+            <CardDescription>GMV attributed</CardDescription>
+            <CardTitle>
+              {funnel ? cents(funnel.gmvCents) : "—"}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="mb-2 text-xs text-muted-foreground">
+              {funnel?.orders ?? 0} orders
+            </p>
+            <Link
+              href="/analytics"
+              className={buttonVariants({
+                variant: "link",
+                className: "h-auto px-0",
+              })}
+            >
+              View analytics
             </Link>
           </CardContent>
         </Card>

@@ -28,8 +28,7 @@ export function DiscoverPageContent() {
       <div>
         <h1 className="text-lg font-semibold tracking-tight">Discover</h1>
         <p className="text-sm text-muted-foreground">
-          Search the platform creator index and save matches into your CRM.
-          Live TikTok crawl is not wired yet — staff populate this index.
+          Search the shared discovery index and save creators into your CRM.
         </p>
       </div>
 

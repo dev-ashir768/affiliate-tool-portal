@@ -62,8 +62,7 @@ export function OrdersPageContent() {
       <div>
         <h1 className="text-lg font-semibold tracking-tight">Orders</h1>
         <p className="text-sm text-muted-foreground">
-          Manual attribution ingest for now. Partner commerce sync plugs in
-          later — same models.
+          Record affiliate orders and commissions attributed to creators.
         </p>
       </div>
 

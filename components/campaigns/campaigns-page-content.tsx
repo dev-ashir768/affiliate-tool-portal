@@ -48,8 +48,7 @@ export function CampaignsPageContent() {
       <div>
         <h1 className="text-lg font-semibold tracking-tight">Campaigns</h1>
         <p className="text-sm text-muted-foreground">
-          Briefs and offers for creator outreach. Sending/automation comes
-          later.
+          Briefs and offers for creator outreach.
         </p>
       </div>
 

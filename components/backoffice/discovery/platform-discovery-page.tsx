@@ -5,19 +5,28 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
 import {
   useCreatePlatformDiscovery,
+  useImportPlatformDiscovery,
   usePlatformDiscovery,
 } from "@/hooks/use-commerce";
+
+const IMPORT_PLACEHOLDER = `[
+  { "handle": "creator_one", "region": "US", "followerCount": 50000 },
+  { "handle": "creator_two", "region": "UK", "displayName": "Creator Two" }
+]`;
 
 export function PlatformDiscoveryPageContent() {
   const [search, setSearch] = useState("");
   const query = usePlatformDiscovery({ search: search || undefined });
   const create = useCreatePlatformDiscovery();
+  const importProfiles = useImportPlatformDiscovery();
   const [handle, setHandle] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [followers, setFollowers] = useState("");
   const [region, setRegion] = useState<"US" | "UK" | "">("");
+  const [importJson, setImportJson] = useState("");
 
   async function onCreate(e: React.FormEvent) {
     e.preventDefault();
@@ -39,6 +48,33 @@ export function PlatformDiscoveryPageContent() {
     }
   }
 
+  async function onImport(e: React.FormEvent) {
+    e.preventDefault();
+    try {
+      const parsed = JSON.parse(importJson) as unknown;
+      const profiles = Array.isArray(parsed)
+        ? parsed
+        : (parsed as { profiles?: unknown }).profiles;
+      if (!Array.isArray(profiles) || profiles.length === 0) {
+        toast.error("Provide a JSON array of profiles");
+        return;
+      }
+      const result = await importProfiles.mutateAsync(profiles);
+      setImportJson("");
+      toast.success(
+        `Import done: ${result.created} upserted, ${result.skipped} skipped`,
+      );
+    } catch (err) {
+      toast.error(
+        err instanceof SyntaxError
+          ? "Invalid JSON"
+          : err instanceof Error
+            ? err.message
+            : "Import failed",
+      );
+    }
+  }
+
   if (query.isLoading) return <Skeleton className="h-48 w-full" />;
   const rows = query.data?.data ?? [];
 
@@ -47,8 +83,8 @@ export function PlatformDiscoveryPageContent() {
       <div>
         <h1 className="text-lg font-semibold tracking-tight">Discovery index</h1>
         <p className="text-sm text-muted-foreground">
-          Build the shared creator catalog merchants search on /discover. No
-          live TikTok scrape here — import/manual only for now.
+          Shared creator catalog for merchant /discover. Add one profile or
+          bulk-import JSON.
         </p>
       </div>
 
@@ -86,6 +122,22 @@ export function PlatformDiscoveryPageContent() {
         </Button>
       </form>
 
+      <form
+        onSubmit={(e) => void onImport(e)}
+        className="space-y-2 rounded-xl border border-border p-4"
+      >
+        <h2 className="text-sm font-semibold">Bulk import (JSON)</h2>
+        <Textarea
+          value={importJson}
+          onChange={(e) => setImportJson(e.target.value)}
+          placeholder={IMPORT_PLACEHOLDER}
+          className="min-h-28 font-mono text-xs"
+        />
+        <Button type="submit" disabled={importProfiles.isPending}>
+          {importProfiles.isPending ? "Importing…" : "Import profiles"}
+        </Button>
+      </form>
+
       <Input
         placeholder="Filter…"
         value={search}
@@ -104,18 +156,29 @@ export function PlatformDiscoveryPageContent() {
             </tr>
           </thead>
           <tbody>
-            {rows.map((p) => (
-              <tr key={p.id} className="border-b border-border last:border-0">
-                <td className="px-3 py-2 font-medium">@{p.handle}</td>
-                <td className="px-3 py-2">{p.region ?? "—"}</td>
-                <td className="px-3 py-2">
-                  {p.followerCount?.toLocaleString() ?? "—"}
-                </td>
-                <td className="px-3 py-2 text-xs text-muted-foreground">
-                  {p.source}
+            {rows.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={4}
+                  className="px-3 py-6 text-center text-muted-foreground"
+                >
+                  No profiles yet. Add or import to populate /discover.
                 </td>
               </tr>
-            ))}
+            ) : (
+              rows.map((p) => (
+                <tr key={p.id} className="border-b border-border last:border-0">
+                  <td className="px-3 py-2 font-medium">@{p.handle}</td>
+                  <td className="px-3 py-2">{p.region ?? "—"}</td>
+                  <td className="px-3 py-2">
+                    {p.followerCount?.toLocaleString() ?? "—"}
+                  </td>
+                  <td className="px-3 py-2 text-xs text-muted-foreground">
+                    {p.source}
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

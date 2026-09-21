@@ -110,3 +110,26 @@ export async function createPlatformDiscovery(body: {
   });
   return (await parseJson(res)) as DiscoveryProfile;
 }
+
+export async function importPlatformDiscovery(profiles: Array<{
+  handle: string;
+  displayName?: string | null;
+  region?: "US" | "UK" | null;
+  followerCount?: number | null;
+  categories?: string[];
+  bio?: string | null;
+  source?: string;
+  enabled?: boolean;
+}>) {
+  const res = await fetch("/api/platform/discovery/import", {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ profiles }),
+  });
+  return (await parseJson(res)) as {
+    created: number;
+    skipped: number;
+    total: number;
+  };
+}

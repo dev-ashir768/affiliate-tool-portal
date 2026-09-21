@@ -17,6 +17,7 @@ import {
   createOutreachTemplate,
   fetchOutreachMessages,
   fetchOutreachTemplates,
+  patchOutreachTemplate,
   sendOutreach,
 } from "@/services/outreach";
 
@@ -132,6 +133,21 @@ export function useCreateOutreachTemplate() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: createOutreachTemplate,
+    onSuccess: () =>
+      void qc.invalidateQueries({ queryKey: ["outreach", "templates"] }),
+  });
+}
+
+export function usePatchOutreachTemplate() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      id,
+      body,
+    }: {
+      id: string;
+      body: Parameters<typeof patchOutreachTemplate>[1];
+    }) => patchOutreachTemplate(id, body),
     onSuccess: () =>
       void qc.invalidateQueries({ queryKey: ["outreach", "templates"] }),
   });

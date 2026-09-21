@@ -11,6 +11,7 @@ import {
   useCreators,
   useOutreachMessages,
   useOutreachTemplates,
+  usePatchOutreachTemplate,
   useSendOutreach,
 } from "@/hooks/use-creators";
 
@@ -19,6 +20,7 @@ export function OutreachPageContent() {
   const messagesQuery = useOutreachMessages();
   const creatorsQuery = useCreators();
   const createTemplate = useCreateOutreachTemplate();
+  const patchTemplate = usePatchOutreachTemplate();
   const send = useSendOutreach();
 
   const [name, setName] = useState("");
@@ -26,20 +28,43 @@ export function OutreachPageContent() {
   const [bodyText, setBodyText] = useState(
     "Hi {{displayName}} (@{{handle}}),\n\nWe'd love to invite you to our TikTok Shop campaign.\n\n— Team",
   );
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [templateId, setTemplateId] = useState("");
   const [creatorId, setCreatorId] = useState("");
 
-  async function onCreateTemplate(e: React.FormEvent) {
+  function loadTemplate(id: string) {
+    const t = (templatesQuery.data?.templates ?? []).find((x) => x.id === id);
+    if (!t) return;
+    setEditingId(t.id);
+    setName(t.name);
+    setSubject(t.subject);
+    setBodyText(t.bodyText);
+  }
+
+  async function onSaveTemplate(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim() || !subject.trim() || !bodyText.trim()) return;
     try {
-      await createTemplate.mutateAsync({
-        name: name.trim(),
-        subject: subject.trim(),
-        bodyText,
-      });
+      if (editingId) {
+        await patchTemplate.mutateAsync({
+          id: editingId,
+          body: {
+            name: name.trim(),
+            subject: subject.trim(),
+            bodyText,
+          },
+        });
+        toast.success("Template updated");
+      } else {
+        await createTemplate.mutateAsync({
+          name: name.trim(),
+          subject: subject.trim(),
+          bodyText,
+        });
+        toast.success("Template saved");
+      }
+      setEditingId(null);
       setName("");
-      toast.success("Template saved");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to save");
     }
@@ -74,6 +99,7 @@ export function OutreachPageContent() {
   const templates = templatesQuery.data?.templates ?? [];
   const creators = creatorsQuery.data?.creators ?? [];
   const messages = messagesQuery.data?.messages ?? [];
+  const saving = createTemplate.isPending || patchTemplate.isPending;
 
   return (
     <div className="flex flex-col gap-8">
@@ -85,8 +111,40 @@ export function OutreachPageContent() {
         </p>
       </div>
 
-      <form onSubmit={(e) => void onCreateTemplate(e)} className="space-y-3">
-        <h2 className="text-sm font-semibold">New template</h2>
+      <form onSubmit={(e) => void onSaveTemplate(e)} className="space-y-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <h2 className="text-sm font-semibold">
+            {editingId ? "Edit template" : "New template"}
+          </h2>
+          {editingId ? (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setEditingId(null);
+                setName("");
+              }}
+            >
+              Cancel edit
+            </Button>
+          ) : null}
+        </div>
+        {templates.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {templates.map((t) => (
+              <Button
+                key={t.id}
+                type="button"
+                size="sm"
+                variant={editingId === t.id ? "default" : "outline"}
+                onClick={() => loadTemplate(t.id)}
+              >
+                {t.name}
+              </Button>
+            ))}
+          </div>
+        ) : null}
         <Input
           placeholder="Template name"
           value={name}
@@ -103,8 +161,8 @@ export function OutreachPageContent() {
           value={bodyText}
           onChange={(e) => setBodyText(e.target.value)}
         />
-        <Button type="submit" disabled={createTemplate.isPending}>
-          Save template
+        <Button type="submit" disabled={saving}>
+          {editingId ? "Update template" : "Save template"}
         </Button>
       </form>
 

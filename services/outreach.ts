@@ -30,6 +30,19 @@ export async function createOutreachTemplate(body: {
   return (await parseJson(res)) as OutreachTemplate;
 }
 
+export async function patchOutreachTemplate(
+  id: string,
+  body: Partial<{ name: string; subject: string; bodyText: string }>,
+) {
+  const res = await fetch(`/api/outreach/templates/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  return (await parseJson(res)) as OutreachTemplate;
+}
+
 export async function fetchOutreachMessages(signal?: AbortSignal) {
   const res = await fetch("/api/outreach/messages", {
     credentials: "include",
