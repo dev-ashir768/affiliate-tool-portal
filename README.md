@@ -1,36 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Affiliate Tool Portal
 
-## Getting Started
+Next.js frontend for the affiliate tool. Server routes (BFF) and `proxy.ts` call **affiliate-tool-apis**; the browser talks to this app only.
 
-First, run the development server:
+Sibling backend: [affiliate-tool-apis](https://github.com/dev-ashir768/affiliate-tool-apis) (default `http://localhost:4000`).
+
+## Environment
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+| Variable | Required | Purpose |
+|----------|----------|---------|
+| `API_URL` | Recommended | Backend origin (no trailing slash). Default if unset: `http://localhost:4000` |
+| `NEXT_PUBLIC_API_URL` | Optional | Same as `API_URL` if `API_URL` is unset |
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Resolved in `lib/auth/constants.ts` → `getApiBaseUrl()`.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+**Auth cookies** (set by BFF after login/register/refresh; names are fixed, not env):
 
-## Learn More
+- `access_token` — httpOnly
+- `refresh_token` — httpOnly
 
-To learn more about Next.js, take a look at the following resources:
+There is **no** portal JWT secret. Tokens are issued by the API; the portal stores them in cookies and forwards `Authorization: Bearer` on server-side API calls. Route guards decode the access JWT payload without verifying (API still verifies).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+No in-portal API stub: if the backend is down, BFF fetches fail.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Run with APIs (local)
 
-## Deploy on Vercel
+**1. APIs** (separate clone):
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+git clone https://github.com/dev-ashir768/affiliate-tool-apis.git
+cd affiliate-tool-apis
+cp .env.example .env   # DATABASE_URL, Redis, JWT secrets, CORS_ORIGINS=http://localhost:3000
+npm install
+npm run prisma:generate && npm run prisma:migrate && npm run prisma:seed
+npm run dev            # http://localhost:4000  — health: GET /health
+# optional worker: npm run worker
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**2. Portal** (this repo):
+
+```bash
+cp .env.example .env   # API_URL=http://localhost:4000
+npm install
+npm run dev            # http://localhost:3000
+```
+
+APIs `CORS_ORIGINS` must include the portal origin (`http://localhost:3000`). Details: APIs `README.md` and `docs/OPERATOR_RUNBOOK.md`.
+
+## Scripts
+
+| Script | Description |
+|--------|-------------|
+| `npm run dev` | Next.js dev server |
+| `npm run build` / `npm start` | Production build / serve |
+| `npm run lint` | ESLint |
+| `npm run typecheck` | `tsc --noEmit` |
