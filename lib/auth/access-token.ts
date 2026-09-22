@@ -8,6 +8,7 @@
 export function readAccessClaims(token: string): {
   orgId: string | null;
   platformRole: string | null;
+  hasProductAccess: boolean;
 } | null {
   try {
     const parts = token.split(".");
@@ -23,6 +24,7 @@ export function readAccessClaims(token: string): {
     const data = JSON.parse(json) as {
       orgId?: unknown;
       platformRole?: unknown;
+      hasProductAccess?: unknown;
     };
     return {
       orgId: data.orgId == null || data.orgId === "" ? null : String(data.orgId),
@@ -30,6 +32,7 @@ export function readAccessClaims(token: string): {
         data.platformRole == null || data.platformRole === ""
           ? null
           : String(data.platformRole),
+      hasProductAccess: Boolean(data.hasProductAccess),
     };
   } catch {
     return null;
@@ -40,8 +43,10 @@ export function readAccessClaims(token: string): {
 export function defaultRedirectForClaims(claims: {
   orgId: string | null;
   platformRole: string | null;
+  hasProductAccess?: boolean;
 }): string {
-  return claims.platformRole ? "/backoffice/users" : "/home";
+  if (claims.platformRole) return "/backoffice/users";
+  return claims.hasProductAccess ? "/home" : "/onboarding";
 }
 
 /** Relative path only — blocks open redirects (`//`, `/\`, `\`, etc.). */

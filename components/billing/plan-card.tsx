@@ -28,6 +28,7 @@ type PlanCardProps = {
   isCurrent: boolean;
   canManage: boolean;
   isLoading?: boolean;
+  ctaLabel?: string;
   onSelect?: (planCode: string) => void;
 };
 
@@ -36,18 +37,17 @@ export function PlanCard({
   isCurrent,
   canManage,
   isLoading,
+  ctaLabel,
   onSelect,
 }: PlanCardProps) {
   const isFree = plan.code === "free";
   const showUpgrade = canManage && !isCurrent && !isFree;
+  const label =
+    ctaLabel ??
+    (plan.trialDays > 0 ? `Start ${plan.trialDays}-day trial` : "Upgrade");
 
   return (
-    <Card
-      className={cn(
-        "h-full",
-        isCurrent && "ring-2 ring-primary/40",
-      )}
-    >
+    <Card className={cn("h-full", isCurrent && "ring-2 ring-primary/40")}>
       <CardHeader>
         <div className="flex items-start justify-between gap-2">
           <CardTitle>{plan.name}</CardTitle>
@@ -65,20 +65,39 @@ export function PlanCard({
             <span className="text-muted-foreground"> / month</span>
           ) : null}
         </CardDescription>
+        {plan.description ? (
+          <p className="text-sm text-muted-foreground">{plan.description}</p>
+        ) : null}
       </CardHeader>
       <CardContent className="space-y-2 text-sm text-muted-foreground">
-        <p>{plan.seatLimit} team seat{plan.seatLimit === 1 ? "" : "s"}</p>
-        <p>{plan.shopLimit} connected shop{plan.shopLimit === 1 ? "" : "s"}</p>
+        <p>
+          {plan.shopLimit} TikTok shop{plan.shopLimit === 1 ? "" : "s"}
+        </p>
+        <p>
+          {plan.botLimit} verify bot{plan.botLimit === 1 ? "" : "s"}
+        </p>
+        <p>
+          {plan.seatLimit} team seat{plan.seatLimit === 1 ? "" : "s"}
+        </p>
         <p>{plan.dailyInviteQuota.toLocaleString()} daily invites</p>
+        {plan.trialDays > 0 ? (
+          <p className="font-medium text-foreground">
+            {plan.trialDays}-day free trial
+          </p>
+        ) : null}
       </CardContent>
       <CardFooter>
         {showUpgrade ? (
           <Button
             className="w-full"
-            disabled={isLoading}
+            disabled={isLoading || plan.hasStripePrice === false}
             onClick={() => onSelect?.(plan.code)}
           >
-            {isLoading ? "Redirecting…" : "Upgrade"}
+            {isLoading
+              ? "Redirecting…"
+              : plan.hasStripePrice === false
+                ? "Unavailable"
+                : label}
           </Button>
         ) : isCurrent ? (
           <Button className="w-full" variant="outline" disabled>

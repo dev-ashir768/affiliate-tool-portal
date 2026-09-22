@@ -13,6 +13,7 @@ import {
 import {
   classifyRoute,
   isProtectedRoute,
+  isSubscriptionExemptPath,
   type RouteClass,
 } from "@/lib/auth/route-policy";
 
@@ -100,6 +101,17 @@ function enforceAreaAccess(
       const login = redirectToLogin(request, pathname);
       clearSessionCookies(login);
       return login;
+    }
+
+    const hasAccess = claims.hasProductAccess;
+    if (!hasAccess && !isSubscriptionExemptPath(pathname)) {
+      return NextResponse.redirect(new URL("/onboarding", request.url));
+    }
+    if (
+      hasAccess &&
+      (pathname === "/onboarding" || pathname.startsWith("/onboarding/"))
+    ) {
+      return NextResponse.redirect(new URL("/home", request.url));
     }
     return response;
   }

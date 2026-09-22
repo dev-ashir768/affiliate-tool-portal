@@ -283,3 +283,28 @@ export async function patchAdminNavItem(
   );
   return (await parseJson(res)) as AdminNavItem;
 }
+
+export async function fetchPlatformPlans(
+  signal?: AbortSignal,
+): Promise<import("@/types/billing").PlatformPlansResponse> {
+  const res = await fetch("/api/platform/plans", {
+    credentials: "include",
+    signal,
+  });
+  return (await parseJson(
+    res,
+  )) as import("@/types/billing").PlatformPlansResponse;
+}
+
+export async function patchPlatformPlan(
+  id: string,
+  body: import("@/validations/platform.validations").PatchPlatformPlanSchemaType,
+): Promise<import("@/types/billing").PlatformPlan> {
+  const res = await fetch(`/api/platform/plans/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  return (await parseJson(res)) as import("@/types/billing").PlatformPlan;
+}

@@ -161,6 +161,7 @@ export function OrgSettingsForm() {
           <ReadOnlyField label="Plan" value={org.plan.code} />
           <ReadOnlyField label="Seat limit" value={String(org.seatLimit)} />
           <ReadOnlyField label="Shop limit" value={String(org.shopLimit)} />
+          <ReadOnlyField label="Bot limit" value={String(org.botLimit)} />
           <ReadOnlyField
             label="Daily invite quota"
             value={String(org.dailyInviteQuota)}

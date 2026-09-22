@@ -164,6 +164,10 @@ export function BillingPageContent() {
               <p className="text-xs text-muted-foreground">Shops</p>
               <p className="font-medium">{org.shopLimit}</p>
             </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Bots</p>
+              <p className="font-medium">{org.botLimit}</p>
+            </div>
           </CardContent>
         </Card>
       ) : null}
@@ -181,8 +185,10 @@ export function BillingPageContent() {
         </p>
       ) : null}
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {plans.map((plan) => (
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {plans
+          .filter((plan) => plan.code !== "free")
+          .map((plan) => (
           <PlanCard
             key={plan.id}
             plan={plan}
@@ -190,6 +196,13 @@ export function BillingPageContent() {
             canManage={canManage}
             isLoading={checkout.isPending && activePlanCode === plan.code}
             onSelect={(code) => void handleUpgrade(code)}
+            ctaLabel={
+              hasPaidSubscription
+                ? "Switch plan"
+                : plan.trialDays > 0
+                  ? `Start ${plan.trialDays}-day trial`
+                  : "Subscribe"
+            }
           />
         ))}
       </div>

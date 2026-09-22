@@ -43,3 +43,23 @@ export function classifyRoute(pathname: string): RouteClass {
 export function isProtectedRoute(kind: RouteClass) {
   return kind === "staff" || kind === "merchant";
 }
+
+/**
+ * Merchant routes reachable without an active subscription / trial.
+ * Everything else redirects to /onboarding until hasProductAccess.
+ */
+export function isSubscriptionExemptPath(pathname: string): boolean {
+  if (pathname === "/onboarding" || pathname.startsWith("/onboarding/")) {
+    return true;
+  }
+  if (pathname === "/billing" || pathname.startsWith("/billing/")) {
+    return true;
+  }
+  if (pathname === "/settings" || pathname.startsWith("/settings/")) {
+    return true;
+  }
+  if (pathname === "/team" || pathname.startsWith("/team/")) {
+    return true;
+  }
+  return false;
+}

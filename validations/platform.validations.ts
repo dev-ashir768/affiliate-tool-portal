@@ -49,3 +49,26 @@ export const patchProxySchema = z
   });
 
 export type PatchProxySchemaType = z.infer<typeof patchProxySchema>;
+
+export const patchPlatformPlanSchema = z
+  .object({
+    name: z.string().trim().min(1).max(80).optional(),
+    description: z.string().trim().max(500).optional().nullable(),
+    monthlyPriceCents: z.coerce.number().int().nonnegative().optional(),
+    seatLimit: z.coerce.number().int().nonnegative().optional(),
+    shopLimit: z.coerce.number().int().nonnegative().optional(),
+    botLimit: z.coerce.number().int().nonnegative().optional(),
+    dailyInviteQuota: z.coerce.number().int().nonnegative().optional(),
+    trialDays: z.coerce.number().int().min(0).max(90).optional(),
+    stripePriceId: z.string().trim().min(1).max(120).optional().nullable(),
+    isPublic: z.boolean().optional(),
+    active: z.boolean().optional(),
+    sortOrder: z.coerce.number().int().optional(),
+  })
+  .refine((b) => Object.keys(b).length > 0, {
+    message: "At least one field is required",
+  });
+
+export type PatchPlatformPlanSchemaType = z.infer<
+  typeof patchPlatformPlanSchema
+>;

@@ -28,7 +28,7 @@ export async function POST(request: Request) {
       user: data.user,
       organization: data.organization,
       platformMembership: data.platformMembership ?? null,
-      redirectTo: data.redirectTo ?? "/home",
+      redirectTo: data.redirectTo ?? "/onboarding",
     });
   } catch (err) {
     if (err instanceof ApiClientError) {

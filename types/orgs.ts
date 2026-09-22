@@ -4,6 +4,7 @@ export type OrganizationCurrent = {
   slug: string;
   seatLimit: number;
   shopLimit: number;
+  botLimit: number;
   dailyInviteQuota: number;
   plan: { id: string; code: string; name: string };
   subscriptionStatus: string | null;

@@ -13,10 +13,12 @@ import {
   patchPlatformCreator,
   fetchPlatformOrganization,
   fetchPlatformOrganizations,
+  fetchPlatformPlans,
   fetchPlatformProxies,
   fetchPlatformShops,
   fetchPlatformStaff,
   patchAdminNavItem,
+  patchPlatformPlan,
   patchPlatformProxy,
   patchPlatformStaff,
   runPlatformCrawlerDryCheck,
@@ -25,6 +27,7 @@ import type { PlatformListParams, PlatformRole } from "@/types/platform";
 import type {
   CreateProxySchemaType,
   CreateStaffSchemaType,
+  PatchPlatformPlanSchemaType,
   PatchProxySchemaType,
   PatchStaffSchemaType,
 } from "@/validations/platform.validations";
@@ -51,13 +54,8 @@ export function useCreatePlatformStaff() {
 export function usePatchPlatformStaff() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({
-      id,
-      body,
-    }: {
-      id: string;
-      body: PatchStaffSchemaType;
-    }) => patchPlatformStaff(id, body),
+    mutationFn: ({ id, body }: { id: string; body: PatchStaffSchemaType }) =>
+      patchPlatformStaff(id, body),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["platform", "staff"] });
     },
@@ -123,13 +121,8 @@ export function useCreatePlatformProxy() {
 export function usePatchPlatformProxy() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({
-      id,
-      body,
-    }: {
-      id: string;
-      body: PatchProxySchemaType;
-    }) => patchPlatformProxy(id, body),
+    mutationFn: ({ id, body }: { id: string; body: PatchProxySchemaType }) =>
+      patchPlatformProxy(id, body),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["platform", "proxies"] });
     },
@@ -233,6 +226,30 @@ export function usePatchAdminNavItem() {
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["platform", "navigation"] });
       void qc.invalidateQueries({ queryKey: ["navigation"] });
+    },
+  });
+}
+
+export function usePlatformPlans() {
+  return useQuery({
+    queryKey: ["platform", "plans"],
+    queryFn: ({ signal }) => fetchPlatformPlans(signal),
+    retry: false,
+  });
+}
+
+export function usePatchPlatformPlan() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      id,
+      body,
+    }: {
+      id: string;
+      body: PatchPlatformPlanSchemaType;
+    }) => patchPlatformPlan(id, body),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["platform", "plans"] });
     },
   });
 }
