@@ -1,37 +1,39 @@
-# Graph Report - affiliate-tool-portal  (2026-09-17)
+# Graph Report - affiliate-tool-portal  (2026-09-18)
 
 ## Corpus Check
-- 164 files · ~221,335 words
+- 263 files · ~242,508 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 943 nodes · 1388 edges · 86 communities (50 shown, 9 thin omitted)
-- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 11 edges (avg confidence: 0.85)
+- 1371 nodes · 2857 edges · 100 communities (66 shown, 16 thin omitted)
+- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 32 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `9e23d4ad`
+- Built from commit: `193d71b4`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
 - Portal Auth E2E — Design
-- react
+- shops-page-content.tsx
 - package.json
 - components.json
 - app-shell.tsx
-- data-table.tsx
+- cn
 - app/layout.tsx
 - compilerOptions
 - dependencies
-- data-table-toolbar.tsx
+- use-creators.ts
 - Slice 2 Task 3 Report: Team DataTable + invite dialog
 - Shopify-style App Shell Design
 - Production DataTable Design
-- data-table-pagination.tsx
+- authenticatedApiFetch
 - shadcn
 - Slice 1 Task 6 Report: Login redirectTo + proxy area guards
-- users-table.tsx
+- services/orgs.ts
+- staff-columns.tsx
+- field.tsx
 - eslint.config.mjs
 - postcss.config.mjs
 - Task 7 Report: Toolbar pieces (header, visibility, pagination, export, toolbar)
@@ -50,71 +52,92 @@
 - README.md
 - task-10-brief.md
 - AGENTS.md
-- proxy.ts
+- proxies-page-content.tsx
+- tabs.tsx
+- react
 - Tiksly Complete SaaS — Master Design (Portal)
 - 2026-09-17-saas-slice-1-platform-nav.md
-- devDependencies
+- services/billing.ts
+- organizations-table.tsx
+- 2026-09-17-saas-slice-2-merchant-team.md
+- data-table.tsx
+- badge.tsx
 - Slice 2 Task 1 Report: Authenticated BFF helper + org current GET/PATCH
 - Slice 1 Task 5 Report: Portal BFF navigation + useNavigation
-- auth-wrapper.tsx
+- next
 - Slice 2 Task 2 Report: Members list BFF + client hooks
 - Slice 1 Task 7 Report: Stub pages for new nav hrefs
-- scripts
+- use-platform.ts
+- 2026-09-17-saas-slice-3-merchant-billing.md
 - Slice 2 Task 4 Report: Accept invite page + BFF
 - Slice 2 Task 2 — Members list BFF + client hooks
 - Slice 2 Task 5 Report: Org settings form
 - Slice 2 Task 3 — Team page DataTable + invite dialog
 - Slice 2 Task 4 — Accept invite page
-- next
+- data-table-toolbar.tsx
 - Slice 2 Task 5 — Org settings form on `/settings`
-- signup/page.tsx
+- 2026-09-17-saas-slice-4-merchant-shops.md
 - Slice 2 Task 1 Spec Review: Org current BFF
 - Slice 2 Task 2 Spec Review: Members BFF + hooks
 - Slice 2 Task 3 Spec Review: Team page + invites
 - Slice 2 Task 4 Spec Review: Accept invite
 - Slice 2 Task 5 Spec Review: Org settings form
 - slice2-task-1-brief.md
+- 2026-09-17-saas-slice-5-backoffice.md
+- use-shops.ts
+- platform-shops-table.tsx
+- use-data-table-preferences.ts
+- audit-log-page.tsx
+- api.ts
+- 2026-09-17-saas-slice-6-hardening.md
+- devDependencies
+- pagination.ts
+- login/page.tsx
+- signup/page.tsx
+- auth-wrapper.tsx
+- [id]/page.tsx
+- scripts
 
 ## God Nodes (most connected - your core abstractions)
-1. `react` - 30 edges
-2. `cn` - 29 edges
-3. `Button()` - 17 edges
-4. `lucide-react` - 16 edges
-5. `compilerOptions` - 16 edges
-6. `Production DataTable Design` - 14 edges
-7. `Task 10 Report: Manual verification pass` - 12 edges
-8. `@tanstack/react-table` - 11 edges
-9. `File structure` - 11 edges
-10. `apiFetch()` - 10 edges
+1. `authenticatedApiFetch()` - 60 edges
+2. `platformErrorResponse()` - 59 edges
+3. `react` - 57 edges
+4. `Button()` - 35 edges
+5. `cn` - 34 edges
+6. `ApiClientError` - 24 edges
+7. `lucide-react` - 22 edges
+8. `sonner` - 21 edges
+9. `parseJson()` - 19 edges
+10. `Input()` - 18 edges
 
 ## Surprising Connections (you probably didn't know these)
+- `BillingCancelPage()` --calls--> `buttonVariants`  [EXTRACTED]
+  app/(dashboard)/billing/cancel/page.tsx → components/ui/button.tsx
+- `BillingSuccessPage()` --calls--> `buttonVariants`  [EXTRACTED]
+  app/(dashboard)/billing/success/page.tsx → components/ui/button.tsx
 - `POST()` --calls--> `setSessionCookies()`  [EXTRACTED]
   app/api/auth/login/route.ts → lib/auth/session.ts
 - `GET()` --calls--> `getAccessToken()`  [EXTRACTED]
   app/api/auth/me/route.ts → lib/auth/session.ts
 - `POST()` --calls--> `setSessionCookies()`  [EXTRACTED]
   app/api/auth/register/route.ts → lib/auth/session.ts
-- `GET()` --calls--> `getAccessToken()`  [EXTRACTED]
-  app/api/navigation/[area]/route.ts → lib/auth/session.ts
-- `onSubmit()` --calls--> `resolvePostAuthRedirect()`  [EXTRACTED]
-  components/auth/login-form.tsx → lib/auth/access-token.ts
 
 ## Import Cycles
 - None detected.
 
-## Communities (86 total, 9 thin omitted)
+## Communities (100 total, 16 thin omitted)
 
 ### Community 0 - "Portal Auth E2E — Design"
 Cohesion: 0.33
 Nodes (5): Changes, Decisions, Goal, Out of scope, Portal Auth E2E — Design
 
-### Community 1 - "react"
-Cohesion: 0.06
-Nodes (40): metadata, LoginForm(), onSubmit(), Button(), buttonVariants, Card(), CardContent(), CardFooter() (+32 more)
+### Community 1 - "shops-page-content.tsx"
+Cohesion: 0.12
+Nodes (22): BillingCancelPage(), BillingSuccessPage(), FinanceOverview(), formatMoney(), OrganizationDetail(), HomeOverview(), OrgSettingsForm(), ShopsPageContent() (+14 more)
 
 ### Community 2 - "package.json"
-Cohesion: 0.11
-Nodes (17): name, private, version, @base-ui/react, eslint, eslint-config-next, @hookform/resolvers, react-dom (+9 more)
+Cohesion: 0.10
+Nodes (20): name, private, version, @base-ui/react, eslint, eslint-config-next, exceljs, @hello-pangea/dnd (+12 more)
 
 ### Community 3 - "components.json"
 Cohesion: 0.09
@@ -124,25 +147,25 @@ Nodes (21): aliases, components, hooks, lib, ui, utils, iconLibrary, menuAccent 
 Cohesion: 0.07
 Nodes (29): Props, Props, AppPageHeader(), AppShell(), getDesktopServerSnapshot(), getDesktopSnapshot(), subscribeDesktop(), AppSidebar() (+21 more)
 
-### Community 5 - "data-table.tsx"
-Cohesion: 0.07
-Nodes (36): cycleSorting(), DataTableColumnHeader(), DataTableColumnHeaderProps, DataTable(), DataTableComponentProps, DataTableHeaderCell(), DataTableEmpty(), Props (+28 more)
+### Community 5 - "cn"
+Cohesion: 0.23
+Nodes (12): Props, formatStatus(), ShopsTable(), ShopsTableProps, statusBadgeClass(), Table(), TableBody(), TableCell() (+4 more)
 
 ### Community 6 - "app/layout.tsx"
-Cohesion: 0.09
-Nodes (19): geistMono, geistSans, metadata, spaceGrotesk, useMe(), Props, Providers(), handleMutationError() (+11 more)
+Cohesion: 0.12
+Nodes (17): geistMono, geistSans, metadata, spaceGrotesk, brandToastVars(), getServerTheme(), getTheme(), subscribe() (+9 more)
 
 ### Community 7 - "compilerOptions"
 Cohesion: 0.11
 Nodes (18): compilerOptions, allowJs, esModuleInterop, incremental, isolatedModules, jsx, lib, module (+10 more)
 
 ### Community 8 - "dependencies"
-Cohesion: 0.09
-Nodes (22): dependencies, @base-ui/react, class-variance-authority, cn, exceljs, gsap, @gsap/react, @hello-pangea/dnd (+14 more)
+Cohesion: 0.08
+Nodes (24): dependencies, @base-ui/react, class-variance-authority, cn, exceljs, gsap, @gsap/react, @hello-pangea/dnd (+16 more)
 
-### Community 9 - "data-table-toolbar.tsx"
-Cohesion: 0.07
-Nodes (33): DataTableColumnVisibility(), DataTableColumnVisibilityProps, getColumnLabel(), DataTableExport(), DataTableExportProps, DataTableToolbarProps, DataTableExportFormat, DataTableFeatures (+25 more)
+### Community 9 - "use-creators.ts"
+Cohesion: 0.08
+Nodes (40): CampaignsPageContent(), CreatorsPageContent(), OutreachPageContent(), useAddCreatorToList(), useCampaigns(), useCreateCampaign(), useCreateCreator(), useCreateCreatorList() (+32 more)
 
 ### Community 10 - "Slice 2 Task 3 Report: Team DataTable + invite dialog"
 Cohesion: 0.17
@@ -156,17 +179,25 @@ Nodes (17): Architecture, Component responsibilities, Data flow, Decisions (lock
 Cohesion: 0.09
 Nodes (22): Accessibility, Architecture, Behavior details, Boundaries, Component API, Decisions (locked), Export — `GET /api/users/export`, Folder layout (+14 more)
 
-### Community 13 - "data-table-pagination.tsx"
-Cohesion: 0.15
-Nodes (9): DataTablePagination(), DataTablePaginationProps, DEFAULT_PAGE_SIZE_OPTIONS, getPaginationItems(), PaginationItem, SelectContent(), SelectItem(), SelectTrigger() (+1 more)
+### Community 13 - "authenticatedApiFetch"
+Cohesion: 0.05
+Nodes (73): Ctx, PATCH(), GET(), POST(), Ctx, DELETE(), PATCH(), Ctx (+65 more)
 
 ### Community 15 - "Slice 1 Task 6 Report: Login redirectTo + proxy area guards"
 Cohesion: 0.17
 Nodes (11): Concerns, Files, Slice 1 Task 6 Report: Login redirectTo + proxy area guards, Step 1: `readAccessClaims` + env note, Step 2: BFF + forms, Step 3: `proxy.ts` area checks, Step 4: Manual E2E, Step 5: Commit (+3 more)
 
-### Community 19 - "users-table.tsx"
+### Community 16 - "services/orgs.ts"
 Cohesion: 0.06
-Nodes (48): GET(), runtime, GET(), parseParams(), runtime, columnHelper, createdAtFormatter, statusBadgeClass() (+40 more)
+Nodes (39): runtime, filterMembers(), filterSortPaginateMembers(), GET(), mapMember(), parseParams(), runtime, SEARCH_FIELDS (+31 more)
+
+### Community 17 - "staff-columns.tsx"
+Cohesion: 0.21
+Nodes (12): columnHelper, createdAtFormatter, staffColumns, statusBadgeClass(), cycleSorting(), DataTableColumnHeader(), DataTableColumnHeaderProps, DataTablePaginationProps (+4 more)
+
+### Community 18 - "field.tsx"
+Cohesion: 0.10
+Nodes (19): ResetPasswordForm(), ResetPasswordFormInner(), formatPrice(), PlanCard(), PlanCardProps, CardFooter(), Field(), FieldDescription() (+11 more)
 
 ### Community 24 - "Task 7 Report: Toolbar pieces (header, visibility, pagination, export, toolbar)"
 Cohesion: 0.11
@@ -224,13 +255,29 @@ Nodes (7): Also, Final DataTable review fixes, Important, Merge-blocking minors,
 Cohesion: 0.50
 Nodes (3): Deploy on Vercel, Getting Started, Learn More
 
-### Community 56 - "proxy.ts"
-Cohesion: 0.09
-Nodes (41): LoginResponse, POST(), POST(), GET(), POST(), RefreshResponse, POST(), RegisterResponse (+33 more)
-
-### Community 64 - "devDependencies"
+### Community 41 - "proxies-page-content.tsx"
 Cohesion: 0.20
-Nodes (10): devDependencies, eslint, eslint-config-next, shadcn, tailwindcss, @tailwindcss/postcss, @types/node, @types/react (+2 more)
+Nodes (16): ConnectShopDialogProps, Dialog(), DialogContent(), DialogDescription(), DialogFooter(), DialogHeader(), DialogTitle(), DialogTrigger() (+8 more)
+
+### Community 56 - "react"
+Cohesion: 0.16
+Nodes (17): Area, STATUSES, STAGES, Props, Button(), InputGroup(), InputGroupAddon(), inputGroupAddonVariants (+9 more)
+
+### Community 60 - "services/billing.ts"
+Cohesion: 0.12
+Nodes (14): BillingPageContent(), formatStatus(), useCheckoutSession(), usePortalSession(), useBillingPlans(), createCheckoutSession(), createPortalSession(), fetchBillingPlans() (+6 more)
+
+### Community 61 - "organizations-table.tsx"
+Cohesion: 0.15
+Nodes (10): columnHelper, createdAtFormatter, organizationsColumns, OrganizationsTable(), searchParamsParsers, searchParamsParsers, SORT_FIELDS, StaffTable() (+2 more)
+
+### Community 63 - "data-table.tsx"
+Cohesion: 0.18
+Nodes (12): DataTable(), DataTableComponentProps, DataTableHeaderCell(), DataTableEmpty(), Props, DataTableError(), Props, getAriaSort() (+4 more)
+
+### Community 64 - "badge.tsx"
+Cohesion: 0.20
+Nodes (9): columnHelper, membersColumns, statusBadgeClass(), MembersTable(), searchParamsParsers, SORT_FIELDS, Badge(), badgeVariants (+1 more)
 
 ### Community 65 - "Slice 2 Task 1 Report: Authenticated BFF helper + org current GET/PATCH"
 Cohesion: 0.18
@@ -240,9 +287,9 @@ Nodes (10): Concerns, Files Touched, Slice 2 Task 1 Report: Authenticated BFF he
 Cohesion: 0.18
 Nodes (10): Concerns, Files, Slice 1 Task 5 Report: Portal BFF navigation + useNavigation, Step 1: BFF route, Step 2: Service + hook, Step 3: Types + icons, Step 4: Commit, Steps Completed (+2 more)
 
-### Community 67 - "auth-wrapper.tsx"
-Cohesion: 0.29
-Nodes (5): Props, AuthWrapper(), Props, gsap, @gsap/react
+### Community 67 - "next"
+Cohesion: 0.17
+Nodes (6): metadata, metadata, Props, ForgotPasswordForm(), nextConfig, next
 
 ### Community 68 - "Slice 2 Task 2 Report: Members list BFF + client hooks"
 Cohesion: 0.18
@@ -252,9 +299,9 @@ Nodes (10): Concerns, Files Touched, Slice 2 Task 2 Report: Members list BFF + c
 Cohesion: 0.29
 Nodes (6): Files Created, Slice 1 Task 7 Report: Stub pages for new nav hrefs, Step 1: Add minimal placeholder pages, Step 2: Commit, Steps Completed, Summary
 
-### Community 70 - "scripts"
-Cohesion: 0.40
-Nodes (5): scripts, build, dev, lint, start
+### Community 70 - "use-platform.ts"
+Cohesion: 0.05
+Nodes (59): CrawlerPageContent(), PlatformCreatorsPageContent(), STAGES, AddItemForm(), NavigationAdminPage(), NavItemRow(), AddProxyDialog(), handleOpenChange() (+51 more)
 
 ### Community 72 - "Slice 2 Task 4 Report: Accept invite page + BFF"
 Cohesion: 0.18
@@ -276,9 +323,9 @@ Nodes (8): Commit, Files, Goal, Invite BFF POST, Report, Slice 2 Task 3 — Team
 Cohesion: 0.22
 Nodes (8): BFF POST, Commit, Files, Goal, Report, Slice 2 Task 4 — Accept invite page, UI, Workspace
 
-### Community 77 - "next"
-Cohesion: 0.25
-Nodes (4): metadata, ForgotPasswordForm(), nextConfig, next
+### Community 77 - "data-table-toolbar.tsx"
+Cohesion: 0.06
+Nodes (37): ROLES, StaffRowActions(), DataTableColumnVisibility(), DataTableColumnVisibilityProps, getColumnLabel(), DataTableExport(), DataTableExportProps, DataTableToolbar() (+29 more)
 
 ### Community 78 - "Slice 2 Task 5 — Org settings form on `/settings`"
 Cohesion: 0.25
@@ -304,25 +351,65 @@ Nodes (3): Checklist, Notes (non-blocking), Slice 2 Task 4 Spec Review: Accept i
 Cohesion: 0.50
 Nodes (3): Checklist, Notes (non-blocking), Slice 2 Task 5 Spec Review: Org settings form
 
+### Community 87 - "use-shops.ts"
+Cohesion: 0.09
+Nodes (19): RouteContext, RouteContext, ConnectShopDialog(), useConnectShop(), useDisconnectShop(), useVerifyShop(), connectShop(), disconnectShop() (+11 more)
+
+### Community 88 - "platform-shops-table.tsx"
+Cohesion: 0.33
+Nodes (4): columnHelper, PlatformShopsTable(), searchParamsParsers, shopsColumns
+
+### Community 89 - "use-data-table-preferences.ts"
+Cohesion: 0.33
+Nodes (7): empty, useDataTablePreferences(), emptyPrefs(), PreferencesState, TablePreferences, useDataTablePreferencesStore, zustand
+
+### Community 90 - "audit-log-page.tsx"
+Cohesion: 0.32
+Nodes (5): AuditLogPage(), AuditResponse, AuditRow, createdAtFormatter, fetchAudit()
+
+### Community 91 - "api.ts"
+Cohesion: 0.06
+Nodes (51): LoginResponse, POST(), POST(), GET(), POST(), RefreshResponse, POST(), RegisterResponse (+43 more)
+
+### Community 93 - "devDependencies"
+Cohesion: 0.20
+Nodes (10): devDependencies, eslint, eslint-config-next, shadcn, tailwindcss, @tailwindcss/postcss, @types/node, @types/react (+2 more)
+
+### Community 94 - "pagination.ts"
+Cohesion: 0.40
+Nodes (3): DataTablePagination(), getPaginationItems(), PaginationItem
+
+### Community 95 - "login/page.tsx"
+Cohesion: 0.40
+Nodes (3): metadata, LoginForm(), onSubmit()
+
+### Community 97 - "auth-wrapper.tsx"
+Cohesion: 0.29
+Nodes (5): Props, AuthWrapper(), Props, gsap, @gsap/react
+
+### Community 100 - "scripts"
+Cohesion: 0.25
+Nodes (8): scripts, build, clean, dev, dev:turbo, lint, start, typecheck
+
 ## Knowledge Gaps
-- **419 isolated node(s):** `npx`, `metadata`, `Props`, `metadata`, `metadata` (+414 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 573 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **9 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **466 isolated node(s):** `npx`, `metadata`, `metadata`, `Props`, `Props` (+461 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 653 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **16 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `react` connect `react` to `package.json`, `auth-wrapper.tsx`, `app-shell.tsx`, `data-table.tsx`, `app/layout.tsx`, `data-table-toolbar.tsx`, `data-table-pagination.tsx`, `users-table.tsx`?**
-  _High betweenness centrality (0.070) - this node is a cross-community bridge._
-- **Why does `cn` connect `react` to `package.json`, `app-shell.tsx`, `data-table.tsx`, `app/layout.tsx`, `data-table-toolbar.tsx`, `data-table-pagination.tsx`, `users-table.tsx`, `progress.tsx`?**
-  _High betweenness centrality (0.052) - this node is a cross-community bridge._
-- **Why does `dependencies` connect `dependencies` to `package.json`?**
-  _High betweenness centrality (0.022) - this node is a cross-community bridge._
-- **What connects `npx`, `metadata`, `Props` to the rest of the system?**
-  _419 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `react` be split into smaller, more focused modules?**
-  _Cohesion score 0.055501460564751706 - nodes in this community are weakly interconnected._
+- **Why does `react` connect `react` to `badge.tsx`, `auth-wrapper.tsx`, `shops-page-content.tsx`, `package.json`, `app-shell.tsx`, `cn`, `use-platform.ts`, `app/layout.tsx`, `proxies-page-content.tsx`, `use-creators.ts`, `data-table-toolbar.tsx`, `field.tsx`, `data-table.tsx`, `platform-shops-table.tsx`, `use-data-table-preferences.ts`, `audit-log-page.tsx`, `organizations-table.tsx`, `login/page.tsx`?**
+  _High betweenness centrality (0.095) - this node is a cross-community bridge._
+- **Why does `cn` connect `cn` to `badge.tsx`, `shops-page-content.tsx`, `package.json`, `app-shell.tsx`, `app/layout.tsx`, `proxies-page-content.tsx`, `tabs.tsx`, `data-table-toolbar.tsx`, `staff-columns.tsx`, `field.tsx`, `platform-shops-table.tsx`, `progress.tsx`, `react`, `data-table.tsx`?**
+  _High betweenness centrality (0.041) - this node is a cross-community bridge._
+- **Why does `authenticatedApiFetch()` connect `authenticatedApiFetch` to `services/orgs.ts`, `api.ts`, `services/billing.ts`, `use-shops.ts`?**
+  _High betweenness centrality (0.030) - this node is a cross-community bridge._
+- **What connects `npx`, `metadata`, `metadata` to the rest of the system?**
+  _466 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `shops-page-content.tsx` be split into smaller, more focused modules?**
+  _Cohesion score 0.125 - nodes in this community are weakly interconnected._
 - **Should `package.json` be split into smaller, more focused modules?**
-  _Cohesion score 0.1111111111111111 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.09523809523809523 - nodes in this community are weakly interconnected._
 - **Should `components.json` be split into smaller, more focused modules?**
   _Cohesion score 0.09090909090909091 - nodes in this community are weakly interconnected._

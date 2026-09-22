@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { authenticatedApiFetch } from "@/lib/api/authenticated-fetch";
 import { platformErrorResponse } from "@/lib/api/platform-bff";
 

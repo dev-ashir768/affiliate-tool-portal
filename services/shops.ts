@@ -67,3 +67,51 @@ export async function disconnectShop(id: string): Promise<Shop> {
   if (!res.ok) throw await parseError(res);
   return (await res.json()) as Shop;
 }
+
+export async function fetchTikTokOAuthStatus(signal?: AbortSignal) {
+  const res = await fetch("/api/shops/tiktok/oauth/status", {
+    credentials: "include",
+    signal,
+  });
+  if (!res.ok) throw await parseError(res);
+  return (await res.json()) as {
+    configured: boolean;
+    appKeySet: boolean;
+    appSecretSet: boolean;
+    redirectUriSet: boolean;
+    redirectUri: string | null;
+    serviceId: string | null;
+  };
+}
+
+export async function startTikTokShopOAuth(body: {
+  region: "US" | "UK";
+  shopId?: string | null;
+}) {
+  const res = await fetch("/api/shops/tiktok/oauth/start", {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw await parseError(res);
+  return (await res.json()) as {
+    shopId: string;
+    authorizeUrl: string;
+    state: string;
+  };
+}
+
+export async function completeTikTokShopOAuth(body: {
+  code: string;
+  state: string;
+}): Promise<Shop> {
+  const res = await fetch("/api/shops/tiktok/oauth/complete", {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw await parseError(res);
+  return (await res.json()) as Shop;
+}

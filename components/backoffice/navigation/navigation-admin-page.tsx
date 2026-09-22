@@ -1,111 +1,34 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { DataTable } from "@/components/data-table";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  AppReactSelect,
+  stringSelectValue,
+  type SelectOption,
+} from "@/components/ui/react-select";
+import { useClientDataTable } from "@/hooks/use-client-data-table";
 import {
   useAdminNavigation,
   useCreateAdminNavItem,
   usePatchAdminNavItem,
 } from "@/hooks/use-platform";
 import type { AdminNavItem } from "@/types/platform";
+import {
+  createNavigationAdminColumns,
+  type NavItemDraft,
+} from "./navigation-admin-columns";
 
 type Area = "dashboard" | "backoffice";
 
-function NavItemRow({ item }: { item: AdminNavItem }) {
-  const patch = usePatchAdminNavItem();
-  const [label, setLabel] = useState(item.label);
-  const [href, setHref] = useState(item.href);
-  const [sortOrder, setSortOrder] = useState(item.sortOrder);
-
-  async function save() {
-    try {
-      await patch.mutateAsync({
-        id: item.id,
-        body: { label, href, sortOrder },
-      });
-      toast.success("Nav item updated");
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Update failed");
-    }
-  }
-
-  async function toggleEnabled() {
-    try {
-      await patch.mutateAsync({
-        id: item.id,
-        body: { enabled: !item.enabled },
-      });
-      toast.success(item.enabled ? "Disabled" : "Enabled");
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Update failed");
-    }
-  }
-
-  return (
-    <tr className="border-t border-border align-top">
-      <td className="px-3 py-2 font-mono text-xs">{item.key}</td>
-      <td className="px-3 py-2">
-        <Input
-          value={label}
-          onChange={(e) => setLabel(e.target.value)}
-          className="h-8"
-        />
-      </td>
-      <td className="px-3 py-2">
-        <Input
-          value={href}
-          onChange={(e) => setHref(e.target.value)}
-          className="h-8 font-mono text-xs"
-        />
-      </td>
-      <td className="px-3 py-2">
-        <Input
-          type="number"
-          value={sortOrder}
-          onChange={(e) => setSortOrder(Number(e.target.value))}
-          className="h-8 w-20"
-        />
-      </td>
-      <td className="px-3 py-2">
-        <Badge variant={item.enabled ? "secondary" : "outline"}>
-          {item.enabled ? "enabled" : "disabled"}
-        </Badge>
-      </td>
-      <td className="px-3 py-2">
-        <div className="flex flex-wrap gap-2">
-          <Button
-            type="button"
-            size="sm"
-            disabled={patch.isPending}
-            onClick={() => void save()}
-          >
-            Save
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            disabled={patch.isPending}
-            onClick={() => void toggleEnabled()}
-          >
-            {item.enabled ? "Disable" : "Enable"}
-          </Button>
-        </div>
-      </td>
-    </tr>
-  );
-}
+const AREA_OPTIONS: SelectOption[] = [
+  { value: "backoffice", label: "Backoffice" },
+  { value: "dashboard", label: "Dashboard" },
+];
 
 function AddItemForm({
   sectionId,
@@ -178,6 +101,123 @@ function AddItemForm({
   );
 }
 
+function NavigationSectionTable({
+  sectionId,
+  items,
+}: {
+  sectionId: string;
+  items: AdminNavItem[];
+}) {
+  const patch = usePatchAdminNavItem();
+  const [drafts, setDrafts] = useState<Record<string, NavItemDraft>>({});
+
+  const draftFor = useCallback(
+    (item: AdminNavItem): NavItemDraft =>
+      drafts[item.id] ?? {
+        label: item.label,
+        href: item.href,
+        sortOrder: item.sortOrder,
+      },
+    [drafts],
+  );
+
+  const onDraftChange = useCallback(
+    (item: AdminNavItem, field: keyof NavItemDraft, value: string | number) => {
+      setDrafts((prev) => {
+        const base = prev[item.id] ?? {
+          label: item.label,
+          href: item.href,
+          sortOrder: item.sortOrder,
+        };
+        return {
+          ...prev,
+          [item.id]: {
+            ...base,
+            [field]: value,
+          },
+        };
+      });
+    },
+    [],
+  );
+
+  const onSave = useCallback(
+    (item: AdminNavItem) => {
+      const draft = draftFor(item);
+      void patch
+        .mutateAsync({
+          id: item.id,
+          body: {
+            label: draft.label,
+            href: draft.href,
+            sortOrder: draft.sortOrder,
+          },
+        })
+        .then(() => toast.success("Nav item updated"))
+        .catch((err) =>
+          toast.error(err instanceof Error ? err.message : "Update failed"),
+        );
+    },
+    [draftFor, patch],
+  );
+
+  const onToggleEnabled = useCallback(
+    (item: AdminNavItem) => {
+      void patch
+        .mutateAsync({
+          id: item.id,
+          body: { enabled: !item.enabled },
+        })
+        .then(() => toast.success(item.enabled ? "Disabled" : "Enabled"))
+        .catch((err) =>
+          toast.error(err instanceof Error ? err.message : "Update failed"),
+        );
+    },
+    [patch],
+  );
+
+  const tableState = useClientDataTable({
+    data: items,
+    getSearchText: (i) => [i.key, i.label, i.href].filter(Boolean).join(" "),
+    getSortValue: (i, id) =>
+      (i as Record<string, unknown>)[id] as string | number | null | undefined,
+  });
+
+  const columns = useMemo(
+    () =>
+      createNavigationAdminColumns({
+        drafts,
+        onDraftChange: (id, field, value) => {
+          const item = items.find((i) => i.id === id);
+          if (!item) return;
+          onDraftChange(item, field, value);
+        },
+        onSave,
+        onToggleEnabled,
+        savePending: patch.isPending,
+      }),
+    [drafts, items, onDraftChange, onSave, onToggleEnabled, patch.isPending],
+  );
+
+  return (
+    <DataTable
+      tableId={`navigation-admin-${sectionId}`}
+      columns={columns}
+      data={tableState.data}
+      totalCount={tableState.totalCount}
+      pagination={tableState.pagination}
+      onPaginationChange={tableState.onPaginationChange}
+      sorting={tableState.sorting}
+      onSortingChange={tableState.onSortingChange}
+      search={tableState.search}
+      onSearchChange={tableState.onSearchChange}
+      getRowId={(row) => row.id}
+      ariaLabel="Navigation items"
+      pageSizeOptions={[10, 20, 50]}
+    />
+  );
+}
+
 export function NavigationAdminPage() {
   const [area, setArea] = useState<Area>("backoffice");
   const query = useAdminNavigation(area);
@@ -197,15 +237,17 @@ export function NavigationAdminPage() {
             Edit DB-backed menus for dashboard and backoffice (SUPERADMIN).
           </p>
         </div>
-        <Select value={area} onValueChange={(v) => setArea(v as Area)}>
-          <SelectTrigger className="w-44">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="backoffice">Backoffice</SelectItem>
-            <SelectItem value="dashboard">Dashboard</SelectItem>
-          </SelectContent>
-        </Select>
+        <AppReactSelect
+          className="w-44"
+          options={AREA_OPTIONS}
+          value={stringSelectValue(AREA_OPTIONS, area)}
+          onChange={(opt) => {
+            const next = opt?.value ? String(opt.value) : "backoffice";
+            setArea(next === "dashboard" ? "dashboard" : "backoffice");
+          }}
+          isSearchable={false}
+          aria-label="Navigation area"
+        />
       </div>
 
       {query.isError ? (
@@ -224,25 +266,10 @@ export function NavigationAdminPage() {
               ({section.key})
             </span>
           </h2>
-          <div className="overflow-x-auto rounded-lg border border-border">
-            <table className="w-full text-sm">
-              <thead className="bg-muted/40 text-left">
-                <tr>
-                  <th className="px-3 py-2 font-medium">Key</th>
-                  <th className="px-3 py-2 font-medium">Label</th>
-                  <th className="px-3 py-2 font-medium">Href</th>
-                  <th className="px-3 py-2 font-medium">Order</th>
-                  <th className="px-3 py-2 font-medium">Status</th>
-                  <th className="px-3 py-2 font-medium">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {section.items.map((item) => (
-                  <NavItemRow key={item.id} item={item} />
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <NavigationSectionTable
+            sectionId={section.id}
+            items={section.items}
+          />
           <AddItemForm
             sectionId={section.id}
             nextSort={

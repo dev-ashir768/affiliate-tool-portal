@@ -3,12 +3,10 @@
 import type { Table } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  AppReactSelect,
+  stringSelectValue,
+  type SelectOption,
+} from "@/components/ui/react-select";
 import type { DataTableFeatures } from "@/components/data-table/types";
 import { getPaginationItems } from "@/components/data-table/utils/pagination";
 
@@ -43,8 +41,13 @@ export function DataTablePagination<TData extends object>({
   const to = Math.min(totalCount, (clampedPageIndex + 1) * pageSize);
   const items = getPaginationItems(currentPage, Math.max(pageCount, 0));
 
+  const pageSizeOptionsSelect: SelectOption[] = pageSizeOptions.map((size) => ({
+    value: String(size),
+    label: String(size),
+  }));
+
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 px-3 pt-3 border-t border-border">
+    <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-3 pt-3">
       <p className="text-sm text-muted-foreground">
         Showing {from}–{to} of {totalCount}
       </p>
@@ -52,29 +55,19 @@ export function DataTablePagination<TData extends object>({
       <div className="flex flex-wrap items-center gap-3">
         <label className="flex items-center gap-2 text-sm text-muted-foreground">
           <span className="whitespace-nowrap">Rows per page</span>
-          <Select
-            value={pageSize}
-            onValueChange={(value) => {
-              if (value == null) return;
-              table.setPageSize(Number(value));
+          <AppReactSelect
+            size="sm"
+            className="w-20"
+            isSearchable={false}
+            isDisabled={controlsDisabled}
+            options={pageSizeOptionsSelect}
+            value={stringSelectValue(pageSizeOptionsSelect, String(pageSize))}
+            onChange={(opt) => {
+              if (!opt) return;
+              table.setPageSize(Number(opt.value));
             }}
-            disabled={controlsDisabled}
-          >
-            <SelectTrigger
-              size="sm"
-              className="w-18"
-              aria-label="Rows per page"
-            >
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {pageSizeOptions.map((size) => (
-                <SelectItem key={size} value={size}>
-                  {size}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            aria-label="Rows per page"
+          />
         </label>
 
         <nav

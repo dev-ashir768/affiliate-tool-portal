@@ -126,3 +126,44 @@ export async function patchCampaign(
   });
   return (await parseJson(res)) as Campaign;
 }
+
+export async function runCampaignAcrossShops(
+  campaignId: string,
+  body: {
+    shopIds: string[];
+    listId?: string;
+    creatorIds?: string[];
+    inviteName: string;
+    message?: string | null;
+    endAt: string;
+    hasFreeSample?: boolean;
+    sampleApprovalExempt?: boolean;
+    products: Array<{ id: string; commissionPercent: number }>;
+    withEmailStep?: boolean;
+    templateId?: string;
+    emailDelayMinutes?: number;
+  },
+) {
+  const res = await fetch(
+    `/api/creators/campaigns/${encodeURIComponent(campaignId)}/multi-shop-run`,
+    {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    },
+  );
+  return (await parseJson(res)) as {
+    campaignId: string;
+    okCount: number;
+    failCount: number;
+    results: Array<{
+      shopId: string;
+      shopName: string | null;
+      ok: boolean;
+      inviteId?: string;
+      automationRunId?: string;
+      error?: string;
+    }>;
+  };
+}

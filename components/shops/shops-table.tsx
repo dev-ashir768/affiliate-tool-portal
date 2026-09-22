@@ -36,7 +36,9 @@ type ShopsTableProps = {
   canManage: boolean;
   verifyingId: string | null;
   disconnectingId: string | null;
+  authorizingId: string | null;
   onVerify: (id: string) => Promise<void>;
+  onAuthorizeTikTok: (id: string) => Promise<void>;
   onDisconnect: (id: string) => Promise<void>;
 };
 
@@ -45,7 +47,9 @@ export function ShopsTable({
   canManage,
   verifyingId,
   disconnectingId,
+  authorizingId,
   onVerify,
+  onAuthorizeTikTok,
   onDisconnect,
 }: ShopsTableProps) {
   const [confirmId, setConfirmId] = useState<string | null>(null);
@@ -65,6 +69,7 @@ export function ShopsTable({
           <TableRow>
             <TableHead>Shop</TableHead>
             <TableHead>Region</TableHead>
+            <TableHead>API</TableHead>
             <TableHead>Bot email</TableHead>
             <TableHead>Status</TableHead>
             {canManage ? <TableHead className="text-right">Actions</TableHead> : null}
@@ -73,7 +78,9 @@ export function ShopsTable({
         <TableBody>
           {shops.map((shop) => {
             const canVerify =
-              shop.status === "PENDING_INVITE" || shop.status === "FAILED";
+              Boolean(shop.botEmail) &&
+              (shop.status === "PENDING_INVITE" || shop.status === "FAILED");
+            const canAuthorize = !shop.oauthConnected && shop.status !== "DISCONNECTED";
             const canDisconnect = shop.status !== "DISCONNECTED";
             const isConfirming = confirmId === shop.id;
 
@@ -93,6 +100,18 @@ export function ShopsTable({
                   ) : null}
                 </TableCell>
                 <TableCell>{shop.region}</TableCell>
+                <TableCell>
+                  {shop.oauthConnected ? (
+                    <Badge
+                      variant="outline"
+                      className="rounded-full border-transparent bg-primary px-2.5 py-0.5 text-primary-foreground"
+                    >
+                      OAuth
+                    </Badge>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">Not linked</span>
+                  )}
+                </TableCell>
                 <TableCell className="font-mono text-xs">
                   {shop.botEmail ?? "—"}
                 </TableCell>
@@ -110,6 +129,18 @@ export function ShopsTable({
                 {canManage ? (
                   <TableCell className="text-right">
                     <div className="flex flex-wrap items-center justify-end gap-2">
+                      {canAuthorize ? (
+                        <Button
+                          type="button"
+                          size="sm"
+                          disabled={authorizingId === shop.id}
+                          onClick={() => void onAuthorizeTikTok(shop.id)}
+                        >
+                          {authorizingId === shop.id
+                            ? "Opening…"
+                            : "Authorize TikTok"}
+                        </Button>
+                      ) : null}
                       {canVerify ? (
                         <Button
                           type="button"

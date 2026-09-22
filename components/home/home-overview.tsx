@@ -180,14 +180,19 @@ export function HomeOverview() {
 
         <Card size="sm">
           <CardHeader>
-            <CardDescription>GMV attributed</CardDescription>
+            <CardDescription>Shop GMV</CardDescription>
             <CardTitle>
-              {funnel ? cents(funnel.gmvCents) : "—"}
+              {funnel
+                ? cents(analyticsQuery.data?.gmv?.shop.gmvCents ?? funnel.gmvCents)
+                : "—"}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="mb-2 text-xs text-muted-foreground">
-              {funnel?.orders ?? 0} orders
+              {funnel?.orders ?? 0} attributed orders
+              {analyticsQuery.data?.gmv?.marketplace.creatorsWithParsableGmv
+                ? ` · ${analyticsQuery.data.gmv.marketplace.creatorsWithParsableGmv} creators w/ marketplace GMV`
+                : ""}
             </p>
             <Link
               href="/analytics"

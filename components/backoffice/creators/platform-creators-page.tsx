@@ -5,15 +5,29 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
+import { DataTable } from "@/components/data-table";
+import {
+  AppReactSelect,
+  stringSelectValue,
+  type SelectOption,
+} from "@/components/ui/react-select";
+import { useClientDataTable } from "@/hooks/use-client-data-table";
 import {
   useCreatePlatformCreator,
   usePatchPlatformCreator,
   usePlatformCreators,
   usePlatformOrganizations,
 } from "@/hooks/use-platform";
+import {
+  createPlatformCreatorsColumns,
+} from "./platform-creators-columns";
 
 const STAGES = ["LEAD", "CONTACTED", "INVITED", "ACTIVE", "REJECTED"] as const;
+
+const STAGE_OPTIONS: SelectOption[] = STAGES.map((s) => ({
+  value: s,
+  label: s,
+}));
 
 export function PlatformCreatorsPageContent() {
   const orgsQuery = usePlatformOrganizations({
@@ -38,12 +52,44 @@ export function PlatformCreatorsPageContent() {
   const [email, setEmail] = useState("");
   const [displayName, setDisplayName] = useState("");
 
-  const orgs = orgsQuery.data?.data ?? [];
+  const orgs = orgsQuery.data?.data;
   const creators = creatorsQuery.data?.data ?? [];
 
-  const orgOptions = useMemo(
-    () => orgs.map((o) => ({ id: o.id, label: `${o.name} (${o.slug})` })),
+  const orgOptions: SelectOption[] = useMemo(
+    () =>
+      (orgs ?? []).map((o) => ({
+        value: o.id,
+        label: `${o.name} (${o.slug})`,
+      })),
     [orgs],
+  );
+
+  const tableState = useClientDataTable({
+    data: creators,
+    getSortValue: (c, id) => {
+      if (id === "organization") return c.organization.name;
+      return (c as Record<string, unknown>)[id] as
+        | string
+        | number
+        | null
+        | undefined;
+    },
+  });
+
+  const columns = useMemo(
+    () =>
+      createPlatformCreatorsColumns({
+        stageOptions: STAGE_OPTIONS,
+        onStageChange: (id, stage) => {
+          void patch
+            .mutateAsync({ id, body: { stage } })
+            .then(() => toast.success("Stage updated"))
+            .catch((err) =>
+              toast.error(err instanceof Error ? err.message : "Update failed"),
+            );
+        },
+      }),
+    [patch],
   );
 
   async function onCreate(e: React.FormEvent) {
@@ -86,19 +132,16 @@ export function PlatformCreatorsPageContent() {
       >
         <div className="space-y-1 sm:col-span-2 lg:col-span-1">
           <label className="text-xs text-muted-foreground">Organization</label>
-          <select
-            className="w-full rounded-md border border-border bg-background px-2 py-2 text-sm"
-            value={organizationId}
-            onChange={(e) => setOrganizationId(e.target.value)}
-            required
-          >
-            <option value="">Select org…</option>
-            {orgOptions.map((o) => (
-              <option key={o.id} value={o.id}>
-                {o.label}
-              </option>
-            ))}
-          </select>
+          <AppReactSelect
+            options={orgOptions}
+            value={stringSelectValue(orgOptions, organizationId)}
+            onChange={(opt) =>
+              setOrganizationId(opt?.value ? String(opt.value) : "")
+            }
+            placeholder="Select org…"
+            isSearchable
+            aria-label="Organization"
+          />
         </div>
         <div className="space-y-1">
           <label className="text-xs text-muted-foreground">Handle</label>
@@ -131,26 +174,16 @@ export function PlatformCreatorsPageContent() {
         </div>
       </form>
 
-      <div className="flex flex-wrap gap-2">
-        <Input
-          placeholder="Search handle / org…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="max-w-xs"
-        />
-        <select
-          className="rounded-md border border-border bg-background px-2 py-2 text-sm"
-          value={orgFilter}
-          onChange={(e) => setOrgFilter(e.target.value)}
-        >
-          <option value="">All organizations</option>
-          {orgOptions.map((o) => (
-            <option key={o.id} value={o.id}>
-              {o.label}
-            </option>
-          ))}
-        </select>
-      </div>
+      <AppReactSelect
+        className="min-w-48 max-w-xs"
+        options={orgOptions}
+        value={stringSelectValue(orgOptions, orgFilter)}
+        onChange={(opt) => setOrgFilter(opt?.value ? String(opt.value) : "")}
+        placeholder="All organizations"
+        isClearable
+        isSearchable
+        aria-label="Filter by organization"
+      />
 
       {creatorsQuery.isLoading ? (
         <Skeleton className="h-40 w-full" />
@@ -161,75 +194,25 @@ export function PlatformCreatorsPageContent() {
             : "Unable to load creators"}
         </p>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-border">
-          <table className="w-full text-sm">
-            <thead className="border-b border-border bg-muted/30 text-left text-muted-foreground">
-              <tr>
-                <th className="px-3 py-2 font-medium">Org</th>
-                <th className="px-3 py-2 font-medium">Handle</th>
-                <th className="px-3 py-2 font-medium">Email</th>
-                <th className="px-3 py-2 font-medium">Stage</th>
-              </tr>
-            </thead>
-            <tbody>
-              {creators.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={4}
-                    className="px-3 py-8 text-center text-muted-foreground"
-                  >
-                    No creators yet.
-                  </td>
-                </tr>
-              ) : (
-                creators.map((c) => (
-                  <tr
-                    key={c.id}
-                    className="border-b border-border last:border-0"
-                  >
-                    <td className="px-3 py-2">{c.organization.name}</td>
-                    <td className="px-3 py-2 font-medium">@{c.handle}</td>
-                    <td className="px-3 py-2 text-xs text-muted-foreground">
-                      {c.contactEmail ?? "—"}
-                    </td>
-                    <td className="px-3 py-2">
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="rounded-md">
-                          {c.stage}
-                        </Badge>
-                        <select
-                          className="rounded-md border border-border bg-background px-2 py-1 text-xs"
-                          value={c.stage}
-                          onChange={(e) => {
-                            void patch
-                              .mutateAsync({
-                                id: c.id,
-                                body: { stage: e.target.value },
-                              })
-                              .then(() => toast.success("Stage updated"))
-                              .catch((err) =>
-                                toast.error(
-                                  err instanceof Error
-                                    ? err.message
-                                    : "Update failed",
-                                ),
-                              );
-                          }}
-                        >
-                          {STAGES.map((s) => (
-                            <option key={s} value={s}>
-                              {s}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+        <DataTable
+          tableId="platform-creators"
+          columns={columns}
+          data={tableState.data}
+          totalCount={tableState.totalCount}
+          pagination={tableState.pagination}
+          onPaginationChange={tableState.onPaginationChange}
+          sorting={tableState.sorting}
+          onSortingChange={tableState.onSortingChange}
+          search={search}
+          onSearchChange={setSearch}
+          isFetching={creatorsQuery.isFetching}
+          isError={creatorsQuery.isError}
+          onRetry={() => void creatorsQuery.refetch()}
+          onRefresh={() => void creatorsQuery.refetch()}
+          getRowId={(row) => row.id}
+          ariaLabel="Platform creators"
+          pageSizeOptions={[10, 20, 50]}
+        />
       )}
     </div>
   );

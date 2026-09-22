@@ -12,9 +12,12 @@ import {
   fetchCreators,
   patchCampaign,
   patchCreator,
+  runCampaignAcrossShops,
 } from "@/services/creators";
 import {
+  bulkSendOutreach,
   createOutreachTemplate,
+  fetchOutreachEmailStatus,
   fetchOutreachMessages,
   fetchOutreachTemplates,
   patchOutreachTemplate,
@@ -121,6 +124,24 @@ export function usePatchCampaign() {
   });
 }
 
+export function useRunCampaignAcrossShops() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      campaignId,
+      body,
+    }: {
+      campaignId: string;
+      body: Parameters<typeof runCampaignAcrossShops>[1];
+    }) => runCampaignAcrossShops(campaignId, body),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["campaigns"] });
+      void qc.invalidateQueries({ queryKey: ["invites"] });
+      void qc.invalidateQueries({ queryKey: ["automations"] });
+    },
+  });
+}
+
 export function useOutreachTemplates() {
   return useQuery({
     queryKey: ["outreach", "templates"],
@@ -165,6 +186,26 @@ export function useSendOutreach() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: sendOutreach,
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["outreach", "messages"] });
+      void qc.invalidateQueries({ queryKey: ["creators"] });
+    },
+  });
+}
+
+export function useOutreachEmailStatus() {
+  return useQuery({
+    queryKey: ["outreach", "email-status"],
+    queryFn: ({ signal }) => fetchOutreachEmailStatus(signal),
+    staleTime: 60_000,
+    retry: false,
+  });
+}
+
+export function useBulkSendOutreach() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: bulkSendOutreach,
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["outreach", "messages"] });
       void qc.invalidateQueries({ queryKey: ["creators"] });

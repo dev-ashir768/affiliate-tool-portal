@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import {
   Card,
@@ -10,7 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { ConnectShopDialog } from "@/components/shops/connect-shop-dialog";
 import { ShopsTable } from "@/components/shops/shops-table";
 import { useMe } from "@/hooks/use-me";
@@ -18,18 +19,34 @@ import { useOrg } from "@/hooks/use-org";
 import {
   useDisconnectShop,
   useShops,
+  useStartTikTokOAuth,
+  useTikTokOAuthStatus,
   useVerifyShop,
 } from "@/hooks/use-shops";
+import {
+  AppReactSelect,
+  stringSelectValue,
+  type SelectOption,
+} from "@/components/ui/react-select";
 import type { ShopStatus } from "@/types/shops";
+
+const OAUTH_REGION_OPTIONS: SelectOption[] = [
+  { value: "US", label: "US" },
+  { value: "UK", label: "UK" },
+];
 
 export function ShopsPageContent() {
   const meQuery = useMe();
   const orgQuery = useOrg();
   const shopsQuery = useShops();
+  const oauthStatus = useTikTokOAuthStatus();
   const verify = useVerifyShop();
   const disconnect = useDisconnectShop();
+  const startOauth = useStartTikTokOAuth();
+  const searchParams = useSearchParams();
   const [actionError, setActionError] = useState<string | null>(null);
   const [showUpgradeHint, setShowUpgradeHint] = useState(false);
+  const [oauthRegion, setOauthRegion] = useState<"US" | "UK">("US");
   const prevStatus = useRef<Record<string, ShopStatus>>({});
 
   const orgRole = useMemo(() => {
@@ -44,13 +61,23 @@ export function ShopsPageContent() {
 
   const canManage = orgRole === "OWNER" || orgRole === "ADMIN";
   const shopLimit = orgQuery.data?.shopLimit ?? 0;
-  const shops = shopsQuery.data?.shops ?? [];
+  const shops = useMemo(
+    () => shopsQuery.data?.shops ?? [],
+    [shopsQuery.data?.shops],
+  );
   const activeCount = shops.filter((s) => s.status !== "DISCONNECTED").length;
   const atLimit = shopLimit > 0 && activeCount >= shopLimit;
   const zeroLimit = shopLimit === 0;
 
   const isLoading =
     meQuery.isLoading || orgQuery.isLoading || shopsQuery.isLoading;
+
+  useEffect(() => {
+    if (searchParams.get("oauth") === "connected") {
+      toast.success("TikTok Shop authorized");
+      void shopsQuery.refetch();
+    }
+  }, [searchParams, shopsQuery]);
 
   useEffect(() => {
     for (const shop of shops) {
@@ -77,6 +104,42 @@ export function ShopsPageContent() {
         err instanceof Error ? err.message : "Failed to start verification";
       setActionError(message);
       toast.error(message);
+    }
+  }
+
+  async function handleAuthorize(id: string) {
+    setActionError(null);
+    try {
+      const shop = shops.find((s) => s.id === id);
+      const result = await startOauth.mutateAsync({
+        region: shop?.region ?? oauthRegion,
+        shopId: id,
+      });
+      window.location.href = result.authorizeUrl;
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Failed to start TikTok OAuth";
+      setActionError(message);
+      toast.error(message);
+    }
+  }
+
+  async function handleOauthConnectNew() {
+    setActionError(null);
+    try {
+      const result = await startOauth.mutateAsync({
+        region: oauthRegion,
+        shopId: null,
+      });
+      window.location.href = result.authorizeUrl;
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Failed to start TikTok OAuth";
+      setActionError(message);
+      toast.error(message);
+      if (message.toLowerCase().includes("shop limit")) {
+        setShowUpgradeHint(true);
+      }
     }
   }
 
@@ -117,13 +180,17 @@ export function ShopsPageContent() {
     );
   }
 
+  const oauthReady = oauthStatus.data?.configured === true;
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-lg font-semibold tracking-tight">Shops</h1>
           <p className="text-sm text-muted-foreground">
-            Connect and verify TikTok Shop accounts for your organization.
+            Authorize your TikTok Shop (OpenAPI) so Tiksly can discover creators
+            for your niche. Bot verify remains optional for collaborator
+            sessions.
             {orgQuery.data ? (
               <>
                 {" "}
@@ -134,19 +201,54 @@ export function ShopsPageContent() {
           </p>
         </div>
         {canManage ? (
-          <ConnectShopDialog
-            disabled={atLimit || zeroLimit}
-            disabledReason={
-              zeroLimit
-                ? "Your plan does not include connected shops."
-                : atLimit
-                  ? "You have reached your shop limit."
-                  : null
-            }
-            onPlanLimit={() => setShowUpgradeHint(true)}
-          />
+          <div className="flex flex-wrap items-center gap-2">
+            <AppReactSelect
+              className="min-w-20"
+              options={OAUTH_REGION_OPTIONS}
+              value={stringSelectValue(OAUTH_REGION_OPTIONS, oauthRegion)}
+              onChange={(opt) =>
+                setOauthRegion(opt?.value === "UK" ? "UK" : "US")
+              }
+              isSearchable={false}
+              aria-label="Shop region"
+            />
+            <Button
+              type="button"
+              disabled={
+                atLimit || zeroLimit || !oauthReady || startOauth.isPending
+              }
+              onClick={() => void handleOauthConnectNew()}
+            >
+              {startOauth.isPending ? "Starting…" : "Authorize TikTok Shop"}
+            </Button>
+            <ConnectShopDialog
+              disabled={atLimit || zeroLimit}
+              disabledReason={
+                zeroLimit
+                  ? "Your plan does not include connected shops."
+                  : atLimit
+                    ? "You have reached your shop limit."
+                    : null
+              }
+              onPlanLimit={() => setShowUpgradeHint(true)}
+            />
+          </div>
         ) : null}
       </div>
+
+      {canManage && oauthStatus.data && !oauthReady ? (
+        <div className="rounded-xl border border-border bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
+          TikTok OAuth not configured on the API. Set{" "}
+          <code className="text-xs">TIKTOK_SHOP_APP_KEY</code>,{" "}
+          <code className="text-xs">TIKTOK_SHOP_APP_SECRET</code>, and{" "}
+          <code className="text-xs">TIKTOK_SHOP_REDIRECT_URI</code>{" "}
+          (e.g.{" "}
+          <code className="text-xs">
+            http://localhost:3000/shops/tiktok/callback
+          </code>
+          ).
+        </div>
+      ) : null}
 
       {!canManage ? (
         <p className="text-sm text-muted-foreground">
@@ -186,7 +288,14 @@ export function ShopsPageContent() {
         disconnectingId={
           disconnect.isPending ? (disconnect.variables ?? null) : null
         }
+        authorizingId={
+          startOauth.isPending
+            ? ((startOauth.variables?.shopId as string | null | undefined) ??
+              "__new__")
+            : null
+        }
         onVerify={handleVerify}
+        onAuthorizeTikTok={handleAuthorize}
         onDisconnect={handleDisconnect}
       />
     </div>

@@ -17,3 +17,16 @@ export async function POST(req: NextRequest, ctx: Ctx) {
     return platformErrorResponse(err, "Failed to add list member");
   }
 }
+
+export async function GET(_req: NextRequest, ctx: Ctx) {
+  try {
+    const { listId } = await ctx.params;
+    const data = await authenticatedApiFetch(
+      `/api/v1/creators/lists/${encodeURIComponent(listId)}/members`,
+      { method: "GET" },
+    );
+    return NextResponse.json(data);
+  } catch (err) {
+    return platformErrorResponse(err, "Failed to load list members");
+  }
+}

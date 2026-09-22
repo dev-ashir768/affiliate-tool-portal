@@ -20,6 +20,9 @@ export type Shop = {
   verifiedAt: string | null;
   createdAt: string;
   updatedAt: string;
+  oauthConnected?: boolean;
+  oauthScopes?: string[];
+  oauthAccessExpiresAt?: string | null;
 };
 
 export type ShopsListResponse = {

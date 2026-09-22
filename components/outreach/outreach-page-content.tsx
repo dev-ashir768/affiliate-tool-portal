@@ -1,27 +1,40 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import {
+  useBulkSendOutreach,
+  useCampaigns,
   useCreateOutreachTemplate,
+  useCreatorLists,
   useCreators,
+  useOutreachEmailStatus,
   useOutreachMessages,
   useOutreachTemplates,
   usePatchOutreachTemplate,
   useSendOutreach,
 } from "@/hooks/use-creators";
+import {
+  AppReactSelect,
+  stringSelectValue,
+  type SelectOption,
+} from "@/components/ui/react-select";
 
 export function OutreachPageContent() {
   const templatesQuery = useOutreachTemplates();
   const messagesQuery = useOutreachMessages();
   const creatorsQuery = useCreators();
+  const listsQuery = useCreatorLists();
+  const campaignsQuery = useCampaigns();
+  const emailStatus = useOutreachEmailStatus();
   const createTemplate = useCreateOutreachTemplate();
   const patchTemplate = usePatchOutreachTemplate();
   const send = useSendOutreach();
+  const bulkSend = useBulkSendOutreach();
 
   const [name, setName] = useState("");
   const [subject, setSubject] = useState("Collab with {{displayName}}");
@@ -31,6 +44,65 @@ export function OutreachPageContent() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [templateId, setTemplateId] = useState("");
   const [creatorId, setCreatorId] = useState("");
+  const [campaignId, setCampaignId] = useState("");
+  const [listId, setListId] = useState("");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  const creators = useMemo(
+    () => creatorsQuery.data?.creators ?? [],
+    [creatorsQuery.data?.creators],
+  );
+  const withEmail = useMemo(
+    () => creators.filter((c) => Boolean(c.contactEmail)),
+    [creators],
+  );
+
+  const templates = useMemo(
+    () => templatesQuery.data?.templates ?? [],
+    [templatesQuery.data?.templates],
+  );
+  const campaigns = useMemo(
+    () => campaignsQuery.data?.campaigns ?? [],
+    [campaignsQuery.data?.campaigns],
+  );
+
+  const templateOptions: SelectOption[] = useMemo(
+    () => [
+      { value: "", label: "Use form subject/body" },
+      ...templates.map((t) => ({ value: t.id, label: t.name })),
+    ],
+    [templates],
+  );
+
+  const campaignOptions: SelectOption[] = useMemo(
+    () => [
+      { value: "", label: "No campaign" },
+      ...campaigns.map((c) => ({ value: c.id, label: c.name })),
+    ],
+    [campaigns],
+  );
+
+  const listOptions: SelectOption[] = useMemo(
+    () => [
+      { value: "", label: "No list (pick creators)" },
+      ...(listsQuery.data?.lists ?? []).map((l) => ({
+        value: l.id,
+        label: `${l.name} (${l.memberCount})`,
+      })),
+    ],
+    [listsQuery.data?.lists],
+  );
+
+  const creatorOptions: SelectOption[] = useMemo(
+    () => [
+      { value: "", label: "Single creator…" },
+      ...creators.map((c) => ({
+        value: c.id,
+        label: `@${c.handle}${c.contactEmail ? "" : " (no email)"}`,
+      })),
+    ],
+    [creators],
+  );
 
   function loadTemplate(id: string) {
     const t = (templatesQuery.data?.templates ?? []).find((x) => x.id === id);
@@ -39,6 +111,19 @@ export function OutreachPageContent() {
     setName(t.name);
     setSubject(t.subject);
     setBodyText(t.bodyText);
+  }
+
+  function toggleCreator(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function selectAllWithEmail() {
+    setSelectedIds(new Set(withEmail.map((c) => c.id)));
   }
 
   async function onSaveTemplate(e: React.FormEvent) {
@@ -80,6 +165,7 @@ export function OutreachPageContent() {
       const msg = await send.mutateAsync({
         creatorId,
         templateId: templateId || undefined,
+        campaignId: campaignId || null,
         subject: templateId ? undefined : subject,
         bodyText: templateId ? undefined : bodyText,
       });
@@ -92,14 +178,53 @@ export function OutreachPageContent() {
     }
   }
 
+  async function onBulk(sync: boolean) {
+    if (!listId && selectedIds.size === 0) {
+      toast.error("Select a list or at least one creator");
+      return;
+    }
+    try {
+      const result = await bulkSend.mutateAsync({
+        ...(listId ? { listId } : { creatorIds: [...selectedIds] }),
+        templateId: templateId || undefined,
+        campaignId: campaignId || null,
+        subject: templateId ? undefined : subject,
+        bodyText: templateId ? undefined : bodyText,
+        sync,
+      });
+      const truncated = result.list?.truncated
+        ? ` (list had ${result.list.totalMembers}, capped at 100)`
+        : "";
+      if (result.jobId) {
+        toast.success(
+          `Queued ${result.queued} emails` +
+            (result.skippedNoEmail
+              ? ` (${result.skippedNoEmail} skipped, no email)`
+              : "") +
+            truncated,
+        );
+      } else {
+        toast.success(
+          `Sent ${result.sent}, failed ${result.failed}` +
+            (result.skippedNoEmail
+              ? `, skipped ${result.skippedNoEmail} (no email)`
+              : "") +
+            truncated,
+        );
+      }
+      void messagesQuery.refetch();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Bulk send failed");
+    }
+  }
+
   if (templatesQuery.isLoading || creatorsQuery.isLoading) {
     return <Skeleton className="h-48 w-full" />;
   }
 
-  const templates = templatesQuery.data?.templates ?? [];
-  const creators = creatorsQuery.data?.creators ?? [];
   const messages = messagesQuery.data?.messages ?? [];
   const saving = createTemplate.isPending || patchTemplate.isPending;
+  const delivery = emailStatus.data;
 
   return (
     <div className="flex flex-col gap-8">
@@ -107,9 +232,28 @@ export function OutreachPageContent() {
         <h1 className="text-lg font-semibold tracking-tight">Outreach</h1>
         <p className="text-sm text-muted-foreground">
           Email templates with {"{{handle}}"} / {"{{displayName}}"} tokens.
-          Sends via your EMAIL_PROVIDER (console or SMTP).
+          Single or bulk send to CRM creators.
         </p>
       </div>
+
+      {delivery ? (
+        <div
+          className={`rounded-xl border px-4 py-3 text-sm ${
+            delivery.ready
+              ? "border-border bg-muted/30 text-muted-foreground"
+              : "border-destructive/40 bg-destructive/5 text-destructive"
+          }`}
+        >
+          <span className="font-medium text-foreground">
+            Email: {delivery.provider}
+          </span>
+          {" · "}
+          {delivery.note}
+          {!delivery.live && delivery.ready ? (
+            <span> (dev log only)</span>
+          ) : null}
+        </div>
+      ) : null}
 
       <form onSubmit={(e) => void onSaveTemplate(e)} className="space-y-3">
         <div className="flex flex-wrap items-center gap-2">
@@ -166,39 +310,133 @@ export function OutreachPageContent() {
         </Button>
       </form>
 
-      <form onSubmit={(e) => void onSend(e)} className="space-y-3">
+      <section className="space-y-3">
         <h2 className="text-sm font-semibold">Send</h2>
         <div className="flex flex-wrap gap-2">
-          <select
-            className="rounded-md border border-border bg-background px-2 py-2 text-sm"
-            value={creatorId}
-            onChange={(e) => setCreatorId(e.target.value)}
-          >
-            <option value="">Creator…</option>
-            {creators.map((c) => (
-              <option key={c.id} value={c.id}>
-                @{c.handle}
-                {c.contactEmail ? "" : " (no email)"}
-              </option>
-            ))}
-          </select>
-          <select
-            className="rounded-md border border-border bg-background px-2 py-2 text-sm"
-            value={templateId}
-            onChange={(e) => setTemplateId(e.target.value)}
-          >
-            <option value="">Use form subject/body</option>
-            {templates.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.name}
-              </option>
-            ))}
-          </select>
-          <Button type="submit" disabled={send.isPending}>
-            {send.isPending ? "Sending…" : "Send"}
-          </Button>
+          <AppReactSelect
+            className="min-w-48"
+            options={templateOptions}
+            value={stringSelectValue(templateOptions, templateId)}
+            onChange={(opt) =>
+              setTemplateId(opt?.value ? String(opt.value) : "")
+            }
+            isSearchable={templates.length > 8}
+            aria-label="Outreach template"
+          />
+          <AppReactSelect
+            className="min-w-40"
+            options={campaignOptions}
+            value={stringSelectValue(campaignOptions, campaignId)}
+            onChange={(opt) =>
+              setCampaignId(opt?.value ? String(opt.value) : "")
+            }
+            isSearchable={campaigns.length > 8}
+            aria-label="Campaign"
+          />
+          <AppReactSelect
+            className="min-w-48"
+            options={listOptions}
+            value={stringSelectValue(listOptions, listId)}
+            onChange={(opt) => {
+              const next = opt?.value ? String(opt.value) : "";
+              setListId(next);
+              if (next) setSelectedIds(new Set());
+            }}
+            isSearchable={(listsQuery.data?.lists?.length ?? 0) > 8}
+            aria-label="Creator list"
+          />
         </div>
-      </form>
+
+        <form onSubmit={(e) => void onSend(e)} className="flex flex-wrap gap-2">
+          <AppReactSelect
+            className="min-w-48"
+            options={creatorOptions}
+            value={stringSelectValue(creatorOptions, creatorId)}
+            onChange={(opt) =>
+              setCreatorId(opt?.value ? String(opt.value) : "")
+            }
+            isSearchable
+            aria-label="Single creator"
+          />
+          <Button
+            type="submit"
+            disabled={send.isPending || delivery?.ready === false}
+          >
+            {send.isPending ? "Sending…" : "Send one"}
+          </Button>
+        </form>
+
+        <div className="space-y-2 rounded-xl border border-border p-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h3 className="text-sm font-medium">
+              Bulk ({listId ? "using list" : `${selectedIds.size} selected`})
+            </h3>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={selectAllWithEmail}
+            >
+              Select all with email ({withEmail.length})
+            </Button>
+          </div>
+          <div className="max-h-40 space-y-1 overflow-y-auto text-sm">
+            {creators.length === 0 ? (
+              <p className="text-muted-foreground">No CRM creators yet.</p>
+            ) : (
+              creators.map((c) => (
+                <label
+                  key={c.id}
+                  className="flex cursor-pointer items-center gap-2"
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedIds.has(c.id)}
+                    disabled={!c.contactEmail}
+                    onChange={() => toggleCreator(c.id)}
+                  />
+                  <span>
+                    @{c.handle}
+                    {!c.contactEmail ? (
+                      <span className="text-muted-foreground"> · no email</span>
+                    ) : (
+                      <span className="text-muted-foreground">
+                        {" "}
+                        · {c.contactEmail}
+                      </span>
+                    )}
+                  </span>
+                </label>
+              ))
+            )}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              disabled={
+                bulkSend.isPending ||
+                selectedIds.size === 0 ||
+                delivery?.ready === false
+              }
+              onClick={() => void onBulk(false)}
+            >
+              {bulkSend.isPending ? "Queuing…" : "Queue bulk send"}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={
+                bulkSend.isPending ||
+                selectedIds.size === 0 ||
+                delivery?.ready === false
+              }
+              onClick={() => void onBulk(true)}
+            >
+              Send bulk now
+            </Button>
+          </div>
+        </div>
+      </section>
 
       <div className="space-y-2">
         <h2 className="text-sm font-semibold">Recent messages</h2>
@@ -213,6 +451,12 @@ export function OutreachPageContent() {
               >
                 <span>
                   @{m.creatorHandle} · {m.subject}
+                  {m.toEmail ? (
+                    <span className="text-muted-foreground">
+                      {" "}
+                      · {m.toEmail}
+                    </span>
+                  ) : null}
                 </span>
                 <Badge variant="outline" className="rounded-md">
                   {m.status}

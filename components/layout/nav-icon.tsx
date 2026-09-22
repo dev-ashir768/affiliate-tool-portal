@@ -11,11 +11,14 @@ import {
   Megaphone,
   Mail,
   Menu,
+  MessageSquare,
   Search,
   Package,
   ScrollText,
+  Send,
   Settings,
   ShoppingCart,
+  Gift,
   Sparkles,
   Store,
   Users,
@@ -25,6 +28,7 @@ const ICONS: Record<string, LucideIcon> = {
   Home,
   Package,
   ShoppingCart,
+  Gift,
   BarChart3,
   Settings,
   Users,
@@ -40,6 +44,8 @@ const ICONS: Record<string, LucideIcon> = {
   Mail,
   Menu,
   Search,
+  Send,
+  MessageSquare,
 };
 
 export function NavIcon({

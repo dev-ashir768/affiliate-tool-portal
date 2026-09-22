@@ -6,7 +6,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { PlusIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -31,16 +30,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { DataTable } from "@/components/data-table";
+import { useClientDataTable } from "@/hooks/use-client-data-table";
 import {
   useCreatePlatformProxy,
-  usePatchPlatformProxy,
   usePlatformProxies,
 } from "@/hooks/use-platform";
+import { proxiesColumns } from "@/components/backoffice/proxies/proxies-columns";
 import {
   createProxySchema,
   type CreateProxySchemaType,
 } from "@/validations/platform.validations";
-import type { PlatformProxy } from "@/types/platform";
 
 function AddProxyDialog() {
   const create = useCreatePlatformProxy();
@@ -250,58 +250,24 @@ function AddProxyDialog() {
   );
 }
 
-function ProxyRowActions({ proxy }: { proxy: PlatformProxy }) {
-  const patch = usePatchPlatformProxy();
-
-  async function setStatus(status: PlatformProxy["status"]) {
-    try {
-      await patch.mutateAsync({ id: proxy.id, body: { status } });
-      toast.success(`Proxy marked ${status.toLowerCase()}`);
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Update failed");
-    }
-  }
-
-  return (
-    <div className="flex flex-wrap gap-2">
-      {proxy.status !== "DISABLED" ? (
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          disabled={patch.isPending}
-          onClick={() => void setStatus("DISABLED")}
-        >
-          Disable
-        </Button>
-      ) : (
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          disabled={patch.isPending}
-          onClick={() => void setStatus("AVAILABLE")}
-        >
-          Enable
-        </Button>
-      )}
-      {proxy.status !== "BANNED" ? (
-        <Button
-          type="button"
-          size="sm"
-          variant="destructive"
-          disabled={patch.isPending}
-          onClick={() => void setStatus("BANNED")}
-        >
-          Ban
-        </Button>
-      ) : null}
-    </div>
-  );
-}
-
 export function ProxiesPageContent() {
   const query = usePlatformProxies({ page: 1, pageSize: 50 });
+  const rows = query.data?.data ?? [];
+  const tableState = useClientDataTable({
+    data: rows,
+    getSearchText: (p) =>
+      [p.label, p.host, p.region, p.status, p.protocol].filter(Boolean).join(" "),
+    getSortValue: (p, id) => {
+      if (id === "endpoint") {
+        return `${p.host}:${p.port}`;
+      }
+      return (p as Record<string, unknown>)[id] as
+        | string
+        | number
+        | null
+        | undefined;
+    },
+  });
 
   if (query.isLoading) {
     return <Skeleton className="h-40 w-full" />;
@@ -316,8 +282,6 @@ export function ProxiesPageContent() {
       </p>
     );
   }
-
-  const rows = query.data?.data ?? [];
 
   return (
     <div className="flex flex-col gap-4">
@@ -336,37 +300,26 @@ export function ProxiesPageContent() {
           No proxies yet. Add one to start allocating traffic.
         </p>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-border">
-          <table className="w-full text-sm">
-            <thead className="bg-muted/40 text-left">
-              <tr>
-                <th className="px-3 py-2 font-medium">Label</th>
-                <th className="px-3 py-2 font-medium">Endpoint</th>
-                <th className="px-3 py-2 font-medium">Region</th>
-                <th className="px-3 py-2 font-medium">Status</th>
-                <th className="px-3 py-2 font-medium">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((proxy) => (
-                <tr key={proxy.id} className="border-t border-border">
-                  <td className="px-3 py-2">{proxy.label}</td>
-                  <td className="px-3 py-2 font-mono text-xs">
-                    {proxy.protocol.toLowerCase()}://{proxy.host}:{proxy.port}
-                    {proxy.hasPassword ? " · auth" : ""}
-                  </td>
-                  <td className="px-3 py-2">{proxy.region ?? "—"}</td>
-                  <td className="px-3 py-2">
-                    <Badge variant="secondary">{proxy.status}</Badge>
-                  </td>
-                  <td className="px-3 py-2">
-                    <ProxyRowActions proxy={proxy} />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <DataTable
+          tableId="platform-proxies"
+          columns={proxiesColumns}
+          data={tableState.data}
+          totalCount={tableState.totalCount}
+          pagination={tableState.pagination}
+          onPaginationChange={tableState.onPaginationChange}
+          sorting={tableState.sorting}
+          onSortingChange={tableState.onSortingChange}
+          search={tableState.search}
+          onSearchChange={tableState.onSearchChange}
+          isLoading={query.isLoading}
+          isFetching={query.isFetching}
+          isError={query.isError}
+          onRetry={() => void query.refetch()}
+          onRefresh={() => void query.refetch()}
+          getRowId={(row) => row.id}
+          ariaLabel="Proxies"
+          pageSizeOptions={[10, 20, 50]}
+        />
       )}
     </div>
   );
