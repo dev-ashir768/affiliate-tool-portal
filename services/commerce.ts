@@ -133,3 +133,47 @@ export async function importPlatformDiscovery(profiles: Array<{
     total: number;
   };
 }
+
+export async function fetchTikTokDiscoveryStatus(signal?: AbortSignal) {
+  const res = await fetch("/api/platform/discovery/tiktok/status", {
+    credentials: "include",
+    signal,
+  });
+  return (await parseJson(res)) as {
+    config: {
+      configured: boolean;
+      appKeySet: boolean;
+      appSecretSet: boolean;
+      accessTokenSet: boolean;
+      shopCipherSet: boolean;
+      baseUrl: string;
+      region: string;
+      searchPath: string;
+      missing: string[];
+      note: string;
+    };
+    queue: {
+      queue: string;
+      counts: Record<string, number>;
+      lastJobId: string | null;
+      lastJobState: string | null;
+      lastRunAt: string | null;
+    } | null;
+  };
+}
+
+export async function syncTikTokDiscovery(body: {
+  maxPages?: number;
+  keyword?: string | null;
+  minFollowers?: number | null;
+  pageSize?: 12 | 20;
+  sync?: boolean;
+} = {}) {
+  const res = await fetch("/api/platform/discovery/tiktok/sync", {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  return parseJson(res);
+}

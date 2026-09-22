@@ -7,9 +7,11 @@ import {
   fetchAnalyticsOverview,
   fetchOrders,
   fetchPlatformDiscovery,
+  fetchTikTokDiscoveryStatus,
   importPlatformDiscovery,
   saveDiscoveryToCrm,
   searchDiscovery,
+  syncTikTokDiscovery,
 } from "@/services/commerce";
 
 export function useDiscoverySearch(params: {
@@ -93,6 +95,28 @@ export function useImportPlatformDiscovery() {
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["platform", "discovery"] });
       void qc.invalidateQueries({ queryKey: ["discovery"] });
+    },
+  });
+}
+
+export function useTikTokDiscoveryStatus() {
+  return useQuery({
+    queryKey: ["platform", "discovery", "tiktok", "status"],
+    queryFn: ({ signal }) => fetchTikTokDiscoveryStatus(signal),
+    retry: false,
+  });
+}
+
+export function useSyncTikTokDiscovery() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: syncTikTokDiscovery,
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["platform", "discovery"] });
+      void qc.invalidateQueries({ queryKey: ["discovery"] });
+      void qc.invalidateQueries({
+        queryKey: ["platform", "discovery", "tiktok", "status"],
+      });
     },
   });
 }
