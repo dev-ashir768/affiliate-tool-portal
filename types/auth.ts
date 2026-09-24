@@ -13,7 +13,10 @@ export type MeMembership = {
     planCode: string;
     seatLimit: number;
     shopLimit: number;
+    botLimit?: number;
     subscriptionStatus: string | null;
+    hasProductAccess?: boolean;
+    currentPeriodEnd?: string | null;
   };
 };
 

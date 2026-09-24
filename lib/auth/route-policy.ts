@@ -3,8 +3,8 @@
  *
  * - Guest auth: anonymous-only (bounce if session exists)
  * - Token auth: email/invite links (reachable with or without session)
- * - Staff area: `/backoffice/*`
- * - Merchant area: every other app path (deny-by-default)
+ * - Staff area: `/backoffice/*` (platformRole only — never merchant)
+ * - Merchant area: every other app path (org session only — never staff)
  */
 
 const GUEST_AUTH = new Set(["/login", "/signup", "/forgot-password"]);

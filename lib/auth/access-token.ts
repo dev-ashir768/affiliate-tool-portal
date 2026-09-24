@@ -56,18 +56,26 @@ function isSafeRelativePath(path: string): boolean {
   return SAFE_RELATIVE_PATH.test(path) && !path.includes("\\");
 }
 
+function isBackofficePath(path: string): boolean {
+  return path === "/backoffice" || path.startsWith("/backoffice/");
+}
+
 /**
- * Staff may only follow `next` under /backoffice; merchants only non-backoffice.
+ * Post-auth `next` resolution — strict area isolation by role.
+ * - Staff (platformRole): backoffice paths only
+ * - Merchant: non-backoffice only
  */
 export function resolvePostAuthRedirect(opts: {
   next: string | null;
   redirectTo?: string | null;
   platformRole: string | null;
 }): string {
+  const isStaff = Boolean(opts.platformRole);
+
   const fallback =
     opts.redirectTo && isSafeRelativePath(opts.redirectTo)
       ? opts.redirectTo
-      : opts.platformRole
+      : isStaff
         ? "/backoffice/users"
         : "/home";
 
@@ -76,11 +84,10 @@ export function resolvePostAuthRedirect(opts: {
     return fallback;
   }
 
-  const isBackoffice =
-    next === "/backoffice" || next.startsWith("/backoffice/");
+  const nextIsBackoffice = isBackofficePath(next);
 
-  if (opts.platformRole) {
-    return isBackoffice ? next : fallback;
+  if (isStaff) {
+    return nextIsBackoffice ? next : fallback;
   }
-  return isBackoffice ? fallback : next;
+  return nextIsBackoffice ? fallback : next;
 }

@@ -66,8 +66,9 @@ function redirectAuthedAwayFromAuth(
 
 /**
  * Area guards after a session token is available.
- * - staff → requires platformRole
- * - merchant → requires orgId; staff-only sessions bounce to backoffice
+ * Strict isolation by role — nobody crosses into the other area's work:
+ * - staff (platformRole) → /backoffice/* only
+ * - merchant (orgId, no platformRole) → product routes only
  */
 function enforceAreaAccess(
   request: NextRequest,
@@ -84,17 +85,19 @@ function enforceAreaAccess(
 
   const { pathname } = request.nextUrl;
   const isStaff = Boolean(claims.platformRole);
-  const isMerchant = Boolean(claims.orgId);
+  const isMerchant = Boolean(claims.orgId) && !isStaff;
 
   if (kind === "staff") {
     if (!isStaff) {
-      return NextResponse.redirect(new URL("/home", request.url));
+      return NextResponse.redirect(
+        new URL(claims.hasProductAccess ? "/home" : "/onboarding", request.url)
+      );
     }
     return response;
   }
 
   if (kind === "merchant") {
-    if (isStaff && !isMerchant) {
+    if (isStaff) {
       return NextResponse.redirect(new URL("/backoffice/users", request.url));
     }
     if (!isMerchant) {
