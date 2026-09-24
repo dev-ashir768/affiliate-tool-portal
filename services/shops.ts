@@ -115,3 +115,25 @@ export async function completeTikTokShopOAuth(body: {
   if (!res.ok) throw await parseError(res);
   return (await res.json()) as Shop;
 }
+
+export async function fetchShopProducts(
+  shopId: string,
+  opts?: {
+    pageToken?: string | null;
+    pageSize?: number;
+    status?: string | null;
+    signal?: AbortSignal;
+  },
+) {
+  const qs = new URLSearchParams();
+  if (opts?.pageToken) qs.set("pageToken", opts.pageToken);
+  if (opts?.pageSize) qs.set("pageSize", String(opts.pageSize));
+  if (opts?.status) qs.set("status", opts.status);
+  const suffix = qs.toString() ? `?${qs.toString()}` : "";
+  const res = await fetch(
+    `/api/shops/${encodeURIComponent(shopId)}/products${suffix}`,
+    { credentials: "include", signal: opts?.signal },
+  );
+  if (!res.ok) throw await parseError(res);
+  return (await res.json()) as import("@/types/products").ShopProductsResponse;
+}

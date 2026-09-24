@@ -31,8 +31,5 @@ export type AffiliateInvite = {
   recipients: AffiliateInviteRecipient[];
 };
 
-export type ShopProductSummary = {
-  id: string;
-  title: string | null;
-  status: string | null;
-};
+export type { ShopProductSummary } from "@/types/products";
+

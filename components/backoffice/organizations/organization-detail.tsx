@@ -81,17 +81,81 @@ export function OrganizationDetail({ id }: { id: string }) {
         </Card>
         <Card size="sm">
           <CardHeader>
-            <CardDescription>Members</CardDescription>
-            <CardTitle>{org.members.length}</CardTitle>
+            <CardDescription>Product access</CardDescription>
+            <CardTitle>{org.hasProductAccess ? "Yes" : "No"}</CardTitle>
           </CardHeader>
         </Card>
         <Card size="sm">
           <CardHeader>
-            <CardDescription>Shops</CardDescription>
-            <CardTitle>{org.shops.length}</CardTitle>
+            <CardDescription>Members / Shops</CardDescription>
+            <CardTitle>
+              {org.members.length} / {org.shops.length}
+            </CardTitle>
           </CardHeader>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Billing</CardTitle>
+          <CardDescription>
+            Invoices and payment methods are managed in Stripe. Merchants open
+            Customer Portal from /billing.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3 text-sm">
+          <div className="grid gap-2 sm:grid-cols-2">
+            <div>
+              <p className="text-xs text-muted-foreground">Period end</p>
+              <p className="font-medium">
+                {org.currentPeriodEnd
+                  ? new Date(org.currentPeriodEnd).toLocaleString()
+                  : "—"}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Stripe customer</p>
+              <p className="font-mono text-xs">
+                {org.stripeCustomerId ?? "—"}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Stripe subscription</p>
+              <p className="font-mono text-xs">
+                {org.stripeSubscriptionId ?? "—"}
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {org.stripeCustomerId ? (
+              <a
+                href={`https://dashboard.stripe.com/customers/${org.stripeCustomerId}`}
+                target="_blank"
+                rel="noreferrer"
+                className={buttonVariants({ variant: "outline", size: "sm" })}
+              >
+                Open Stripe customer
+              </a>
+            ) : null}
+            {org.stripeSubscriptionId ? (
+              <a
+                href={`https://dashboard.stripe.com/subscriptions/${org.stripeSubscriptionId}`}
+                target="_blank"
+                rel="noreferrer"
+                className={buttonVariants({ variant: "outline", size: "sm" })}
+              >
+                Open Stripe subscription
+              </a>
+            ) : null}
+            <Link
+              href="/backoffice/finance"
+              className={buttonVariants({ variant: "ghost", size: "sm" })}
+            >
+              Finance overview
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

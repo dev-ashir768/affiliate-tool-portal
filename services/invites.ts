@@ -1,7 +1,8 @@
 import type {
   AffiliateInvite,
-  ShopProductSummary,
 } from "@/types/invites";
+import type { ShopProductSummary } from "@/types/products";
+import { fetchShopProducts } from "@/services/shops";
 
 async function parseJson(res: Response) {
   const data = await res.json().catch(() => ({}));
@@ -19,21 +20,15 @@ export async function fetchAffiliateInvites(signal?: AbortSignal) {
   return (await parseJson(res)) as { invites: AffiliateInvite[] };
 }
 
+/** @deprecated Prefer fetchShopProducts — kept for invite/automation pickers. */
 export async function fetchInviteProducts(
   shopId: string,
   opts?: { pageToken?: string | null; pageSize?: number; signal?: AbortSignal },
 ) {
-  const qs = new URLSearchParams({ shopId });
-  if (opts?.pageToken) qs.set("pageToken", opts.pageToken);
-  if (opts?.pageSize) qs.set("pageSize", String(opts.pageSize));
-  const res = await fetch(`/api/invites/products?${qs}`, {
-    credentials: "include",
-    signal: opts?.signal,
-  });
-  return (await parseJson(res)) as {
+  return fetchShopProducts(shopId, opts) as Promise<{
     products: ShopProductSummary[];
     nextPageToken: string | null;
-  };
+  }>;
 }
 
 export async function createAffiliateInvite(body: {

@@ -19,6 +19,9 @@ export type PlatformListParams = {
   search?: string;
   sortBy?: string;
   sortOrder?: "asc" | "desc";
+  subscriptionStatus?: string;
+  planCode?: string;
+  billingTier?: "free" | "paid" | "access";
 };
 
 export type PlatformListMeta = {
@@ -43,6 +46,8 @@ export type PlatformOrgSummary = {
   plan: { id: string; code: string; name: string };
   subscriptionStatus: string | null;
   currentPeriodEnd: string | null;
+  hasProductAccess?: boolean;
+  stripeCustomerId?: string | null;
   shopCount?: number;
   memberCount?: number;
 };
@@ -54,6 +59,7 @@ export type PlatformOrgListResponse = {
 
 export type PlatformOrgDetail = PlatformOrgSummary & {
   stripeCustomerId: string | null;
+  stripeSubscriptionId?: string | null;
   members: Array<{
     id: string;
     role: string;
@@ -94,9 +100,13 @@ export type BillingOverview = {
   organizationCount: number;
   freeOrganizationCount: number;
   paidOrganizationCount: number;
+  withProductAccessCount: number;
+  noSubscriptionCount: number;
   activeSubscriptionCount: number;
   pastDueCount: number;
   trialingCount: number;
+  canceledCount: number;
+  incompleteCount: number;
   avgMrrPerPaidOrgCents: number;
   orgsByPlan: Array<{ planCode: string; planName: string; count: number }>;
   revenueByPlan: Array<{
@@ -108,6 +118,29 @@ export type BillingOverview = {
   }>;
   subscriptionsByStatus: Array<{ status: string; count: number }>;
   mrrCents: number;
+  funnel?: {
+    registered: number;
+    subscribed: number;
+    renewed: number;
+    upgraded: number;
+    upgradedCustomers: number;
+    downgraded: number;
+    canceled: number;
+    conversionRate: number;
+  };
+  recentLifecycle?: Array<{
+    id: string;
+    type: string;
+    fromPlanCode: string | null;
+    toPlanCode: string | null;
+    createdAt: string;
+    organization: { id: string; name: string; slug: string };
+  }>;
+  notes?: {
+    mrrBasis: string;
+    invoicing: string;
+    funnel?: string;
+  };
 };
 
 export type ProxyStatus = "AVAILABLE" | "IN_USE" | "DISABLED" | "BANNED";

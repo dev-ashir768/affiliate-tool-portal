@@ -17,7 +17,7 @@ export function useAffiliateInvites() {
 
 export function useInviteProducts(shopId: string | null) {
   return useQuery({
-    queryKey: ["invite-products", shopId],
+    queryKey: ["shop-products", shopId],
     queryFn: ({ signal }) =>
       fetchInviteProducts(shopId!, { pageSize: 50, signal }),
     enabled: Boolean(shopId),
