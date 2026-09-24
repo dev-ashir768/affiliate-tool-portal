@@ -88,10 +88,11 @@ export function useSyncAffiliateOrders() {
   });
 }
 
-export function useAnalyticsOverview() {
+export function useAnalyticsOverview(params: { from?: string; to?: string } = {}) {
+  const rangeKey = { from: params.from ?? "", to: params.to ?? "" };
   return useQuery({
-    queryKey: ["analytics", "overview"],
-    queryFn: ({ signal }) => fetchAnalyticsOverview(signal),
+    queryKey: ["analytics", "overview", rangeKey],
+    queryFn: ({ signal }) => fetchAnalyticsOverview(params, signal),
     retry: false,
   });
 }

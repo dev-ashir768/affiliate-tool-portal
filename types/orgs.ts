@@ -46,6 +46,34 @@ export type CreateInviteResponse = {
   };
 };
 
+export type OrgAuditLogEntry = {
+  id: string;
+  action: string;
+  entityType: string;
+  entityId: string | null;
+  meta: unknown;
+  createdAt: string;
+  actor: { id: string; email: string; name: string } | null;
+};
+
+export type OrgAuditListParams = {
+  page: number;
+  pageSize: number;
+  from?: string;
+  to?: string;
+  search?: string;
+};
+
+export type OrgAuditListResponse = {
+  data: OrgAuditLogEntry[];
+  meta: {
+    total: number;
+    page: number;
+    pageSize: number;
+    totalPages?: number;
+  };
+};
+
 export type AcceptInviteResponse = {
   membership: {
     id: string;

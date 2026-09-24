@@ -1,10 +1,18 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { authenticatedApiFetch } from "@/lib/api/authenticated-fetch";
-import { platformErrorResponse } from "@/lib/api/platform-bff";
+import {
+  platformErrorResponse,
+  toQuery,
+} from "@/lib/api/platform-bff";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const data = await authenticatedApiFetch("/api/v1/analytics/overview", {
+    const sp = request.nextUrl.searchParams;
+    const qs = toQuery({
+      from: sp.get("from"),
+      to: sp.get("to"),
+    });
+    const data = await authenticatedApiFetch(`/api/v1/analytics/overview${qs}`, {
       method: "GET",
     });
     return NextResponse.json(data);

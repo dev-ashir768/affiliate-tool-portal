@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useMemo, useState } from "react";
 import {
   Card,
   CardContent,
@@ -10,11 +11,17 @@ import {
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { buttonVariants } from "@/components/ui/button";
+import {
+  DateRangePicker,
+  rangeFromDays,
+  type DateRangeValue,
+} from "@/components/ui/date-range-picker";
 import { useMe } from "@/hooks/use-me";
 import { useOrg } from "@/hooks/use-org";
 import { useShops } from "@/hooks/use-shops";
 import { useMembersQuery } from "@/hooks/use-members";
 import { useAnalyticsOverview } from "@/hooks/use-commerce";
+import { HomeAnalyticsCharts } from "@/components/home/home-analytics-charts";
 
 function cents(n: number) {
   return (n / 100).toLocaleString(undefined, {
@@ -24,11 +31,22 @@ function cents(n: number) {
 }
 
 export function HomeOverview() {
+  const [dateRange, setDateRange] = useState<DateRangeValue>(() =>
+    rangeFromDays(30),
+  );
+  const analyticsParams = useMemo(
+    () => ({
+      from: dateRange.from || undefined,
+      to: dateRange.to || undefined,
+    }),
+    [dateRange.from, dateRange.to],
+  );
+
   const meQuery = useMe();
   const orgQuery = useOrg();
   const shopsQuery = useShops();
   const membersQuery = useMembersQuery({ page: 1, pageSize: 1 });
-  const analyticsQuery = useAnalyticsOverview();
+  const analyticsQuery = useAnalyticsOverview(analyticsParams);
 
   const isLoading =
     meQuery.isLoading || orgQuery.isLoading || shopsQuery.isLoading;
@@ -56,16 +74,23 @@ export function HomeOverview() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-lg font-semibold tracking-tight">
-          Welcome{me?.user.name ? `, ${me.user.name.split(" ")[0]}` : ""}
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          {org
-            ? `${org.name} · ${org.plan.name} plan`
-            : "Your organization dashboard"}
-          {currentMembership ? ` · ${currentMembership.role}` : null}
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-lg font-semibold tracking-tight">
+            Welcome{me?.user.name ? `, ${me.user.name.split(" ")[0]}` : ""}
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            {org
+              ? `${org.name} · ${org.plan.name} plan`
+              : "Your organization dashboard"}
+            {currentMembership ? ` · ${currentMembership.role}` : null}
+          </p>
+        </div>
+        <DateRangePicker
+          value={dateRange}
+          onChange={setDateRange}
+          disabled={analyticsQuery.isFetching}
+        />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -206,6 +231,12 @@ export function HomeOverview() {
           </CardContent>
         </Card>
       </div>
+
+      {analyticsQuery.isLoading ? (
+        <Skeleton className="h-72 w-full" />
+      ) : analyticsQuery.data ? (
+        <HomeAnalyticsCharts data={analyticsQuery.data} />
+      ) : null}
     </div>
   );
 }

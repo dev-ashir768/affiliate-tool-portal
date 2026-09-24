@@ -3,6 +3,8 @@ import type {
   CreateInviteResponse,
   MembersListParams,
   MembersListResponse,
+  OrgAuditListParams,
+  OrgAuditListResponse,
   OrganizationCurrent,
 } from "@/types/orgs";
 import type {
@@ -82,6 +84,29 @@ export async function createInvite(
     throw new Error(data?.error?.message ?? "Failed to create invite");
   }
   return data as CreateInviteResponse;
+}
+
+export const ORG_AUDIT_FORBIDDEN = "ORG_AUDIT_FORBIDDEN";
+
+export async function fetchOrgAudit(
+  params: OrgAuditListParams,
+  signal?: AbortSignal,
+): Promise<OrgAuditListResponse> {
+  const qs = toQuery(params);
+  const res = await fetch(`/api/orgs/current/audit?${qs}`, {
+    method: "GET",
+    credentials: "include",
+    signal,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const code = data?.error?.code as string | undefined;
+    if (res.status === 403 || code === "FORBIDDEN") {
+      throw new Error(ORG_AUDIT_FORBIDDEN);
+    }
+    throw new Error(data?.error?.message ?? "Failed to load activity");
+  }
+  return data as OrgAuditListResponse;
 }
 
 export async function acceptInvite(

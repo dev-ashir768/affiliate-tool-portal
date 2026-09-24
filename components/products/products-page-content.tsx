@@ -86,7 +86,7 @@ export function ProductsPageContent() {
         <>
           <div className="flex flex-wrap gap-3">
             <AppReactSelect
-              className="min-w-[220px] max-w-sm flex-1"
+              className="min-w-55 max-w-sm flex-1"
               options={shopOptions}
               value={stringSelectValue(shopOptions, activeShopId ?? "")}
               onChange={(opt) =>

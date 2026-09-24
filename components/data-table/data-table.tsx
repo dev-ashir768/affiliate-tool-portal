@@ -235,6 +235,7 @@ export function DataTable<TData extends object>({
   onExport,
   onRefresh,
   onFiltersClick,
+  toolbarLeading,
   enableColumnResizing,
   enableColumnOrdering = false,
   pageSizeOptions,
@@ -361,6 +362,7 @@ export function DataTable<TData extends object>({
         onRefresh={onRefresh}
         onExport={onExport}
         onFiltersClick={onFiltersClick}
+        leading={toolbarLeading}
         isFetching={isFetching}
       />
 

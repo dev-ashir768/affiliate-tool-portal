@@ -29,6 +29,8 @@ type PlanCardProps = {
   canManage: boolean;
   isLoading?: boolean;
   ctaLabel?: string;
+  allowSelect?: boolean;
+  disabledReason?: string;
   onSelect?: (planCode: string) => void;
 };
 
@@ -38,13 +40,16 @@ export function PlanCard({
   canManage,
   isLoading,
   ctaLabel,
+  allowSelect = true,
+  disabledReason,
   onSelect,
 }: PlanCardProps) {
   const isFree = plan.code === "free";
-  const showUpgrade = canManage && !isCurrent && !isFree;
+  const showCta = canManage && !isCurrent && !isFree;
   const label =
     ctaLabel ??
     (plan.trialDays > 0 ? `Start ${plan.trialDays}-day trial` : "Upgrade");
+  const blocked = showCta && !allowSelect;
 
   return (
     <Card className={cn("h-full", isCurrent && "ring-2 ring-primary/40")}>
@@ -55,6 +60,10 @@ export function PlanCard({
             <Badge className="border-transparent bg-primary text-primary-foreground">
               Current
             </Badge>
+          ) : plan.changeKind === "upgrade" ? (
+            <Badge variant="secondary">Upgrade</Badge>
+          ) : plan.changeKind === "downgrade" ? (
+            <Badge variant="outline">Downgrade</Badge>
           ) : null}
         </div>
         <CardDescription>
@@ -85,19 +94,28 @@ export function PlanCard({
             {plan.trialDays}-day free trial
           </p>
         ) : null}
+        {blocked && disabledReason ? (
+          <p className="text-destructive">
+            Reduce usage first: {disabledReason}
+          </p>
+        ) : null}
       </CardContent>
       <CardFooter>
-        {showUpgrade ? (
+        {showCta ? (
           <Button
             className="w-full"
-            disabled={isLoading || plan.hasStripePrice === false}
+            disabled={
+              isLoading || plan.hasStripePrice === false || !allowSelect
+            }
             onClick={() => onSelect?.(plan.code)}
           >
             {isLoading
-              ? "Redirecting…"
+              ? "Working…"
               : plan.hasStripePrice === false
                 ? "Unavailable"
-                : label}
+                : blocked
+                  ? "Usage too high"
+                  : label}
           </Button>
         ) : isCurrent ? (
           <Button className="w-full" variant="outline" disabled>

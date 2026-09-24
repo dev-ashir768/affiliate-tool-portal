@@ -1,4 +1,5 @@
 import type {
+  BillingOverviewResponse,
   BillingPlansResponse,
   CheckoutSessionResponse,
   PortalSessionResponse,
@@ -18,6 +19,21 @@ export async function fetchBillingPlans(
     throw new Error(data?.error?.message ?? "Failed to load plans");
   }
   return data as BillingPlansResponse;
+}
+
+export async function fetchBillingOverview(
+  signal?: AbortSignal,
+): Promise<BillingOverviewResponse> {
+  const res = await fetch("/api/billing/overview", {
+    method: "GET",
+    credentials: "include",
+    signal,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data?.error?.message ?? "Failed to load billing overview");
+  }
+  return data as BillingOverviewResponse;
 }
 
 export async function createCheckoutSession(

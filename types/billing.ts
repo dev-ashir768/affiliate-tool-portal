@@ -10,6 +10,13 @@ export type BillingPlan = {
   dailyInviteQuota: number;
   trialDays: number;
   hasStripePrice?: boolean;
+  changeKind?: "current" | "upgrade" | "downgrade" | "subscribe";
+  canSwitch?: boolean;
+  blockers?: Array<{
+    resource: "seats" | "shops" | "bots";
+    used: number;
+    limit: number;
+  }>;
 };
 
 export type BillingPlansResponse = {
@@ -33,13 +40,22 @@ export type BillingOverviewResponse = {
     dailyInviteQuota: number;
     stripeCustomerId: string | null;
   };
+  usage: { seats: number; shops: number; bots: number };
+  overage: { seats: number; shops: number; bots: number };
+  hasOverage: boolean;
   plans: BillingPlan[];
+  rules: {
+    upgrade: string;
+    downgrade: string;
+    cancel: string;
+    effects: string[];
+  };
 };
 
 export type CheckoutSessionResponse = {
   url: string | null;
   id: string;
-  mode?: "checkout" | "upgrade";
+  mode?: "checkout" | "upgrade" | "downgrade";
 };
 
 export type PortalSessionResponse = {

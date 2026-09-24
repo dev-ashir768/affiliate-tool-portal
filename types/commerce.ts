@@ -128,4 +128,11 @@ export type AnalyticsOverview = {
     orderedAt: string;
     creatorHandle?: string | null;
   }>;
+  range?: {
+    from: string | null;
+    to: string | null;
+  };
+  charts?: {
+    gmvByDay: Array<{ date: string; gmvCents: number }>;
+  };
 };

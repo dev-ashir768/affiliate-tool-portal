@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 import type { Table } from "@tanstack/react-table";
 import { ListFilter, RefreshCw, Search, X } from "lucide-react";
@@ -34,6 +35,8 @@ export type DataTableToolbarProps<TData extends object> = {
   onRefresh?: () => void;
   onExport?: (format: DataTableExportFormat) => Promise<void>;
   onFiltersClick?: () => void;
+  /** Optional date-range / custom filter controls shown left of search. */
+  leading?: ReactNode;
   isFetching?: boolean;
   isExporting?: boolean;
   disabled?: boolean;
@@ -46,6 +49,7 @@ export function DataTableToolbar<TData extends object>({
   onRefresh,
   onExport,
   onFiltersClick,
+  leading,
   isFetching = false,
   isExporting = false,
   disabled = false,
@@ -94,9 +98,7 @@ export function DataTableToolbar<TData extends object>({
   useEffect(() => {
     if (!searchOpen) return;
     const id = window.requestAnimationFrame(() => {
-      searchFieldRef.current
-        ?.querySelector<HTMLInputElement>("input")
-        ?.focus();
+      searchFieldRef.current?.querySelector<HTMLInputElement>("input")?.focus();
     });
     return () => window.cancelAnimationFrame(id);
   }, [searchOpen]);
@@ -138,143 +140,121 @@ export function DataTableToolbar<TData extends object>({
 
   return (
     <TooltipProvider>
-      <div className="flex w-full items-center justify-end gap-2 px-3">
-        <div
-          className={cn(
-            "overflow-hidden transition-[max-width,opacity] duration-300 ease-in-out",
-            searchOpen
-              ? "max-w-sm opacity-100 sm:max-w-md"
-              : "max-w-0 opacity-0",
-          )}
-        >
+      <div className="flex w-full flex-wrap items-center justify-between gap-2 px-3">
+        {leading ? <div className="min-w-0 flex-1">{leading}</div> : null}
+        <div className="ml-auto flex items-center justify-end gap-2">
           <div
-            className="relative w-[min(100vw-8rem,28rem)] min-w-48"
-            ref={searchFieldRef}
+            className={cn(
+              "overflow-hidden transition-[max-width,opacity] duration-300 ease-in-out",
+              searchOpen
+                ? "max-w-sm opacity-100 sm:max-w-md"
+                : "max-w-0 opacity-0",
+            )}
           >
-            <Search
-              className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
-              aria-hidden
-            />
-            <Input
-              type="search"
-              value={inputValue}
-              onChange={(event) => setInputValue(event.target.value)}
-              onKeyDown={handleSearchKeyDown}
-              placeholder="Search..."
-              aria-label="Search"
-              disabled={disabled || !searchOpen}
-              tabIndex={searchOpen ? 0 : -1}
-              className="h-9 w-full bg-muted pr-9 pl-9 focus-visible:ring-0 focus-visible:border-border border-0"
-            />
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              aria-label="Close search"
-              disabled={disabled || !searchOpen}
-              onClick={closeSearch}
-              tabIndex={searchOpen ? 0 : -1}
-              className="absolute top-1/2 right-1 size-7 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            <div
+              className="relative w-[min(100vw-8rem,28rem)] min-w-48"
+              ref={searchFieldRef}
             >
-              <X className="size-4" />
-            </Button>
+              <Search
+                className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+                aria-hidden
+              />
+              <Input
+                type="search"
+                value={inputValue}
+                onChange={(event) => setInputValue(event.target.value)}
+                onKeyDown={handleSearchKeyDown}
+                placeholder="Search..."
+                aria-label="Search"
+                disabled={disabled || !searchOpen}
+                tabIndex={searchOpen ? 0 : -1}
+                className="h-9 w-full bg-muted pr-9 pl-9 focus-visible:ring-0 focus-visible:border-border border-0"
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                aria-label="Close search"
+                disabled={disabled || !searchOpen}
+                onClick={closeSearch}
+                tabIndex={searchOpen ? 0 : -1}
+                className="absolute top-1/2 right-1 size-7 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                <X className="size-4" />
+              </Button>
+            </div>
           </div>
-        </div>
 
-        <div className="flex shrink-0 items-center">
-          {showSearchButton ? (
-            <Tooltip>
-              <TooltipTrigger
-                delay={200}
-                render={
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    aria-label="Search"
-                    disabled={disabled}
-                    onClick={openSearch}
-                    className="size-9"
-                  />
-                }
-              >
-                <Search className="size-4" />
-              </TooltipTrigger>
-              <TooltipContent side="bottom">Search</TooltipContent>
-            </Tooltip>
-          ) : null}
-
-          <DataTableColumnVisibility table={table} disabled={disabled} />
-
-          {onRefresh ? (
-            <Tooltip>
-              <TooltipTrigger
-                delay={200}
-                render={
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    aria-label="Refresh"
-                    disabled={disabled || isFetching}
-                    onClick={onRefresh}
-                    className="size-9"
-                  />
-                }
-              >
-                <RefreshCw
-                  className={isFetching ? "size-4 animate-spin" : "size-4"}
-                />
-              </TooltipTrigger>
-              <TooltipContent side="bottom">Refresh</TooltipContent>
-            </Tooltip>
-          ) : null}
-
-          {onExport ? (
-            <DataTableExport
-              onExport={onExport}
-              isExporting={isExporting}
-              disabled={disabled}
-            />
-          ) : null}
-
-          {onFiltersClick ? (
-            <Tooltip>
-              <TooltipTrigger
-                delay={200}
-                render={
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    aria-label="Filters"
-                    disabled={disabled}
-                    onClick={onFiltersClick}
-                    className="size-9"
-                  />
-                }
-              >
-                <ListFilter className="size-4" />
-              </TooltipTrigger>
-              <TooltipContent side="bottom">Filters</TooltipContent>
-            </Tooltip>
-          ) : (
-            <DropdownMenu>
+          <div className="flex shrink-0 items-center">
+            {showSearchButton ? (
               <Tooltip>
                 <TooltipTrigger
                   delay={200}
                   render={
-                    <DropdownMenuTrigger
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Search"
                       disabled={disabled}
-                      render={
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="size-9"
-                          aria-label="Filters"
-                        />
-                      }
+                      onClick={openSearch}
+                      className="size-9"
+                    />
+                  }
+                >
+                  <Search className="size-4" />
+                </TooltipTrigger>
+                <TooltipContent side="bottom">Search</TooltipContent>
+              </Tooltip>
+            ) : null}
+
+            <DataTableColumnVisibility table={table} disabled={disabled} />
+
+            {onRefresh ? (
+              <Tooltip>
+                <TooltipTrigger
+                  delay={200}
+                  render={
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Refresh"
+                      disabled={disabled || isFetching}
+                      onClick={onRefresh}
+                      className="size-9"
+                    />
+                  }
+                >
+                  <RefreshCw
+                    className={isFetching ? "size-4 animate-spin" : "size-4"}
+                  />
+                </TooltipTrigger>
+                <TooltipContent side="bottom">Refresh</TooltipContent>
+              </Tooltip>
+            ) : null}
+
+            {onExport ? (
+              <DataTableExport
+                onExport={onExport}
+                isExporting={isExporting}
+                disabled={disabled}
+              />
+            ) : null}
+
+            {onFiltersClick ? (
+              <Tooltip>
+                <TooltipTrigger
+                  delay={200}
+                  render={
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Filters"
+                      disabled={disabled}
+                      onClick={onFiltersClick}
+                      className="size-9"
                     />
                   }
                 >
@@ -282,13 +262,38 @@ export function DataTableToolbar<TData extends object>({
                 </TooltipTrigger>
                 <TooltipContent side="bottom">Filters</TooltipContent>
               </Tooltip>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuLabel className="font-normal text-muted-foreground">
-                  No filters available
-                </DropdownMenuLabel>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
+            ) : (
+              <DropdownMenu>
+                <Tooltip>
+                  <TooltipTrigger
+                    delay={200}
+                    render={
+                      <DropdownMenuTrigger
+                        disabled={disabled}
+                        render={
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="size-9"
+                            aria-label="Filters"
+                          />
+                        }
+                      />
+                    }
+                  >
+                    <ListFilter className="size-4" />
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom">Filters</TooltipContent>
+                </Tooltip>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuLabel className="font-normal text-muted-foreground">
+                    No filters available
+                  </DropdownMenuLabel>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </div>
         </div>
       </div>
     </TooltipProvider>

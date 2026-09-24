@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type {
   ColumnDef,
   ColumnOrderState,
@@ -52,6 +53,8 @@ export type DataTableProps<TData extends object> = {
   onExport?: (format: DataTableExportFormat) => Promise<void>;
   onRefresh?: () => void;
   onFiltersClick?: () => void;
+  /** Optional toolbar leading slot (e.g. DateRangePicker). */
+  toolbarLeading?: ReactNode;
   enableColumnResizing?: boolean;
   enableColumnOrdering?: boolean;
   pageSizeOptions?: number[];

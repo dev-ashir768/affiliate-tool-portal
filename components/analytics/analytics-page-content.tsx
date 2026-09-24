@@ -1,8 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { useMemo, useState } from "react";
 import { buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  DateRangePicker,
+  rangeFromDays,
+  type DateRangeValue,
+} from "@/components/ui/date-range-picker";
 import { DataTable } from "@/components/data-table";
 import { useClientDataTable } from "@/hooks/use-client-data-table";
 import { useAnalyticsOverview } from "@/hooks/use-commerce";
@@ -17,7 +23,17 @@ function formatMoney(cents: number, currency = "USD") {
 }
 
 export function AnalyticsPageContent() {
-  const query = useAnalyticsOverview();
+  const [dateRange, setDateRange] = useState<DateRangeValue>(() =>
+    rangeFromDays(30),
+  );
+  const analyticsParams = useMemo(
+    () => ({
+      from: dateRange.from || undefined,
+      to: dateRange.to || undefined,
+    }),
+    [dateRange.from, dateRange.to],
+  );
+  const query = useAnalyticsOverview(analyticsParams);
   const topCreators = query.data?.topMarketplaceCreators ?? [];
   const topCreatorsTable = useClientDataTable({
     data: topCreators,
@@ -68,12 +84,19 @@ export function AnalyticsPageContent() {
 
   return (
     <div className="flex flex-col gap-8">
-      <div>
-        <h1 className="text-lg font-semibold tracking-tight">Analytics</h1>
-        <p className="text-sm text-muted-foreground">
-          Funnel plus a clear split: shop order GMV vs creator marketplace GMV
-          snapshots.
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-lg font-semibold tracking-tight">Analytics</h1>
+          <p className="text-sm text-muted-foreground">
+            Funnel plus a clear split: shop order GMV vs creator marketplace GMV
+            snapshots.
+          </p>
+        </div>
+        <DateRangePicker
+          value={dateRange}
+          onChange={setDateRange}
+          disabled={query.isFetching}
+        />
       </div>
 
       <section className="space-y-3">

@@ -110,11 +110,21 @@ export async function syncAffiliateOrders(body: {
   };
 }
 
-export async function fetchAnalyticsOverview(signal?: AbortSignal) {
-  const res = await fetch("/api/analytics/overview", {
-    credentials: "include",
-    signal,
-  });
+export async function fetchAnalyticsOverview(
+  params: { from?: string; to?: string } = {},
+  signal?: AbortSignal,
+) {
+  const qs = new URLSearchParams();
+  if (params.from) qs.set("from", params.from);
+  if (params.to) qs.set("to", params.to);
+  const suffix = qs.toString();
+  const res = await fetch(
+    `/api/analytics/overview${suffix ? `?${suffix}` : ""}`,
+    {
+      credentials: "include",
+      signal,
+    },
+  );
   return (await parseJson(res)) as AnalyticsOverview;
 }
 
