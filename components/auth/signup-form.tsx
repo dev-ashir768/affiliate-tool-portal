@@ -25,11 +25,10 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "../ui/button";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { setFlashToast } from "@/lib/ui/flash-toast";
 import { toast } from "sonner";
 
 export default function SignupForm() {
-  const router = useRouter();
   const signupForm = useForm<SignupFormSchemaType>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
@@ -67,9 +66,8 @@ export default function SignupForm() {
         payload.redirectTo.startsWith("/")
           ? payload.redirectTo
           : "/home";
-      toast.success("Account created");
-      router.replace(dest);
-      router.refresh();
+      setFlashToast({ type: "success", message: "Account created" });
+      window.location.replace(dest);
     } catch {
       const message = "Unable to reach the server";
       signupForm.setError("root", { message });

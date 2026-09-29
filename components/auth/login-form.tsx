@@ -25,12 +25,12 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "../ui/button";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { resolvePostAuthRedirect } from "@/lib/auth/access-token";
+import { setFlashToast } from "@/lib/ui/flash-toast";
 import { toast } from "sonner";
 
 export default function LoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const loginForm = useForm<LoginFormSchemaType>({
     resolver: zodResolver(loginSchema),
@@ -70,9 +70,9 @@ export default function LoginForm() {
         redirectTo: payload?.redirectTo ?? null,
         platformRole,
       });
-      toast.success("Logged in");
-      router.replace(dest);
-      router.refresh();
+      // Hard replace so /login leaves the history stack (back button can't return).
+      setFlashToast({ type: "success", message: "Logged in" });
+      window.location.replace(dest);
     } catch {
       const message = "Unable to reach the server";
       loginForm.setError("root", { message });

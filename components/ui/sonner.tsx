@@ -54,6 +54,20 @@ function brandToastVars(
           "--warning-text": "oklch(0.5 0.12 55)",
         };
 
+  // Success must read as green — brand primary is red and looks like an error.
+  const success =
+    mode === "dark"
+      ? {
+          "--success-bg": "oklch(0.28 0.06 155)",
+          "--success-border": "oklch(0.38 0.08 155)",
+          "--success-text": "oklch(0.86 0.1 155)",
+        }
+      : {
+          "--success-bg": "oklch(0.96 0.04 155)",
+          "--success-border": "oklch(0.88 0.08 155)",
+          "--success-text": "oklch(0.42 0.12 155)",
+        };
+
   return {
     "--normal-bg": "var(--popover)",
     "--normal-bg-hover": "var(--accent)",
@@ -61,10 +75,7 @@ function brandToastVars(
     "--normal-border-hover": "var(--border)",
     "--normal-text": "var(--popover-foreground)",
     "--border-radius": "var(--radius)",
-    "--success-bg": "color-mix(in oklch, var(--primary) 12%, var(--popover))",
-    "--success-border":
-      "color-mix(in oklch, var(--primary) 28%, var(--border))",
-    "--success-text": "var(--primary)",
+    ...success,
     "--info-bg": "color-mix(in oklch, var(--secondary) 8%, var(--popover))",
     "--info-border": "color-mix(in oklch, var(--secondary) 20%, var(--border))",
     "--info-text": "var(--secondary)",

@@ -203,7 +203,8 @@ export async function proxy(request: NextRequest) {
     return enforceAreaAccess(request, accessToken, kind, base);
   }
 
-  if (kind === "guest_auth" && (accessToken || refreshToken)) {
+  // Guest auth pages: any session → bounce to the right area (no back to login).
+  if (kind === "guest_auth") {
     if (!accessToken && refreshToken) {
       const tokens = await rotateTokens(refreshToken);
       if (tokens) {

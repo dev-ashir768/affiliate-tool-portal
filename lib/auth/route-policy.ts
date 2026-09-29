@@ -22,17 +22,27 @@ export type RouteClass =
   | "staff"
   | "merchant";
 
+/** Strip trailing slash except for `/`. */
+function normalizePath(pathname: string): string {
+  if (pathname.length > 1 && pathname.endsWith("/")) {
+    return pathname.slice(0, -1);
+  }
+  return pathname;
+}
+
 /** Classify a pathname for proxy guards. */
 export function classifyRoute(pathname: string): RouteClass {
-  if (pathname === "/") return "entry";
+  const path = normalizePath(pathname);
 
-  if (GUEST_AUTH.has(pathname)) return "guest_auth";
+  if (path === "/") return "entry";
 
-  if (TOKEN_AUTH_EXACT.has(pathname) || isInvitePath(pathname)) {
+  if (GUEST_AUTH.has(path)) return "guest_auth";
+
+  if (TOKEN_AUTH_EXACT.has(path) || isInvitePath(path)) {
     return "token_auth";
   }
 
-  if (pathname === "/backoffice" || pathname.startsWith("/backoffice/")) {
+  if (path === "/backoffice" || path.startsWith("/backoffice/")) {
     return "staff";
   }
 
