@@ -1,3 +1,5 @@
+import { merchantPathAllowedBeforeSubscribe } from "./subscription-paths";
+
 /**
  * Edge route policy — conventions, not a page inventory.
  *
@@ -56,20 +58,8 @@ export function isProtectedRoute(kind: RouteClass) {
 
 /**
  * Merchant routes reachable without an active subscription / trial.
- * Everything else redirects to /onboarding until hasProductAccess.
+ * Only onboarding + billing — everything else redirects to /onboarding.
  */
 export function isSubscriptionExemptPath(pathname: string): boolean {
-  if (pathname === "/onboarding" || pathname.startsWith("/onboarding/")) {
-    return true;
-  }
-  if (pathname === "/billing" || pathname.startsWith("/billing/")) {
-    return true;
-  }
-  if (pathname === "/settings" || pathname.startsWith("/settings/")) {
-    return true;
-  }
-  if (pathname === "/team" || pathname.startsWith("/team/")) {
-    return true;
-  }
-  return false;
+  return merchantPathAllowedBeforeSubscribe(pathname);
 }

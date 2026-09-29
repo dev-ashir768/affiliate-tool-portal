@@ -51,7 +51,18 @@ export function OrgSettingsForm() {
     );
   }, [meQuery.data]);
 
-  const canEditName = orgRole === "OWNER" || orgRole === "ADMIN";
+  const hasProductAccess = useMemo(() => {
+    const me = meQuery.data;
+    if (!me?.currentOrganizationId) return false;
+    return (
+      me.memberships.find(
+        (m) => m.organization.id === me.currentOrganizationId,
+      )?.organization.hasProductAccess ?? false
+    );
+  }, [meQuery.data]);
+
+  const canEditName =
+    hasProductAccess && (orgRole === "OWNER" || orgRole === "ADMIN");
 
   const form = useForm<PatchCurrentOrgSchemaType>({
     resolver: zodResolver(patchCurrentOrgSchema),
@@ -146,7 +157,12 @@ export function OrgSettingsForm() {
                   type="text"
                   placeholder="Organization name"
                 />
-                {!canEditName ? (
+                {!hasProductAccess ? (
+                  <FieldDescription>
+                    Choose a plan on onboarding or billing before changing
+                    organization settings.
+                  </FieldDescription>
+                ) : !canEditName ? (
                   <FieldDescription>
                     Only owners and admins can change the organization name.
                   </FieldDescription>
