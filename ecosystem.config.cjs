@@ -13,14 +13,13 @@ module.exports = {
       name: "tiksly-portal",
       cwd: __dirname,
       script: "node_modules/next/dist/bin/next",
-      args: "start -p 3000",
+      args: "start -p 3001",
       instances: 1,
       exec_mode: "fork",
       env: {
         NODE_ENV: "production",
-        PORT: 3000,
-        // Must point at the public API URL (or localhost if same machine + nginx)
-        // API_URL: "https://api.yourdomain.com",
+        PORT: 3001,
+        API_URL: "https://api.dealhoper.com",
       },
       max_memory_restart: "768M",
       time: true,
