@@ -18,14 +18,18 @@ import {
 } from "@/lib/auth/route-policy";
 
 async function rotateTokens(refreshToken: string) {
-  const res = await fetch(`${getApiBaseUrl()}/api/v1/auth/refresh`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ refreshToken }),
-    cache: "no-store",
-  });
-  if (!res.ok) return null;
-  return (await res.json()) as { accessToken: string; refreshToken: string };
+  try {
+    const res = await fetch(`${getApiBaseUrl()}/api/v1/auth/refresh`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refreshToken }),
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
+    return (await res.json()) as { accessToken: string; refreshToken: string };
+  } catch {
+    return null;
+  }
 }
 
 function applySessionCookies(
@@ -49,6 +53,12 @@ function clearSessionCookies(response: NextResponse) {
   response.cookies.delete(REFRESH_TOKEN_COOKIE);
 }
 
+function copySessionCookies(from: NextResponse, to: NextResponse) {
+  for (const cookie of from.cookies.getAll()) {
+    to.cookies.set(cookie);
+  }
+}
+
 function redirectToLogin(request: NextRequest, pathname: string) {
   const loginUrl = new URL("/login", request.url);
   loginUrl.searchParams.set("next", pathname);
@@ -60,8 +70,14 @@ function redirectAuthedAwayFromAuth(
   accessToken: string
 ): NextResponse {
   const claims = readAccessClaims(accessToken);
-  const dest = claims ? defaultRedirectForClaims(claims) : "/home";
-  return NextResponse.redirect(new URL(dest, request.url));
+  if (!claims) {
+    const login = NextResponse.redirect(new URL("/login", request.url));
+    clearSessionCookies(login);
+    return login;
+  }
+  return NextResponse.redirect(
+    new URL(defaultRedirectForClaims(claims), request.url)
+  );
 }
 
 /**
@@ -122,8 +138,10 @@ function enforceAreaAccess(
   return response;
 }
 
+/**
+ * Prefer a valid (non-expired) access token; otherwise rotate via refresh.
+ */
 async function ensureAccessToken(
-  request: NextRequest,
   accessToken: string | undefined,
   refreshToken: string | undefined
 ): Promise<{
@@ -131,12 +149,16 @@ async function ensureAccessToken(
   sessionResponse: NextResponse | null;
   cleared: boolean;
 }> {
-  if (accessToken) {
+  if (accessToken && readAccessClaims(accessToken)) {
     return { accessToken, sessionResponse: null, cleared: false };
   }
 
   if (!refreshToken) {
-    return { accessToken: null, sessionResponse: null, cleared: false };
+    return {
+      accessToken: null,
+      sessionResponse: null,
+      cleared: Boolean(accessToken),
+    };
   }
 
   const tokens = await rotateTokens(refreshToken);
@@ -154,78 +176,67 @@ async function ensureAccessToken(
 }
 
 export async function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-  const kind = classifyRoute(pathname);
+  try {
+    const { pathname } = request.nextUrl;
+    const kind = classifyRoute(pathname);
 
-  let accessToken = request.cookies.get(ACCESS_TOKEN_COOKIE)?.value;
-  const refreshToken = request.cookies.get(REFRESH_TOKEN_COOKIE)?.value;
+    const rawAccess = request.cookies.get(ACCESS_TOKEN_COOKIE)?.value;
+    const refreshToken = request.cookies.get(REFRESH_TOKEN_COOKIE)?.value;
 
-  if (kind === "entry") {
-    if (!accessToken && refreshToken) {
-      const tokens = await rotateTokens(refreshToken);
-      if (tokens) {
+    if (kind === "entry") {
+      const ensured = await ensureAccessToken(rawAccess, refreshToken);
+      if (ensured.accessToken) {
         const response = redirectAuthedAwayFromAuth(
           request,
-          tokens.accessToken
+          ensured.accessToken
         );
-        applySessionCookies(response, tokens);
+        if (ensured.sessionResponse) {
+          copySessionCookies(ensured.sessionResponse, response);
+        }
         return response;
       }
       const login = NextResponse.redirect(new URL("/login", request.url));
-      clearSessionCookies(login);
-      return login;
-    }
-    if (accessToken) {
-      return redirectAuthedAwayFromAuth(request, accessToken);
-    }
-    return NextResponse.redirect(new URL("/login", request.url));
-  }
-
-  if (isProtectedRoute(kind)) {
-    const ensured = await ensureAccessToken(
-      request,
-      accessToken,
-      refreshToken
-    );
-    accessToken = ensured.accessToken ?? undefined;
-
-    if (ensured.cleared) {
-      const login = redirectToLogin(request, pathname);
-      clearSessionCookies(login);
+      if (ensured.cleared) clearSessionCookies(login);
       return login;
     }
 
-    if (!accessToken) {
-      return redirectToLogin(request, pathname);
+    if (isProtectedRoute(kind)) {
+      const ensured = await ensureAccessToken(rawAccess, refreshToken);
+
+      if (ensured.cleared || !ensured.accessToken) {
+        const login = redirectToLogin(request, pathname);
+        clearSessionCookies(login);
+        return login;
+      }
+
+      const base = ensured.sessionResponse ?? NextResponse.next();
+      return enforceAreaAccess(request, ensured.accessToken, kind, base);
     }
 
-    const base = ensured.sessionResponse ?? NextResponse.next();
-    return enforceAreaAccess(request, accessToken, kind, base);
-  }
-
-  // Guest auth pages: any session → bounce to the right area (no back to login).
-  if (kind === "guest_auth") {
-    if (!accessToken && refreshToken) {
-      const tokens = await rotateTokens(refreshToken);
-      if (tokens) {
+    if (kind === "guest_auth") {
+      const ensured = await ensureAccessToken(rawAccess, refreshToken);
+      if (ensured.accessToken) {
         const response = redirectAuthedAwayFromAuth(
           request,
-          tokens.accessToken
+          ensured.accessToken
         );
-        applySessionCookies(response, tokens);
+        if (ensured.sessionResponse) {
+          copySessionCookies(ensured.sessionResponse, response);
+        }
         return response;
       }
-      const response = NextResponse.next();
-      clearSessionCookies(response);
-      return response;
+      if (ensured.cleared) {
+        const response = NextResponse.next();
+        clearSessionCookies(response);
+        return response;
+      }
     }
-    if (accessToken) {
-      return redirectAuthedAwayFromAuth(request, accessToken);
-    }
-  }
 
-  // token_auth + anything else: pass through
-  return NextResponse.next();
+    return NextResponse.next();
+  } catch {
+    // Never blank the app from a proxy failure — page/BFF still enforce auth.
+    return NextResponse.next();
+  }
 }
 
 /**

@@ -25,7 +25,14 @@ export function readAccessClaims(token: string): {
       orgId?: unknown;
       platformRole?: unknown;
       hasProductAccess?: unknown;
+      exp?: unknown;
     };
+
+    // Treat expired access tokens as missing so proxy can refresh.
+    if (typeof data.exp === "number" && data.exp * 1000 <= Date.now()) {
+      return null;
+    }
+
     return {
       orgId: data.orgId == null || data.orgId === "" ? null : String(data.orgId),
       platformRole:

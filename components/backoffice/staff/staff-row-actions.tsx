@@ -1,8 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { MoreHorizontalIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,68 +17,67 @@ const ROLES: PlatformRole[] = ["SUPERADMIN", "FINANCE", "OPS"];
 
 export function StaffRowActions({ staff }: { staff: PlatformStaff }) {
   const patch = usePatchPlatformStaff();
-  const [error, setError] = useState<string | null>(null);
 
   async function update(body: {
     role?: PlatformRole;
     status?: "ACTIVE" | "DISABLED";
   }) {
-    setError(null);
     try {
       await patch.mutateAsync({ id: staff.id, body });
+      if (body.role) toast.success(`Role set to ${body.role}`);
+      if (body.status === "DISABLED") toast.success("Staff disabled");
+      if (body.status === "ACTIVE") toast.success("Staff enabled");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Update failed");
+      toast.error(err instanceof Error ? err.message : "Update failed");
     }
   }
 
   return (
-    <div className="flex flex-col items-end gap-1">
-      <DropdownMenu>
-        <DropdownMenuTrigger
-          render={
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              aria-label={`Actions for ${staff.name}`}
-            />
-          }
-        >
-          <MoreHorizontalIcon />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuLabel>Role</DropdownMenuLabel>
-          {ROLES.map((role) => (
-            <DropdownMenuItem
-              key={role}
-              disabled={patch.isPending || staff.role === role}
-              onClick={() => void update({ role })}
-            >
-              {role}
-            </DropdownMenuItem>
-          ))}
-          <DropdownMenuSeparator />
-          <DropdownMenuLabel>Status</DropdownMenuLabel>
-          {staff.status === "ACTIVE" ? (
-            <DropdownMenuItem
-              disabled={patch.isPending}
-              onClick={() => void update({ status: "DISABLED" })}
-            >
-              Disable
-            </DropdownMenuItem>
-          ) : (
-            <DropdownMenuItem
-              disabled={patch.isPending}
-              onClick={() => void update({ status: "ACTIVE" })}
-            >
-              Enable
-            </DropdownMenuItem>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
-      {error ? (
-        <p className="max-w-40 text-right text-xs text-destructive">{error}</p>
-      ) : null}
-    </div>
+    <DropdownMenu>
+      {/* Match topbar: native trigger styles — nested Button via `render` can crash Base UI Menu. */}
+      <DropdownMenuTrigger
+        type="button"
+        disabled={patch.isPending}
+        aria-label={`Actions for ${staff.name}`}
+        className="inline-flex size-7 items-center justify-center rounded-lg text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50"
+      >
+        <MoreHorizontalIcon className="size-4" />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="min-w-40">
+        <DropdownMenuLabel>Role</DropdownMenuLabel>
+        {ROLES.map((role) => (
+          <DropdownMenuItem
+            key={role}
+            disabled={patch.isPending || staff.role === role}
+            onClick={() => {
+              void update({ role });
+            }}
+          >
+            {role}
+          </DropdownMenuItem>
+        ))}
+        <DropdownMenuSeparator />
+        <DropdownMenuLabel>Status</DropdownMenuLabel>
+        {staff.status === "ACTIVE" ? (
+          <DropdownMenuItem
+            disabled={patch.isPending}
+            onClick={() => {
+              void update({ status: "DISABLED" });
+            }}
+          >
+            Disable
+          </DropdownMenuItem>
+        ) : (
+          <DropdownMenuItem
+            disabled={patch.isPending}
+            onClick={() => {
+              void update({ status: "ACTIVE" });
+            }}
+          >
+            Enable
+          </DropdownMenuItem>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

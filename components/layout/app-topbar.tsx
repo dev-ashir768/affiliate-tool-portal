@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { MenuIcon, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -33,7 +32,6 @@ export function AppTopbar({
   onMenuClick: () => void;
   showCloseIcon: boolean;
 }) {
-  const router = useRouter();
   const queryClient = useQueryClient();
   const { data: me } = useMe();
   const displayName = me?.user.name ?? "Account";
@@ -108,7 +106,9 @@ export function AppTopbar({
           <DropdownMenuContent align="end">
             <DropdownMenuItem
               className="cursor-pointer"
-              onClick={() => router.push(settingsHref)}
+              onClick={() => {
+                window.location.assign(settingsHref);
+              }}
             >
               {isStaff ? "Staff console" : "Settings"}
             </DropdownMenuItem>
