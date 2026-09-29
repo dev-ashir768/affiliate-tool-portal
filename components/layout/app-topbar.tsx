@@ -45,8 +45,7 @@ export function AppTopbar({
       await fetch("/api/auth/logout", { method: "POST" });
     } finally {
       queryClient.removeQueries({ queryKey: ["auth", "me"] });
-      router.replace("/login");
-      router.refresh();
+      window.location.replace("/login");
     }
   }
 
