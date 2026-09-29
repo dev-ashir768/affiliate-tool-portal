@@ -227,18 +227,18 @@ export function OrganizationsTable() {
     });
   };
 
-  return (
-    <div className="flex flex-col gap-4">
-      <div>
-        <h1 className="text-lg font-semibold tracking-tight">Organizations</h1>
-        <p className="text-sm text-muted-foreground">
-          Customers (tenants) — filter by subscription health and plan.
-        </p>
-      </div>
+  const filterActive = Boolean(
+    params.subscriptionStatus || params.planCode || params.billingTier,
+  );
 
-      <div className="flex flex-wrap gap-3">
+  const toolbarFilters = (
+    <div className="flex flex-col gap-3">
+      <div className="space-y-1.5">
+        <p className="text-xs font-medium text-muted-foreground">
+          Subscription status
+        </p>
         <AppReactSelect
-          className="min-w-[180px] max-w-xs flex-1"
+          portalMenu
           options={STATUS_OPTIONS}
           value={stringSelectValue(STATUS_OPTIONS, params.subscriptionStatus)}
           onChange={(opt) =>
@@ -249,8 +249,11 @@ export function OrganizationsTable() {
           }
           aria-label="Subscription status"
         />
+      </div>
+      <div className="space-y-1.5">
+        <p className="text-xs font-medium text-muted-foreground">Plan</p>
         <AppReactSelect
-          className="min-w-[160px] max-w-xs flex-1"
+          portalMenu
           options={planOptions}
           value={stringSelectValue(planOptions, params.planCode)}
           onChange={(opt) =>
@@ -261,8 +264,13 @@ export function OrganizationsTable() {
           }
           aria-label="Plan"
         />
+      </div>
+      <div className="space-y-1.5">
+        <p className="text-xs font-medium text-muted-foreground">
+          Billing tier
+        </p>
         <AppReactSelect
-          className="min-w-[160px] max-w-xs flex-1"
+          portalMenu
           options={TIER_OPTIONS}
           value={stringSelectValue(TIER_OPTIONS, params.billingTier ?? "")}
           onChange={(opt) =>
@@ -275,6 +283,17 @@ export function OrganizationsTable() {
           }
           aria-label="Billing tier"
         />
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div>
+        <h1 className="text-lg font-semibold tracking-tight">Organizations</h1>
+        <p className="text-sm text-muted-foreground">
+          Customers (tenants) — filter by subscription health and plan.
+        </p>
       </div>
 
       <DataTable
@@ -293,6 +312,8 @@ export function OrganizationsTable() {
         isError={query.isError}
         onRetry={() => void query.refetch()}
         onRefresh={() => void query.refetch()}
+        toolbarFilters={toolbarFilters}
+        filterActive={filterActive}
         enableColumnOrdering
         pageSizeOptions={[10, 20, 50, 100]}
         getRowId={(row) => row.id}

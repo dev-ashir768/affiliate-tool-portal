@@ -55,6 +55,10 @@ export type DataTableProps<TData extends object> = {
   onFiltersClick?: () => void;
   /** Optional toolbar leading slot (e.g. DateRangePicker). */
   toolbarLeading?: ReactNode;
+  /** Filter controls rendered inside the toolbar filter menu. */
+  toolbarFilters?: ReactNode;
+  /** Highlight filter icon when filters are active. */
+  filterActive?: boolean;
   enableColumnResizing?: boolean;
   enableColumnOrdering?: boolean;
   pageSizeOptions?: number[];

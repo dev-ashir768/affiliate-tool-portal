@@ -37,6 +37,9 @@ export type DataTableToolbarProps<TData extends object> = {
   onFiltersClick?: () => void;
   /** Optional date-range / custom filter controls shown left of search. */
   leading?: ReactNode;
+  /** Filter fields shown in the filter dropdown (replaces "No filters available"). */
+  filters?: ReactNode;
+  filterActive?: boolean;
   isFetching?: boolean;
   isExporting?: boolean;
   disabled?: boolean;
@@ -50,6 +53,8 @@ export function DataTableToolbar<TData extends object>({
   onExport,
   onFiltersClick,
   leading,
+  filters,
+  filterActive = false,
   isFetching = false,
   isExporting = false,
   disabled = false,
@@ -254,7 +259,10 @@ export function DataTableToolbar<TData extends object>({
                       aria-label="Filters"
                       disabled={disabled}
                       onClick={onFiltersClick}
-                      className="size-9"
+                      className={cn(
+                        "size-9",
+                        filterActive && "text-primary",
+                      )}
                     />
                   }
                 >
@@ -262,6 +270,37 @@ export function DataTableToolbar<TData extends object>({
                 </TooltipTrigger>
                 <TooltipContent side="bottom">Filters</TooltipContent>
               </Tooltip>
+            ) : filters ? (
+              <DropdownMenu>
+                <Tooltip>
+                  <TooltipTrigger
+                    delay={200}
+                    render={
+                      <DropdownMenuTrigger
+                        disabled={disabled}
+                        render={
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className={cn(
+                              "size-9",
+                              filterActive && "text-primary",
+                            )}
+                            aria-label="Filters"
+                          />
+                        }
+                      />
+                    }
+                  >
+                    <ListFilter className="size-4" />
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom">Filters</TooltipContent>
+                </Tooltip>
+                <DropdownMenuContent align="end" className="w-72 p-3">
+                  {filters}
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : (
               <DropdownMenu>
                 <Tooltip>
