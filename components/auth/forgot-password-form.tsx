@@ -85,7 +85,7 @@ export default function ForgotPasswordForm() {
       <CardContent>
         {sent ? (
           <div className="space-y-3 text-sm text-muted-foreground">
-            <p>Check your email for reset instructions.</p>
+            <p className="text-center">Check your email for reset instructions.</p>
             {devResetUrl ? (
               <p className="rounded-lg bg-muted/50 p-3 font-mono text-xs break-all text-foreground">
                 Dev reset link:{" "}
