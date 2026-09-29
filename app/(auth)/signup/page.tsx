@@ -1,10 +1,11 @@
 import SignupForm from "@/components/auth/signup-form";
-import { Metadata } from "next";
+import { pageMetadata } from "@/lib/site-metadata";
 
-export const metadata: Metadata = {
-  title: "Signup",
-  description: "Signup to your account",
-};
+export const metadata = pageMetadata({
+  title: "Sign up",
+  description:
+    "Create your Tiksly account and start running TikTok Shop affiliate programs with your team.",
+});
 
 export default function SignupPage() {
   return (

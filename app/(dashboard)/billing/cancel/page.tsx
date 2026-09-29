@@ -1,4 +1,11 @@
 import Link from "next/link";
+import { pageMetadata } from "@/lib/site-metadata";
+
+export const metadata = pageMetadata({
+  title: "Checkout canceled",
+  description:
+    "Your Stripe checkout was canceled. You can return to billing anytime to subscribe to Tiksly.",
+});
 import { buttonVariants } from "@/components/ui/button";
 import {
   Card,

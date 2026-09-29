@@ -1,11 +1,13 @@
 import { Suspense } from "react";
 import { OnboardingPageContent } from "@/components/onboarding/onboarding-page-content";
 import { Skeleton } from "@/components/ui/skeleton";
+import { pageMetadata } from "@/lib/site-metadata";
 
-export const metadata = {
+export const metadata = pageMetadata({
   title: "Choose a plan",
-  description: "Subscribe to unlock Tiksly product features",
-};
+  description:
+    "Pick a Tiksly subscription plan to unlock shops, creators, campaigns, and the rest of your workspace.",
+});
 
 export default function OnboardingPage() {
   return (

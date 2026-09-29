@@ -2,6 +2,13 @@ import { Suspense } from "react";
 import { DataTableSkeleton } from "@/components/data-table/data-table-skeleton";
 import { InviteMemberDialog } from "@/components/team/invite-member-dialog";
 import { MembersTable } from "@/components/team/members-table";
+import { pageMetadata } from "@/lib/site-metadata";
+
+export const metadata = pageMetadata({
+  title: "Team",
+  description:
+    "Invite colleagues and manage roles for your Tiksly organization.",
+});
 
 export default function TeamPage() {
   return (

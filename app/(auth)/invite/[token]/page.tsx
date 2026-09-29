@@ -1,10 +1,12 @@
 import AcceptInviteForm from "@/components/invites/accept-invite-form";
-import { Metadata } from "next";
+import { pageMetadata } from "@/lib/site-metadata";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "Accept invite",
-  description: "Accept your organization invite",
-};
+  description:
+    "Join your team on Tiksly by accepting this organization invite and setting up your account.",
+  noIndex: true,
+});
 
 type Props = { params: Promise<{ token: string }> };
 

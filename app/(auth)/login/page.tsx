@@ -1,11 +1,12 @@
 import { Suspense } from "react";
 import LoginForm from "@/components/auth/login-form";
-import { Metadata } from "next";
+import { pageMetadata } from "@/lib/site-metadata";
 
-export const metadata: Metadata = {
-  title: "Login",
-  description: "Login to your account",
-};
+export const metadata = pageMetadata({
+  title: "Sign in",
+  description:
+    "Sign in to your Tiksly workspace to manage TikTok Shop affiliates, campaigns, and outreach.",
+});
 
 export default function LoginPage() {
   return (
