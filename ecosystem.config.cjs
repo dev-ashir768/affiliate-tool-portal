@@ -10,7 +10,7 @@
 module.exports = {
   apps: [
     {
-      name: "influxa-portal",
+      name: "tiksly-portal",
       cwd: __dirname,
       script: "node_modules/next/dist/bin/next",
       args: "start -p 3001",

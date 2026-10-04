@@ -1,45 +1,41 @@
-/**
- * Decode access JWT payload for routing (platformRole / orgId).
- *
- * Trust boundary: httpOnly cookies are set only by our BFF after API auth.
- * The API still verifies signatures on every call. Decode-only here is for
- * UX redirects / area guards — cookie theft risk is unchanged.
- */
-export function readAccessClaims(token: string): {
+import { jwtVerify } from "jose";
+
+export type AccessClaims = {
   orgId: string | null;
   platformRole: string | null;
   hasProductAccess: boolean;
-} | null {
+};
+
+function accessSecretKey(): Uint8Array | null {
+  const secret = process.env.JWT_ACCESS_SECRET;
+  if (!secret || secret.length < 32) return null;
+  return new TextEncoder().encode(secret);
+}
+
+/**
+ * Verify access JWT signature + expiry for routing (platformRole / orgId).
+ * Requires JWT_ACCESS_SECRET (same as APIs). Returns null if invalid/missing.
+ */
+export async function verifyAccessClaims(
+  token: string
+): Promise<AccessClaims | null> {
+  const key = accessSecretKey();
+  if (!key) {
+    // Misconfigured portal — never trust an unverified payload for authz.
+    return null;
+  }
   try {
-    const parts = token.split(".");
-    if (parts.length < 2) return null;
-    const payload = parts[1];
-    const padded = payload.replace(/-/g, "+").replace(/_/g, "/");
-    const padLen = (4 - (padded.length % 4)) % 4;
-    const b64 = padded + "=".repeat(padLen);
-    const json =
-      typeof atob === "function"
-        ? atob(b64)
-        : Buffer.from(b64, "base64").toString("utf8");
-    const data = JSON.parse(json) as {
-      orgId?: unknown;
-      platformRole?: unknown;
-      hasProductAccess?: unknown;
-      exp?: unknown;
-    };
-
-    // Treat expired access tokens as missing so proxy can refresh.
-    if (typeof data.exp === "number" && data.exp * 1000 <= Date.now()) {
-      return null;
-    }
-
+    const { payload } = await jwtVerify(token, key, { algorithms: ["HS256"] });
     return {
-      orgId: data.orgId == null || data.orgId === "" ? null : String(data.orgId),
-      platformRole:
-        data.platformRole == null || data.platformRole === ""
+      orgId:
+        payload.orgId == null || payload.orgId === ""
           ? null
-          : String(data.platformRole),
-      hasProductAccess: Boolean(data.hasProductAccess),
+          : String(payload.orgId),
+      platformRole:
+        payload.platformRole == null || payload.platformRole === ""
+          ? null
+          : String(payload.platformRole),
+      hasProductAccess: Boolean(payload.hasProductAccess),
     };
   } catch {
     return null;

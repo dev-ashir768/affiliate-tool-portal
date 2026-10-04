@@ -143,29 +143,6 @@ export type BillingOverview = {
   };
 };
 
-export type ProxyStatus = "AVAILABLE" | "IN_USE" | "DISABLED" | "BANNED";
-export type ProxyProtocol = "HTTP" | "HTTPS" | "SOCKS5";
-
-export type PlatformProxy = {
-  id: string;
-  label: string;
-  host: string;
-  port: number;
-  protocol: ProxyProtocol;
-  username: string | null;
-  hasPassword: boolean;
-  region: string | null;
-  status: ProxyStatus;
-  lastCheckedAt: string | null;
-  createdAt: string;
-  updatedAt: string;
-};
-
-export type PlatformProxyListResponse = {
-  data: PlatformProxy[];
-  meta: PlatformListMeta;
-};
-
 export type PlatformCreatorRow = {
   id: string;
   handle: string;
@@ -183,28 +160,6 @@ export type PlatformCreatorRow = {
 export type PlatformCreatorListResponse = {
   data: PlatformCreatorRow[];
   meta: PlatformListMeta;
-};
-
-export type PlatformCrawlerStatus = {
-  status: "IDLE" | "RUNNING" | "DEGRADED" | string;
-  lastRunAt: string | null;
-  lastJobId?: string | null;
-  lastJobState?: string | null;
-  queue?: string;
-  counts?: {
-    waiting: number;
-    active: number;
-    completed: number;
-    failed: number;
-    delayed: number;
-  };
-  note: string;
-};
-
-export type PlatformCrawlerRunResult = {
-  jobId: string;
-  queue: string;
-  status: "QUEUED";
 };
 
 export type AdminNavItem = {

@@ -3,32 +3,25 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createAdminNavItem,
-  createPlatformProxy,
   createPlatformStaff,
   fetchAdminNavigation,
   fetchBillingOverview,
-  fetchPlatformCrawler,
   fetchPlatformCreators,
   createPlatformCreator,
   patchPlatformCreator,
   fetchPlatformOrganization,
   fetchPlatformOrganizations,
   fetchPlatformPlans,
-  fetchPlatformProxies,
   fetchPlatformShops,
   fetchPlatformStaff,
   patchAdminNavItem,
   patchPlatformPlan,
-  patchPlatformProxy,
   patchPlatformStaff,
-  runPlatformCrawlerDryCheck,
 } from "@/services/platform";
 import type { PlatformListParams, PlatformRole } from "@/types/platform";
 import type {
-  CreateProxySchemaType,
   CreateStaffSchemaType,
   PatchPlatformPlanSchemaType,
-  PatchProxySchemaType,
   PatchStaffSchemaType,
 } from "@/validations/platform.validations";
 
@@ -98,47 +91,6 @@ export function useBillingOverview() {
   });
 }
 
-export function usePlatformProxies(
-  params: PlatformListParams = { page: 1, pageSize: 50 },
-) {
-  return useQuery({
-    queryKey: ["platform", "proxies", params],
-    queryFn: ({ signal }) => fetchPlatformProxies(params, signal),
-    retry: false,
-  });
-}
-
-export function useCreatePlatformProxy() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (body: CreateProxySchemaType) => createPlatformProxy(body),
-    onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: ["platform", "proxies"] });
-    },
-  });
-}
-
-export function usePatchPlatformProxy() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: ({ id, body }: { id: string; body: PatchProxySchemaType }) =>
-      patchPlatformProxy(id, body),
-    onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: ["platform", "proxies"] });
-    },
-  });
-}
-
-export function usePlatformCrawler() {
-  return useQuery({
-    queryKey: ["platform", "crawler"],
-    queryFn: ({ signal }) => fetchPlatformCrawler(signal),
-    refetchInterval: (q) =>
-      q.state.data?.status === "RUNNING" ? 2_000 : false,
-    retry: false,
-  });
-}
-
 export function usePlatformCreators(
   params: PlatformListParams & { organizationId?: string },
 ) {
@@ -172,16 +124,6 @@ export function usePatchPlatformCreator() {
     }) => patchPlatformCreator(id, body),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["platform", "creators"] });
-    },
-  });
-}
-
-export function useRunPlatformCrawlerDryCheck() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: runPlatformCrawlerDryCheck,
-    onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: ["platform", "crawler"] });
     },
   });
 }

@@ -3,12 +3,15 @@ import {
   ACCESS_TOKEN_COOKIE,
   REFRESH_TOKEN_COOKIE,
   accessCookieOptions,
+  clearAccessCookieOptions,
+  clearRefreshCookieOptions,
   getApiBaseUrl,
+  getPortalBffSecret,
   refreshCookieOptions,
 } from "@/lib/auth/constants";
 import {
   defaultRedirectForClaims,
-  readAccessClaims,
+  verifyAccessClaims,
 } from "@/lib/auth/access-token";
 import {
   classifyRoute,
@@ -19,14 +22,28 @@ import {
 
 async function rotateTokens(refreshToken: string) {
   try {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    const bffSecret = getPortalBffSecret();
+    if (bffSecret) headers["X-Portal-Bff-Secret"] = bffSecret;
+
     const res = await fetch(`${getApiBaseUrl()}/api/v1/auth/refresh`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: JSON.stringify({ refreshToken }),
       cache: "no-store",
     });
     if (!res.ok) return null;
-    return (await res.json()) as { accessToken: string; refreshToken: string };
+    const data = (await res.json()) as {
+      accessToken: string;
+      refreshToken?: string;
+    };
+    if (!data.accessToken || !data.refreshToken) return null;
+    return {
+      accessToken: data.accessToken,
+      refreshToken: data.refreshToken,
+    };
   } catch {
     return null;
   }
@@ -49,8 +66,14 @@ function applySessionCookies(
 }
 
 function clearSessionCookies(response: NextResponse) {
-  response.cookies.delete(ACCESS_TOKEN_COOKIE);
-  response.cookies.delete(REFRESH_TOKEN_COOKIE);
+  response.cookies.set(ACCESS_TOKEN_COOKIE, "", {
+    ...clearAccessCookieOptions(),
+    maxAge: 0,
+  });
+  response.cookies.set(REFRESH_TOKEN_COOKIE, "", {
+    ...clearRefreshCookieOptions(),
+    maxAge: 0,
+  });
 }
 
 function copySessionCookies(from: NextResponse, to: NextResponse) {
@@ -65,11 +88,11 @@ function redirectToLogin(request: NextRequest, pathname: string) {
   return NextResponse.redirect(loginUrl);
 }
 
-function redirectAuthedAwayFromAuth(
+async function redirectAuthedAwayFromAuth(
   request: NextRequest,
   accessToken: string
-): NextResponse {
-  const claims = readAccessClaims(accessToken);
+): Promise<NextResponse> {
+  const claims = await verifyAccessClaims(accessToken);
   if (!claims) {
     const login = NextResponse.redirect(new URL("/login", request.url));
     clearSessionCookies(login);
@@ -81,18 +104,17 @@ function redirectAuthedAwayFromAuth(
 }
 
 /**
- * Area guards after a session token is available.
- * Strict isolation by role — nobody crosses into the other area's work:
+ * Area guards after a verified session token is available.
  * - staff (platformRole) → /backoffice/* only
  * - merchant (orgId, no platformRole) → product routes only
  */
-function enforceAreaAccess(
+async function enforceAreaAccess(
   request: NextRequest,
   accessToken: string,
   kind: RouteClass,
   response: NextResponse
-): NextResponse {
-  const claims = readAccessClaims(accessToken);
+): Promise<NextResponse> {
+  const claims = await verifyAccessClaims(accessToken);
   if (!claims) {
     const login = redirectToLogin(request, request.nextUrl.pathname);
     clearSessionCookies(login);
@@ -139,7 +161,7 @@ function enforceAreaAccess(
 }
 
 /**
- * Prefer a valid (non-expired) access token; otherwise rotate via refresh.
+ * Prefer a valid (signature-verified) access token; otherwise rotate via refresh.
  */
 async function ensureAccessToken(
   accessToken: string | undefined,
@@ -149,7 +171,7 @@ async function ensureAccessToken(
   sessionResponse: NextResponse | null;
   cleared: boolean;
 }> {
-  if (accessToken && readAccessClaims(accessToken)) {
+  if (accessToken && (await verifyAccessClaims(accessToken))) {
     return { accessToken, sessionResponse: null, cleared: false };
   }
 
@@ -176,17 +198,17 @@ async function ensureAccessToken(
 }
 
 export async function proxy(request: NextRequest) {
-  try {
-    const { pathname } = request.nextUrl;
-    const kind = classifyRoute(pathname);
+  const { pathname } = request.nextUrl;
+  const kind = classifyRoute(pathname);
 
+  try {
     const rawAccess = request.cookies.get(ACCESS_TOKEN_COOKIE)?.value;
     const refreshToken = request.cookies.get(REFRESH_TOKEN_COOKIE)?.value;
 
     if (kind === "entry") {
       const ensured = await ensureAccessToken(rawAccess, refreshToken);
       if (ensured.accessToken) {
-        const response = redirectAuthedAwayFromAuth(
+        const response = await redirectAuthedAwayFromAuth(
           request,
           ensured.accessToken
         );
@@ -216,7 +238,7 @@ export async function proxy(request: NextRequest) {
     if (kind === "guest_auth") {
       const ensured = await ensureAccessToken(rawAccess, refreshToken);
       if (ensured.accessToken) {
-        const response = redirectAuthedAwayFromAuth(
+        const response = await redirectAuthedAwayFromAuth(
           request,
           ensured.accessToken
         );
@@ -234,7 +256,12 @@ export async function proxy(request: NextRequest) {
 
     return NextResponse.next();
   } catch {
-    // Never blank the app from a proxy failure — page/BFF still enforce auth.
+    // Fail closed for protected / entry routes — never skip auth on proxy errors.
+    if (isProtectedRoute(kind) || kind === "entry") {
+      const login = redirectToLogin(request, pathname);
+      clearSessionCookies(login);
+      return login;
+    }
     return NextResponse.next();
   }
 }

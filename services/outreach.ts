@@ -73,7 +73,7 @@ export async function fetchOutreachEmailStatus(signal?: AbortSignal) {
     signal,
   });
   return (await parseJson(res)) as {
-    provider: "console" | "smtp" | "resend";
+    provider: "console" | "smtp";
     fromSet: boolean;
     live: boolean;
     ready: boolean;
