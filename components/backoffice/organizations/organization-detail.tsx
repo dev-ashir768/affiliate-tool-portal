@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { toast } from "sonner";
 import {
   Card,
   CardContent,
@@ -9,11 +10,17 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { buttonVariants } from "@/components/ui/button";
-import { usePlatformOrganization } from "@/hooks/use-platform";
+import { Badge } from "@/components/ui/badge";
+import { Button, buttonVariants } from "@/components/ui/button";
+import {
+  usePlatformOrganization,
+  useRevokePlatformOrganizationAccess,
+} from "@/hooks/use-platform";
+import { GrantAccessDialog } from "@/components/backoffice/organizations/grant-access-dialog";
 
 export function OrganizationDetail({ id }: { id: string }) {
   const query = usePlatformOrganization(id);
+  const revoke = useRevokePlatformOrganizationAccess();
 
   if (query.isLoading) {
     return (
@@ -48,6 +55,25 @@ export function OrganizationDetail({ id }: { id: string }) {
   }
 
   const org = query.data;
+  const billingSource = org.billingSource ?? "none";
+
+  async function handleRevokeAccess() {
+    if (
+      !window.confirm(
+        "Revoke complimentary access for this organization? They will lose product access when the change applies.",
+      )
+    ) {
+      return;
+    }
+    try {
+      await revoke.mutateAsync({ id, body: {} });
+      toast.success("Complimentary access revoked");
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Failed to revoke access",
+      );
+    }
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -97,11 +123,35 @@ export function OrganizationDetail({ id }: { id: string }) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Billing</CardTitle>
-          <CardDescription>
-            Invoices and payment methods are managed in Stripe. Merchants open
-            Customer Portal from /billing.
-          </CardDescription>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="space-y-1.5">
+              <CardTitle>Billing</CardTitle>
+              <CardDescription>
+                {billingSource === "manual"
+                  ? "Complimentary access is managed by the platform team."
+                  : "Invoices and payment methods are managed in Stripe. Merchants open Customer Portal from /billing."}
+              </CardDescription>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="secondary">
+                Billing source: {billingSource}
+              </Badge>
+              {billingSource !== "stripe" ? (
+                <GrantAccessDialog organizationId={id} />
+              ) : null}
+              {billingSource === "manual" ? (
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="sm"
+                  disabled={revoke.isPending}
+                  onClick={() => void handleRevokeAccess()}
+                >
+                  {revoke.isPending ? "Revoking…" : "Revoke access"}
+                </Button>
+              ) : null}
+            </div>
+          </div>
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
           <div className="grid gap-2 sm:grid-cols-2">
@@ -137,7 +187,7 @@ export function OrganizationDetail({ id }: { id: string }) {
                 Open Stripe customer
               </a>
             ) : null}
-            {org.stripeSubscriptionId ? (
+            {billingSource === "stripe" && org.stripeSubscriptionId ? (
               <a
                 href={`https://dashboard.stripe.com/subscriptions/${org.stripeSubscriptionId}`}
                 target="_blank"
