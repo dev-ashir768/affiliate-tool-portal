@@ -42,3 +42,21 @@ export const patchPlatformPlanSchema = z
 export type PatchPlatformPlanSchemaType = z.infer<
   typeof patchPlatformPlanSchema
 >;
+
+export const grantPlatformAccessSchema = z.object({
+  planCode: z.string().trim().min(1).max(40),
+  currentPeriodEnd: z.string().datetime().optional().nullable(),
+  note: z.string().trim().max(500).optional(),
+});
+
+export type GrantPlatformAccessSchemaType = z.infer<
+  typeof grantPlatformAccessSchema
+>;
+
+export const revokePlatformAccessSchema = z.object({
+  note: z.string().trim().max(500).optional(),
+});
+
+export type RevokePlatformAccessSchemaType = z.infer<
+  typeof revokePlatformAccessSchema
+>;

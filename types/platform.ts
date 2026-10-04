@@ -30,6 +30,8 @@ export type PlatformListMeta = {
   pageSize: number;
 };
 
+export type BillingSource = "manual" | "stripe" | "none";
+
 export type PlatformStaffListResponse = {
   data: PlatformStaff[];
   meta: PlatformListMeta;
@@ -48,6 +50,7 @@ export type PlatformOrgSummary = {
   currentPeriodEnd: string | null;
   hasProductAccess?: boolean;
   stripeCustomerId?: string | null;
+  billingSource?: BillingSource;
   shopCount?: number;
   memberCount?: number;
 };

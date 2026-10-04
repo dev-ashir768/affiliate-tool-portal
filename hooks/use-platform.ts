@@ -11,6 +11,8 @@ import {
   patchPlatformCreator,
   fetchPlatformOrganization,
   fetchPlatformOrganizations,
+  grantPlatformOrganizationAccess,
+  revokePlatformOrganizationAccess,
   fetchPlatformPlans,
   fetchPlatformShops,
   fetchPlatformStaff,
@@ -21,8 +23,10 @@ import {
 import type { PlatformListParams, PlatformRole } from "@/types/platform";
 import type {
   CreateStaffSchemaType,
+  GrantPlatformAccessSchemaType,
   PatchPlatformPlanSchemaType,
   PatchStaffSchemaType,
+  RevokePlatformAccessSchemaType,
 } from "@/validations/platform.validations";
 
 export function usePlatformStaff(params: PlatformListParams) {
@@ -70,6 +74,40 @@ export function usePlatformOrganization(id: string) {
     queryFn: ({ signal }) => fetchPlatformOrganization(id, signal),
     enabled: Boolean(id),
     retry: false,
+  });
+}
+
+export function useGrantPlatformOrganizationAccess() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      id,
+      body,
+    }: {
+      id: string;
+      body: GrantPlatformAccessSchemaType;
+    }) => grantPlatformOrganizationAccess(id, body),
+    onSuccess: (_data, { id }) => {
+      void qc.invalidateQueries({ queryKey: ["platform", "organizations", id] });
+      void qc.invalidateQueries({ queryKey: ["platform", "organizations"] });
+    },
+  });
+}
+
+export function useRevokePlatformOrganizationAccess() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      id,
+      body,
+    }: {
+      id: string;
+      body: RevokePlatformAccessSchemaType;
+    }) => revokePlatformOrganizationAccess(id, body),
+    onSuccess: (_data, { id }) => {
+      void qc.invalidateQueries({ queryKey: ["platform", "organizations", id] });
+      void qc.invalidateQueries({ queryKey: ["platform", "organizations"] });
+    },
   });
 }
 

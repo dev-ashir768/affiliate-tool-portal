@@ -14,7 +14,9 @@ import type {
 } from "@/types/platform";
 import type {
   CreateStaffSchemaType,
+  GrantPlatformAccessSchemaType,
   PatchStaffSchemaType,
+  RevokePlatformAccessSchemaType,
 } from "@/validations/platform.validations";
 
 function toQuery(params: Record<string, string | number | undefined | null>) {
@@ -92,6 +94,38 @@ export async function fetchPlatformOrganization(
     {
       credentials: "include",
       signal,
+    },
+  );
+  return (await parseJson(res)) as PlatformOrgDetail;
+}
+
+export async function grantPlatformOrganizationAccess(
+  id: string,
+  body: GrantPlatformAccessSchemaType,
+): Promise<PlatformOrgDetail> {
+  const res = await fetch(
+    `/api/platform/organizations/${encodeURIComponent(id)}/grant-access`,
+    {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    },
+  );
+  return (await parseJson(res)) as PlatformOrgDetail;
+}
+
+export async function revokePlatformOrganizationAccess(
+  id: string,
+  body: RevokePlatformAccessSchemaType,
+): Promise<PlatformOrgDetail> {
+  const res = await fetch(
+    `/api/platform/organizations/${encodeURIComponent(id)}/revoke-access`,
+    {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
     },
   );
   return (await parseJson(res)) as PlatformOrgDetail;
