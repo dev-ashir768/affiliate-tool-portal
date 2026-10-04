@@ -60,10 +60,11 @@ export function GrantAccessDialog({ organizationId }: { organizationId: string }
       return;
     }
     const trimmedNote = note.trim();
-    const currentPeriodEnd = periodEndLocal.trim()
-      ? new Date(periodEndLocal).toISOString()
-      : null;
     try {
+      let currentPeriodEnd: string | null = null;
+      if (periodEndLocal.trim()) {
+        currentPeriodEnd = new Date(periodEndLocal).toISOString();
+      }
       await grant.mutateAsync({
         id: organizationId,
         body: {
