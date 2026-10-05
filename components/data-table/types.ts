@@ -31,8 +31,6 @@ export const dataTableFeatures = tableFeatures({
 
 export type DataTableFeatures = typeof dataTableFeatures;
 
-export type DataTableExportFormat = "csv" | "xlsx";
-
 export type { ColumnOrderState, ColumnSizingState, ColumnVisibilityState };
 
 export type DataTableProps<TData extends object> = {
@@ -50,7 +48,6 @@ export type DataTableProps<TData extends object> = {
   isFetching?: boolean;
   isError?: boolean;
   onRetry?: () => void;
-  onExport?: (format: DataTableExportFormat) => Promise<void>;
   onRefresh?: () => void;
   onFiltersClick?: () => void;
   /** Optional toolbar leading slot (e.g. DateRangePicker). */

@@ -232,7 +232,6 @@ export function DataTable<TData extends object>({
   isFetching = false,
   isError = false,
   onRetry,
-  onExport,
   onRefresh,
   onFiltersClick,
   toolbarLeading,
@@ -362,7 +361,6 @@ export function DataTable<TData extends object>({
         search={search}
         onSearchChange={onSearchChange}
         onRefresh={onRefresh}
-        onExport={onExport}
         onFiltersClick={onFiltersClick}
         leading={toolbarLeading}
         filters={toolbarFilters}

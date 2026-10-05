@@ -20,11 +20,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { DataTableColumnVisibility } from "@/components/data-table/data-table-column-visibility";
-import { DataTableExport } from "@/components/data-table/data-table-export";
-import type {
-  DataTableExportFormat,
-  DataTableFeatures,
-} from "@/components/data-table/types";
+import type { DataTableFeatures } from "@/components/data-table/types";
 
 const SEARCH_DEBOUNCE_MS = 400;
 
@@ -33,7 +29,6 @@ export type DataTableToolbarProps<TData extends object> = {
   search: string;
   onSearchChange: (value: string) => void;
   onRefresh?: () => void;
-  onExport?: (format: DataTableExportFormat) => Promise<void>;
   onFiltersClick?: () => void;
   /** Optional date-range / custom filter controls shown left of search. */
   leading?: ReactNode;
@@ -41,7 +36,6 @@ export type DataTableToolbarProps<TData extends object> = {
   filters?: ReactNode;
   filterActive?: boolean;
   isFetching?: boolean;
-  isExporting?: boolean;
   disabled?: boolean;
 };
 
@@ -50,13 +44,11 @@ export function DataTableToolbar<TData extends object>({
   search,
   onSearchChange,
   onRefresh,
-  onExport,
   onFiltersClick,
   leading,
   filters,
   filterActive = false,
   isFetching = false,
-  isExporting = false,
   disabled = false,
 }: DataTableToolbarProps<TData>) {
   const [inputValue, setInputValue] = useState(search);
@@ -237,14 +229,6 @@ export function DataTableToolbar<TData extends object>({
                 </TooltipTrigger>
                 <TooltipContent side="bottom">Refresh</TooltipContent>
               </Tooltip>
-            ) : null}
-
-            {onExport ? (
-              <DataTableExport
-                onExport={onExport}
-                isExporting={isExporting}
-                disabled={disabled}
-              />
             ) : null}
 
             {onFiltersClick ? (
