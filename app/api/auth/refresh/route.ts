@@ -27,6 +27,20 @@ export async function POST() {
       body: JSON.stringify({ refreshToken }),
     });
 
+    if (!data.accessToken?.trim() || !data.refreshToken?.trim()) {
+      await clearSessionCookies();
+      return NextResponse.json(
+        {
+          error: {
+            code: "UNAUTHORIZED",
+            message:
+              "Auth tokens missing from API. Check PORTAL_BFF_SECRET matches on portal and APIs.",
+          },
+        },
+        { status: 401 },
+      );
+    }
+
     await setSessionCookies({
       accessToken: data.accessToken,
       refreshToken: data.refreshToken,

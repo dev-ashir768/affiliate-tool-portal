@@ -45,7 +45,7 @@ export type PatchPlatformPlanSchemaType = z.infer<
 
 export const grantPlatformAccessSchema = z.object({
   planCode: z.string().trim().min(1).max(40),
-  currentPeriodEnd: z.string().datetime().optional().nullable(),
+  currentPeriodEnd: z.string().datetime(),
   note: z.string().trim().max(500).optional(),
 });
 

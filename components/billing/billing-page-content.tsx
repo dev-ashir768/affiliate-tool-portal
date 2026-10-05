@@ -19,6 +19,7 @@ import {
 } from "@/hooks/use-billing-actions";
 import { useBillingOverview } from "@/hooks/use-billing-overview";
 import { useMe } from "@/hooks/use-me";
+import { redirectToBillingUrl } from "@/lib/billing/stripe-redirect";
 
 function formatStatus(status: string | null | undefined) {
   if (!status) return "None";
@@ -77,7 +78,7 @@ export function BillingPageContent() {
             ? "Applying upgrade…"
             : "Redirecting to Stripe Checkout",
       );
-      window.location.href = session.url;
+      redirectToBillingUrl(session.url);
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Failed to change plan";
@@ -92,7 +93,7 @@ export function BillingPageContent() {
     try {
       const session = await portal.mutateAsync();
       toast.success("Opening Stripe billing portal");
-      window.location.href = session.url;
+      redirectToBillingUrl(session.url);
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Failed to open billing portal";

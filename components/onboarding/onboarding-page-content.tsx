@@ -15,6 +15,7 @@ import { useBillingPlans } from "@/hooks/use-billing-plans";
 import { useCheckoutSession } from "@/hooks/use-billing-actions";
 import { useMe } from "@/hooks/use-me";
 import { useOrg } from "@/hooks/use-org";
+import { redirectToBillingUrl } from "@/lib/billing/stripe-redirect";
 
 export function OnboardingPageContent() {
   const searchParams = useSearchParams();
@@ -56,7 +57,7 @@ export function OnboardingPageContent() {
           ? "Plan updated"
           : "Redirecting to Stripe Checkout",
       );
-      window.location.href = session.url;
+      redirectToBillingUrl(session.url);
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Failed to start checkout";

@@ -59,12 +59,13 @@ export function GrantAccessDialog({ organizationId }: { organizationId: string }
       toast.error("Select a plan");
       return;
     }
+    if (!periodEndLocal.trim()) {
+      toast.error("Set when access ends");
+      return;
+    }
     const trimmedNote = note.trim();
     try {
-      let currentPeriodEnd: string | null = null;
-      if (periodEndLocal.trim()) {
-        currentPeriodEnd = new Date(periodEndLocal).toISOString();
-      }
+      const currentPeriodEnd = new Date(periodEndLocal).toISOString();
       await grant.mutateAsync({
         id: organizationId,
         body: {
@@ -92,8 +93,8 @@ export function GrantAccessDialog({ organizationId }: { organizationId: string }
         <DialogHeader>
           <DialogTitle>Grant complimentary access</DialogTitle>
           <DialogDescription>
-            Assign a paid plan without Stripe billing. Optional end date limits
-            how long access lasts.
+            Assign a paid plan without Stripe billing. An end date is required
+            so complimentary access cannot run forever.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-3">
@@ -126,13 +127,14 @@ export function GrantAccessDialog({ organizationId }: { organizationId: string }
               htmlFor="grant-period-end"
               className="text-xs font-medium text-muted-foreground"
             >
-              Access ends (optional)
+              Access ends
             </label>
             <Input
               id="grant-period-end"
               type="datetime-local"
               value={periodEndLocal}
               onChange={(e) => setPeriodEndLocal(e.target.value)}
+              required
             />
           </div>
           <div className="space-y-1.5">
@@ -163,7 +165,7 @@ export function GrantAccessDialog({ organizationId }: { organizationId: string }
           </Button>
           <Button
             type="button"
-            disabled={grant.isPending || !planCode}
+            disabled={grant.isPending || !planCode || !periodEndLocal.trim()}
             onClick={() => void onSubmit()}
           >
             {grant.isPending ? "Granting…" : "Grant access"}

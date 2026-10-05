@@ -23,6 +23,19 @@ export async function POST(request: Request) {
       body: JSON.stringify(body),
     });
 
+    if (!data.accessToken?.trim() || !data.refreshToken?.trim()) {
+      return NextResponse.json(
+        {
+          error: {
+            code: "INTERNAL",
+            message:
+              "Auth tokens missing from API. Check PORTAL_BFF_SECRET matches on portal and APIs.",
+          },
+        },
+        { status: 502 },
+      );
+    }
+
     await setSessionCookies({
       accessToken: data.accessToken,
       refreshToken: data.refreshToken,

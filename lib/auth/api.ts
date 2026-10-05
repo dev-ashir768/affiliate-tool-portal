@@ -1,4 +1,4 @@
-import { getApiBaseUrl, getPortalBffSecret } from "./constants";
+import { getApiBaseUrl, requirePortalBffSecret } from "./constants";
 
 export type ApiErrorBody = {
   error?: { code?: string; message?: string; details?: unknown };
@@ -33,10 +33,7 @@ export async function apiFetch<T>(
   if (accessToken) {
     headers.set("Authorization", `Bearer ${accessToken}`);
   }
-  const bffSecret = getPortalBffSecret();
-  if (bffSecret) {
-    headers.set("X-Portal-Bff-Secret", bffSecret);
-  }
+  headers.set("X-Portal-Bff-Secret", requirePortalBffSecret());
 
   const res = await fetch(url, {
     ...requestInit,

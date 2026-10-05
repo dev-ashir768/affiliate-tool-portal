@@ -54,3 +54,17 @@ export function getPortalBffSecret(): string | undefined {
   const v = process.env.PORTAL_BFF_SECRET?.trim();
   return v || undefined;
 }
+
+/**
+ * BFF → API shared secret. Required in production; recommended in all envs.
+ * Throws when missing so misconfig fails closed instead of silently dropping refresh tokens.
+ */
+export function requirePortalBffSecret(): string {
+  const secret = getPortalBffSecret();
+  if (!secret) {
+    throw new Error(
+      "PORTAL_BFF_SECRET is required. Set the same value on portal and APIs.",
+    );
+  }
+  return secret;
+}

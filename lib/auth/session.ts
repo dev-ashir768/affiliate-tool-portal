@@ -15,6 +15,9 @@ export type SessionTokens = {
 };
 
 export async function setSessionCookies(tokens: SessionTokens) {
+  if (!tokens.accessToken?.trim() || !tokens.refreshToken?.trim()) {
+    throw new Error("Both accessToken and refreshToken are required");
+  }
   const jar = await cookies();
   jar.set(ACCESS_TOKEN_COOKIE, tokens.accessToken, accessCookieOptions());
   jar.set(REFRESH_TOKEN_COOKIE, tokens.refreshToken, refreshCookieOptions());

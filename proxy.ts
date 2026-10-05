@@ -6,7 +6,7 @@ import {
   clearAccessCookieOptions,
   clearRefreshCookieOptions,
   getApiBaseUrl,
-  getPortalBffSecret,
+  requirePortalBffSecret,
   refreshCookieOptions,
 } from "@/lib/auth/constants";
 import {
@@ -24,9 +24,8 @@ async function rotateTokens(refreshToken: string) {
   try {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
+      "X-Portal-Bff-Secret": requirePortalBffSecret(),
     };
-    const bffSecret = getPortalBffSecret();
-    if (bffSecret) headers["X-Portal-Bff-Secret"] = bffSecret;
 
     const res = await fetch(`${getApiBaseUrl()}/api/v1/auth/refresh`, {
       method: "POST",
