@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "cn";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,11 @@ import {
   type SelectOption,
 } from "@/components/ui/react-select";
 
+import { Field, FieldLabel } from "@/components/ui/field";
+import { Textarea } from "@/components/ui/textarea";
+import { CheckboxLabel } from "@/components/ui/checkbox";
+import { PageHeader } from "@/components/layout/page-header";
+import { FormGrid, SectionCard } from "@/components/layout/section-card";
 export function OutreachPageContent() {
   const templatesQuery = useOutreachTemplates();
   const messagesQuery = useOutreachMessages();
@@ -219,30 +225,42 @@ export function OutreachPageContent() {
   }
 
   if (templatesQuery.isLoading || creatorsQuery.isLoading) {
-    return <Skeleton className="h-48 w-full" />;
+    return (
+      <div className="flex flex-col gap-6">
+        <Skeleton className="h-14 w-full max-w-md" />
+        <div className="grid gap-6 lg:grid-cols-2">
+          <Skeleton className="h-80 w-full" />
+          <Skeleton className="h-80 w-full" />
+        </div>
+      </div>
+    );
   }
 
   const messages = messagesQuery.data?.messages ?? [];
   const saving = createTemplate.isPending || patchTemplate.isPending;
   const delivery = emailStatus.data;
+  const sendBlocked = delivery?.ready === false;
 
   return (
-    <div className="flex flex-col gap-8">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Outreach</h1>
-        <p className="text-sm text-muted-foreground">
-          Email templates with {"{{handle}}"} / {"{{displayName}}"} tokens.
-          Single or bulk send to CRM creators.
-        </p>
-      </div>
+    <div className="flex flex-col gap-6">
+      <PageHeader
+        title="Outreach"
+        description={
+          <>
+            Email templates with {"{{handle}}"} / {"{{displayName}}"} tokens.
+            Single or bulk send to CRM creators.
+          </>
+        }
+      />
 
       {delivery ? (
         <div
-          className={`rounded-xl border px-4 py-3 text-sm ${
+          className={cn(
+            "rounded-xl border px-4 py-3 text-sm",
             delivery.ready
-              ? "border-border bg-muted/30 text-muted-foreground"
-              : "border-destructive/40 bg-destructive/5 text-destructive"
-          }`}
+              ? "border-border bg-card text-muted-foreground"
+              : "border-destructive/40 bg-destructive/5 text-destructive",
+          )}
         >
           <span className="font-medium text-foreground">
             Email: {delivery.provider}
@@ -255,217 +273,251 @@ export function OutreachPageContent() {
         </div>
       ) : null}
 
-      <form onSubmit={(e) => void onSaveTemplate(e)} className="space-y-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <h2 className="text-sm font-semibold">
-            {editingId ? "Edit template" : "New template"}
-          </h2>
-          {editingId ? (
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                setEditingId(null);
-                setName("");
-              }}
-            >
-              Cancel edit
-            </Button>
-          ) : null}
-        </div>
-        {templates.length > 0 ? (
-          <div className="flex flex-wrap gap-2">
-            {templates.map((t) => (
+      <div className="grid gap-6 lg:grid-cols-2">
+        <SectionCard
+          title={editingId ? "Edit template" : "New template"}
+          description="Pick an existing template to edit, or write a new one."
+          actions={
+            editingId ? (
               <Button
-                key={t.id}
                 type="button"
+                variant="ghost"
                 size="sm"
-                variant={editingId === t.id ? "default" : "outline"}
-                onClick={() => loadTemplate(t.id)}
+                onClick={() => {
+                  setEditingId(null);
+                  setName("");
+                }}
               >
-                {t.name}
+                Cancel edit
               </Button>
-            ))}
-          </div>
-        ) : null}
-        <Input
-          placeholder="Template name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="max-w-sm"
-        />
-        <Input
-          placeholder="Subject"
-          value={subject}
-          onChange={(e) => setSubject(e.target.value)}
-        />
-        <textarea
-          className="min-h-28 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-          value={bodyText}
-          onChange={(e) => setBodyText(e.target.value)}
-        />
-        <Button type="submit" disabled={saving}>
-          {editingId ? "Update template" : "Save template"}
-        </Button>
-      </form>
-
-      <section className="space-y-3">
-        <h2 className="text-sm font-semibold">Send</h2>
-        <div className="flex flex-wrap gap-2">
-          <AppReactSelect
-            className="min-w-48"
-            options={templateOptions}
-            value={stringSelectValue(templateOptions, templateId)}
-            onChange={(opt) =>
-              setTemplateId(opt?.value ? String(opt.value) : "")
-            }
-            isSearchable={templates.length > 8}
-            aria-label="Outreach template"
-          />
-          <AppReactSelect
-            className="min-w-40"
-            options={campaignOptions}
-            value={stringSelectValue(campaignOptions, campaignId)}
-            onChange={(opt) =>
-              setCampaignId(opt?.value ? String(opt.value) : "")
-            }
-            isSearchable={campaigns.length > 8}
-            aria-label="Campaign"
-          />
-          <AppReactSelect
-            className="min-w-48"
-            options={listOptions}
-            value={stringSelectValue(listOptions, listId)}
-            onChange={(opt) => {
-              const next = opt?.value ? String(opt.value) : "";
-              setListId(next);
-              if (next) setSelectedIds(new Set());
-            }}
-            isSearchable={(listsQuery.data?.lists?.length ?? 0) > 8}
-            aria-label="Creator list"
-          />
-        </div>
-
-        <form onSubmit={(e) => void onSend(e)} className="flex flex-wrap gap-2">
-          <AppReactSelect
-            className="min-w-48"
-            options={creatorOptions}
-            value={stringSelectValue(creatorOptions, creatorId)}
-            onChange={(opt) =>
-              setCreatorId(opt?.value ? String(opt.value) : "")
-            }
-            isSearchable
-            aria-label="Single creator"
-          />
-          <Button
-            type="submit"
-            disabled={send.isPending || delivery?.ready === false}
+            ) : undefined
+          }
+        >
+          <form
+            onSubmit={(e) => void onSaveTemplate(e)}
+            className="flex h-full flex-col gap-4"
           >
-            {send.isPending ? "Sending…" : "Send one"}
-          </Button>
-        </form>
-
-        <div className="space-y-2 rounded-xl border border-border p-3">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <h3 className="text-sm font-medium">
-              Bulk ({listId ? "using list" : `${selectedIds.size} selected`})
-            </h3>
+            {templates.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {templates.map((t) => (
+                  <Button
+                    key={t.id}
+                    type="button"
+                    size="sm"
+                    variant={editingId === t.id ? "default" : "outline"}
+                    onClick={() => loadTemplate(t.id)}
+                  >
+                    {t.name}
+                  </Button>
+                ))}
+              </div>
+            ) : null}
+            <Field>
+              <FieldLabel htmlFor="template-name">Template name</FieldLabel>
+              <Input
+                id="template-name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="template-subject">Subject</FieldLabel>
+              <Input
+                id="template-subject"
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+              />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="template-body">Body</FieldLabel>
+              <Textarea
+                id="template-body"
+                value={bodyText}
+                onChange={(e) => setBodyText(e.target.value)}
+                rows={7}
+              />
+            </Field>
             <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              onClick={selectAllWithEmail}
+              type="submit"
+              size="lg"
+              className="mt-auto self-end"
+              disabled={saving}
             >
-              Select all with email ({withEmail.length})
+              {editingId ? "Update template" : "Save template"}
             </Button>
-          </div>
-          <div className="max-h-40 space-y-1 overflow-y-auto text-sm">
-            {creators.length === 0 ? (
-              <p className="text-muted-foreground">No CRM creators yet.</p>
-            ) : (
-              creators.map((c) => (
-                <label
-                  key={c.id}
-                  className="flex cursor-pointer items-center gap-2"
+          </form>
+        </SectionCard>
+
+        <SectionCard
+          title="Send"
+          description="Send to one creator, or queue a bulk send to a list or selection."
+        >
+          <div className="flex flex-col gap-5">
+            <FormGrid columns={2}>
+              <Field>
+                <FieldLabel>Template</FieldLabel>
+                <AppReactSelect
+                  options={templateOptions}
+                  value={stringSelectValue(templateOptions, templateId)}
+                  onChange={(opt) =>
+                    setTemplateId(opt?.value ? String(opt.value) : "")
+                  }
+                  isSearchable={templates.length > 8}
+                  aria-label="Outreach template"
+                />
+              </Field>
+              <Field>
+                <FieldLabel>Campaign</FieldLabel>
+                <AppReactSelect
+                  options={campaignOptions}
+                  value={stringSelectValue(campaignOptions, campaignId)}
+                  onChange={(opt) =>
+                    setCampaignId(opt?.value ? String(opt.value) : "")
+                  }
+                  isSearchable={campaigns.length > 8}
+                  aria-label="Campaign"
+                />
+              </Field>
+            </FormGrid>
+
+            <form
+              onSubmit={(e) => void onSend(e)}
+              className="flex flex-col gap-2 rounded-lg border p-4"
+            >
+              <FieldLabel>Single creator</FieldLabel>
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <AppReactSelect
+                  className="min-w-0 flex-1"
+                  options={creatorOptions}
+                  value={stringSelectValue(creatorOptions, creatorId)}
+                  onChange={(opt) =>
+                    setCreatorId(opt?.value ? String(opt.value) : "")
+                  }
+                  isSearchable
+                  aria-label="Single creator"
+                />
+                <Button
+                  type="submit"
+                  size="lg"
+                  disabled={send.isPending || sendBlocked}
                 >
-                  <input
-                    type="checkbox"
-                    checked={selectedIds.has(c.id)}
-                    disabled={!c.contactEmail}
-                    onChange={() => toggleCreator(c.id)}
-                  />
-                  <span>
-                    @{c.handle}
-                    {!c.contactEmail ? (
-                      <span className="text-muted-foreground"> · no email</span>
-                    ) : (
-                      <span className="text-muted-foreground">
-                        {" "}
-                        · {c.contactEmail}
-                      </span>
-                    )}
-                  </span>
-                </label>
-              ))
-            )}
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Button
-              type="button"
-              disabled={
-                bulkSend.isPending ||
-                selectedIds.size === 0 ||
-                delivery?.ready === false
-              }
-              onClick={() => void onBulk(false)}
-            >
-              {bulkSend.isPending ? "Queuing…" : "Queue bulk send"}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              disabled={
-                bulkSend.isPending ||
-                selectedIds.size === 0 ||
-                delivery?.ready === false
-              }
-              onClick={() => void onBulk(true)}
-            >
-              Send bulk now
-            </Button>
-          </div>
-        </div>
-      </section>
+                  {send.isPending ? "Sending…" : "Send one"}
+                </Button>
+              </div>
+            </form>
 
-      <div className="space-y-2">
-        <h2 className="text-sm font-semibold">Recent messages</h2>
+            <div className="flex flex-col gap-3 rounded-lg border p-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="text-sm font-medium">
+                  Bulk ({listId ? "using list" : `${selectedIds.size} selected`})
+                </span>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={selectAllWithEmail}
+                >
+                  Select all with email ({withEmail.length})
+                </Button>
+              </div>
+              <Field>
+                <FieldLabel>Creator list (optional)</FieldLabel>
+                <AppReactSelect
+                  options={listOptions}
+                  value={stringSelectValue(listOptions, listId)}
+                  onChange={(opt) => {
+                    const next = opt?.value ? String(opt.value) : "";
+                    setListId(next);
+                    if (next) setSelectedIds(new Set());
+                  }}
+                  isSearchable={(listsQuery.data?.lists?.length ?? 0) > 8}
+                  aria-label="Creator list"
+                />
+              </Field>
+              <div className="max-h-48 overflow-y-auto rounded-lg border">
+                {creators.length === 0 ? (
+                  <p className="px-3 py-4 text-sm text-muted-foreground">
+                    No CRM creators yet.
+                  </p>
+                ) : (
+                  <ul className="divide-y">
+                    {creators.map((c) => (
+                      <li key={c.id} className="px-3 py-2">
+                        <CheckboxLabel
+                          checked={selectedIds.has(c.id)}
+                          disabled={!c.contactEmail}
+                          onChange={() => toggleCreator(c.id)}
+                        >
+                          @{c.handle}
+                          <span className="text-muted-foreground">
+                            {" · "}
+                            {c.contactEmail ?? "no email"}
+                          </span>
+                        </CheckboxLabel>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+              <div className="flex flex-wrap justify-end gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="lg"
+                  disabled={
+                    bulkSend.isPending || selectedIds.size === 0 || sendBlocked
+                  }
+                  onClick={() => void onBulk(true)}
+                >
+                  Send bulk now
+                </Button>
+                <Button
+                  type="button"
+                  size="lg"
+                  disabled={
+                    bulkSend.isPending || selectedIds.size === 0 || sendBlocked
+                  }
+                  onClick={() => void onBulk(false)}
+                >
+                  {bulkSend.isPending ? "Queuing…" : "Queue bulk send"}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </SectionCard>
+      </div>
+
+      <SectionCard
+        title="Recent messages"
+        description="Latest outreach emails and their status."
+        contentClassName="px-0"
+      >
         {messages.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No outreach yet.</p>
+          <p className="px-4 py-6 text-center text-sm text-muted-foreground">
+            No outreach yet.
+          </p>
         ) : (
-          <ul className="space-y-2">
+          <ul className="divide-y">
             {messages.map((m) => (
               <li
                 key={m.id}
-                className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border px-3 py-2 text-sm"
+                className="flex flex-col gap-2 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between"
               >
-                <span>
-                  @{m.creatorHandle} · {m.subject}
-                  {m.toEmail ? (
-                    <span className="text-muted-foreground">
-                      {" "}
-                      · {m.toEmail}
-                    </span>
-                  ) : null}
-                </span>
-                <Badge variant="outline" className="rounded-md">
+                <div className="min-w-0">
+                  <p className="truncate font-medium">{m.subject}</p>
+                  <p className="truncate text-muted-foreground">
+                    @{m.creatorHandle}
+                    {m.toEmail ? ` · ${m.toEmail}` : ""}
+                  </p>
+                </div>
+                <Badge variant="outline" className="self-start rounded-md sm:self-center">
                   {m.status}
                 </Badge>
               </li>
             ))}
           </ul>
         )}
-      </div>
+      </SectionCard>
     </div>
   );
 }

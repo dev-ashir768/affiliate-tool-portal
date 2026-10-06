@@ -2,7 +2,7 @@
 
 import { RouteError } from "@/components/layout/route-error";
 
-export default function BackofficeError({
+export default function DashboardError({
   error,
   reset,
 }: {
@@ -13,9 +13,9 @@ export default function BackofficeError({
     <RouteError
       error={error}
       reset={reset}
-      scope="backoffice"
-      homeHref="/backoffice/users"
-      homeLabel="Back to Users"
+      scope="dashboard"
+      homeHref="/home"
+      homeLabel="Back to Home"
     />
   );
 }

@@ -148,7 +148,7 @@ export function PlatformShopsTable() {
     <div className="flex flex-col gap-4">
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-foreground">All shops</h1>
-        <p className="text-sm text-muted-foreground">
+        <p className="mt-1 text-sm text-muted-foreground">
           Cross-tenant shop connections and verification status.
         </p>
       </div>

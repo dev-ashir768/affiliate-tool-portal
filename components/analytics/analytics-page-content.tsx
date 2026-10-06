@@ -14,6 +14,9 @@ import { useClientDataTable } from "@/hooks/use-client-data-table";
 import { useAnalyticsOverview } from "@/hooks/use-commerce";
 import { analyticsTopCreatorsColumns } from "./analytics-top-creators-columns";
 
+import { PageHeader } from "@/components/layout/page-header";
+import { StatCard } from "@/components/layout/stat-card";
+import { SectionCard } from "@/components/layout/section-card";
 function formatMoney(cents: number, currency = "USD") {
   return new Intl.NumberFormat(undefined, {
     style: "currency",
@@ -52,15 +55,49 @@ export function AnalyticsPageContent() {
     initialPageSize: 10,
   });
 
-  if (query.isLoading) return <Skeleton className="h-48 w-full" />;
+  const header = (
+    <PageHeader
+      title="Analytics"
+      description="Funnel plus a clear split: shop order GMV vs creator marketplace GMV snapshots."
+      actions={
+        <DateRangePicker
+          value={dateRange}
+          onChange={setDateRange}
+          disabled={query.isFetching}
+        />
+      }
+    />
+  );
+
+  if (query.isLoading) {
+    return (
+      <div className="flex flex-col gap-6">
+        {header}
+        <div className="grid gap-4 lg:grid-cols-2">
+          <Skeleton className="h-40 w-full" />
+          <Skeleton className="h-40 w-full" />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-5">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton key={i} className="h-24 w-full" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   if (query.isError) {
     return (
-      <p className="text-sm text-destructive" role="alert">
-        {query.error instanceof Error
-          ? query.error.message
-          : "Unable to load analytics"}
-      </p>
+      <div className="flex flex-col gap-6">
+        {header}
+        <SectionCard title="Unable to load analytics">
+          <p className="text-sm text-destructive" role="alert">
+            {query.error instanceof Error
+              ? query.error.message
+              : "Request failed"}
+          </p>
+        </SectionCard>
+      </div>
     );
   }
 
@@ -82,140 +119,110 @@ export function AnalyticsPageContent() {
     },
   ];
 
+  const shopGmvByCreator = data.shopGmvByCreator ?? [];
+  const campaignsPerformance = data.campaignsPerformance ?? [];
+  const recentOrders = data.recentOrders ?? [];
+
   return (
-    <div className="flex flex-col gap-8">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Analytics</h1>
-          <p className="text-sm text-muted-foreground">
-            Funnel plus a clear split: shop order GMV vs creator marketplace GMV
-            snapshots.
+    <div className="flex flex-col gap-6">
+      {header}
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <StatCard
+          label={shop?.label ?? "Shop attributed GMV"}
+          value={
+            shop
+              ? formatMoney(shop.gmvCents, shopPrimaryCurrency)
+              : formatMoney(f.gmvCents)
+          }
+          hint={shop?.description ?? "Orders attributed to your TikTok Shop."}
+        >
+          <p>
+            {shop?.orders ?? f.orders} orders · commission{" "}
+            {formatMoney(
+              shop?.commissionCents ?? f.commissionCents,
+              shopPrimaryCurrency,
+            )}
           </p>
-        </div>
-        <DateRangePicker
-          value={dateRange}
-          onChange={setDateRange}
-          disabled={query.isFetching}
-        />
+          {(shop?.byCurrency.length ?? 0) > 1 ? (
+            <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
+              {shop!.byCurrency.map((b) => (
+                <li key={b.currency}>
+                  {b.currency}: {formatMoney(b.gmvCents, b.currency)} (
+                  {b.orders} orders)
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </StatCard>
+
+        <StatCard
+          label={marketplace?.label ?? "Creator marketplace GMV"}
+          value={
+            marketplace
+              ? marketplace.multiCurrency
+                ? `${marketplace.byCurrency.length} currencies`
+                : formatMoney(marketplace.parsedGmvCents, marketPrimaryCurrency)
+              : "—"
+          }
+          hint={
+            marketplace?.description ??
+            "TikTok Creator Marketplace affiliate GMV snapshots — not shop sales."
+          }
+        >
+          <p>
+            {marketplace?.creatorsWithParsableGmv ?? 0} with amount ·{" "}
+            {marketplace?.creatorsWithRangeOnly ?? 0} range-only ·{" "}
+            {marketplace?.creatorsWithMetrics ?? 0} synced
+          </p>
+          {(marketplace?.byCurrency.length ?? 0) > 0 ? (
+            <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
+              {marketplace!.byCurrency.map((b) => (
+                <li key={b.currency}>
+                  {b.currency}: {formatMoney(b.gmvCents, b.currency)} (
+                  {b.creators} creators)
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-2 text-xs text-muted-foreground">
+              No marketplace amounts yet.{" "}
+              <Link
+                href="/discover"
+                className={buttonVariants({
+                  variant: "link",
+                  className: "h-auto p-0 text-xs",
+                })}
+              >
+                Sync / refresh metrics
+              </Link>
+            </p>
+          )}
+          {marketplace?.lastSyncedAt ? (
+            <p className="mt-1 text-xs text-muted-foreground">
+              Last metrics sync{" "}
+              {new Date(marketplace.lastSyncedAt).toLocaleString()}
+            </p>
+          ) : null}
+        </StatCard>
       </div>
 
-      <section className="space-y-3">
-        <h2 className="text-sm font-semibold">GMV sources</h2>
-        <div className="grid gap-3 lg:grid-cols-2">
-          <div className="rounded-xl border border-border px-4 py-4">
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              {shop?.label ?? "Shop attributed GMV"}
-            </p>
-            <p className="mt-2 text-2xl font-semibold tracking-tight">
-              {shop
-                ? formatMoney(shop.gmvCents, shopPrimaryCurrency)
-                : formatMoney(f.gmvCents)}
-            </p>
-            <p className="mt-2 text-xs text-muted-foreground">
-              {shop?.description ??
-                "Orders attributed to your TikTok Shop."}
-            </p>
-            <p className="mt-3 text-sm">
-              {shop?.orders ?? f.orders} orders · commission{" "}
-              {formatMoney(
-                shop?.commissionCents ?? f.commissionCents,
-                shopPrimaryCurrency,
-              )}
-            </p>
-            {(shop?.byCurrency.length ?? 0) > 1 ? (
-              <ul className="mt-3 space-y-1 text-xs text-muted-foreground">
-                {shop!.byCurrency.map((b) => (
-                  <li key={b.currency}>
-                    {b.currency}: {formatMoney(b.gmvCents, b.currency)} (
-                    {b.orders} orders)
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-          </div>
+      <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-5">
+        {funnelCards.map((c) => (
+          <StatCard key={c.label} label={c.label} value={c.value} />
+        ))}
+      </div>
 
-          <div className="rounded-xl border border-border px-4 py-4">
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              {marketplace?.label ?? "Creator marketplace GMV"}
-            </p>
-            <p className="mt-2 text-2xl font-semibold tracking-tight">
-              {marketplace
-                ? marketplace.multiCurrency
-                  ? `${marketplace.byCurrency.length} currencies`
-                  : formatMoney(
-                      marketplace.parsedGmvCents,
-                      marketPrimaryCurrency,
-                    )
-                : "—"}
-            </p>
-            <p className="mt-2 text-xs text-muted-foreground">
-              {marketplace?.description ??
-                "TikTok Creator Marketplace affiliate GMV snapshots — not shop sales."}
-            </p>
-            <p className="mt-3 text-sm">
-              {marketplace?.creatorsWithParsableGmv ?? 0} with amount ·{" "}
-              {marketplace?.creatorsWithRangeOnly ?? 0} range-only ·{" "}
-              {marketplace?.creatorsWithMetrics ?? 0} synced
-            </p>
-            {(marketplace?.byCurrency.length ?? 0) > 0 ? (
-              <ul className="mt-3 space-y-1 text-xs text-muted-foreground">
-                {marketplace!.byCurrency.map((b) => (
-                  <li key={b.currency}>
-                    {b.currency}: {formatMoney(b.gmvCents, b.currency)} (
-                    {b.creators} creators)
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="mt-3 text-xs text-muted-foreground">
-                No marketplace amounts yet.{" "}
-                <Link
-                  href="/discover"
-                  className={buttonVariants({
-                    variant: "link",
-                    className: "h-auto p-0 text-xs",
-                  })}
-                >
-                  Sync / refresh metrics
-                </Link>
-              </p>
-            )}
-            {marketplace?.lastSyncedAt ? (
-              <p className="mt-2 text-xs text-muted-foreground">
-                Last metrics sync{" "}
-                {new Date(marketplace.lastSyncedAt).toLocaleString()}
-              </p>
-            ) : null}
-          </div>
-        </div>
-      </section>
-
-      <section className="space-y-3">
-        <h2 className="text-sm font-semibold">Funnel</h2>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {funnelCards.map((c) => (
-            <div
-              key={c.label}
-              className="rounded-xl border border-border px-4 py-3"
-            >
-              <p className="text-xs text-muted-foreground">{c.label}</p>
-              <p className="mt-1 text-xl font-semibold tracking-tight">
-                {c.value}
-              </p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section>
-        <h2 className="mb-2 text-sm font-semibold">
-          Top CRM creators by marketplace GMV
-        </h2>
-        {topCreators.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            No marketplace GMV on CRM creators yet.
-          </p>
-        ) : (
+      {topCreators.length === 0 ? (
+        <SectionCard
+          title="Top CRM creators by marketplace GMV"
+          description="No marketplace GMV on CRM creators yet."
+        />
+      ) : (
+        <div className="flex flex-col gap-3">
+          <h2 className="text-base font-semibold">
+            Top CRM creators by marketplace GMV
+          </h2>
           <DataTable
             tableId="analytics-top-creators"
             columns={analyticsTopCreatorsColumns}
@@ -231,96 +238,98 @@ export function AnalyticsPageContent() {
             ariaLabel="Top CRM creators by marketplace GMV"
             pageSizeOptions={[10, 20, 50]}
           />
-        )}
-      </section>
+        </div>
+      )}
 
-      <section>
-        <h2 className="mb-2 text-sm font-semibold">
-          Shop GMV by attributed creator
-        </h2>
-        {(data.shopGmvByCreator ?? []).length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            No shop orders linked to creators yet. Sync affiliate orders or
-            attribute manually.
-          </p>
-        ) : (
-          <ul className="space-y-2 text-sm">
-            {data.shopGmvByCreator!.map((c) => (
-              <li
-                key={c.creatorId}
-                className="flex justify-between gap-3 rounded-lg border border-border px-3 py-2"
-              >
-                <div>
-                  <span className="font-medium">@{c.handle ?? "unknown"}</span>
-                  {c.displayName ? (
-                    <span className="ml-2 text-xs text-muted-foreground">
-                      {c.displayName}
-                    </span>
-                  ) : null}
-                  <span className="ml-2 text-xs text-muted-foreground">
-                    {c.orders} orders
-                  </span>
-                </div>
-                <span>{formatMoney(c.gmvCents, shopPrimaryCurrency)}</span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      <section>
-        <h2 className="mb-2 text-sm font-semibold">Campaign performance</h2>
-        {(data.campaignsPerformance ?? []).length === 0 ? (
-          <p className="text-sm text-muted-foreground">No campaigns yet.</p>
-        ) : (
-          <ul className="space-y-2 text-sm">
-            {data.campaignsPerformance!.map((c) => (
-              <li
-                key={c.id}
-                className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border px-3 py-2"
-              >
-                <div>
-                  <span className="font-medium">{c.name}</span>
-                  <span className="ml-2 text-xs text-muted-foreground">
-                    {c.status}
-                  </span>
-                </div>
-                <div className="text-xs text-muted-foreground">
-                  {c.invites} invites · {c.outreachSent} emails sent
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      <section>
-        <h2 className="mb-2 text-sm font-semibold">Recent shop orders</h2>
-        <ul className="space-y-2 text-sm">
-          {(data.recentOrders ?? []).length === 0 ? (
-            <li className="text-muted-foreground">No orders yet.</li>
+      <div className="grid gap-6 lg:grid-cols-2">
+        <SectionCard
+          title="Shop GMV by attributed creator"
+          contentClassName="px-0"
+        >
+          {shopGmvByCreator.length === 0 ? (
+            <p className="px-4 text-sm text-muted-foreground">
+              No shop orders linked to creators yet. Sync affiliate orders or
+              attribute manually.
+            </p>
           ) : (
-            data.recentOrders.map((o) => (
+            <ul className="divide-y text-sm">
+              {shopGmvByCreator.map((c) => (
+                <li
+                  key={c.creatorId}
+                  className="flex items-center justify-between gap-3 px-4 py-3"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate font-medium">
+                      @{c.handle ?? "unknown"}
+                    </p>
+                    <p className="truncate text-xs text-muted-foreground">
+                      {c.displayName ? `${c.displayName} · ` : ""}
+                      {c.orders} orders
+                    </p>
+                  </div>
+                  <span className="shrink-0 font-medium tabular-nums">
+                    {formatMoney(c.gmvCents, shopPrimaryCurrency)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </SectionCard>
+
+        <SectionCard title="Campaign performance" contentClassName="px-0">
+          {campaignsPerformance.length === 0 ? (
+            <p className="px-4 text-sm text-muted-foreground">
+              No campaigns yet.
+            </p>
+          ) : (
+            <ul className="divide-y text-sm">
+              {campaignsPerformance.map((c) => (
+                <li
+                  key={c.id}
+                  className="flex items-center justify-between gap-3 px-4 py-3"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate font-medium">{c.name}</p>
+                    <p className="text-xs text-muted-foreground">{c.status}</p>
+                  </div>
+                  <span className="shrink-0 text-xs text-muted-foreground">
+                    {c.invites} invites · {c.outreachSent} emails sent
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </SectionCard>
+      </div>
+
+      <SectionCard title="Recent shop orders" contentClassName="px-0">
+        {recentOrders.length === 0 ? (
+          <p className="px-4 text-sm text-muted-foreground">No orders yet.</p>
+        ) : (
+          <ul className="divide-y text-sm">
+            {recentOrders.map((o) => (
               <li
                 key={o.id}
-                className="flex justify-between gap-3 rounded-lg border border-border px-3 py-2"
+                className="flex items-center justify-between gap-3 px-4 py-3"
               >
-                <div>
-                  <span className="font-mono text-xs">{o.externalOrderId}</span>
+                <div className="min-w-0">
+                  <p className="truncate font-mono text-xs">
+                    {o.externalOrderId}
+                  </p>
                   {o.creatorHandle ? (
-                    <span className="ml-2 text-xs text-muted-foreground">
+                    <p className="text-xs text-muted-foreground">
                       @{o.creatorHandle}
-                    </span>
+                    </p>
                   ) : null}
                 </div>
-                <span>
+                <span className="shrink-0 font-medium tabular-nums">
                   {formatMoney(o.gmvCents, o.currency ?? "USD")}
                 </span>
               </li>
-            ))
-          )}
-        </ul>
-      </section>
+            ))}
+          </ul>
+        )}
+      </SectionCard>
     </div>
   );
 }

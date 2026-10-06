@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { isChunkLoadError, reloadForNewBuild } from "@/lib/ui/chunk-error";
 
 export default function GlobalError({
   error,
@@ -11,6 +12,7 @@ export default function GlobalError({
 }) {
   useEffect(() => {
     console.error("[global]", error);
+    if (isChunkLoadError(error)) reloadForNewBuild();
   }, [error]);
 
   return (
@@ -33,6 +35,18 @@ export default function GlobalError({
           <p style={{ opacity: 0.75, marginBottom: 20, fontSize: 14 }}>
             Reload to try again, or go back to the home screen.
           </p>
+          <pre
+            style={{
+              opacity: 0.6,
+              marginBottom: 20,
+              fontSize: 12,
+              whiteSpace: "pre-wrap",
+              textAlign: "left",
+            }}
+          >
+            {error.message || "Unknown error"}
+            {error.digest ? `\nRef: ${error.digest}` : ""}
+          </pre>
           <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
             <button
               type="button"

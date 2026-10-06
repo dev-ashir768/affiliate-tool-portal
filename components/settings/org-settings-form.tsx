@@ -21,21 +21,7 @@ import {
   type PatchCurrentOrgSchemaType,
 } from "@/validations/org.validations";
 
-function ReadOnlyField({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
-  return (
-    <Field>
-      <FieldLabel>{label}</FieldLabel>
-      <Input value={value} readOnly disabled className="bg-muted/40" />
-    </Field>
-  );
-}
-
+import { SectionCard } from "@/components/layout/section-card";
 export function OrgSettingsForm() {
   const meQuery = useMe();
   const orgQuery = useOrg();
@@ -93,7 +79,7 @@ export function OrgSettingsForm() {
 
   if (orgQuery.isLoading || meQuery.isLoading) {
     return (
-      <div className="rounded-lg border border-border bg-card p-6">
+      <div className="rounded-xl bg-card p-6 ring-1 ring-foreground/10">
         <div className="flex max-w-lg flex-col gap-4">
           <Skeleton className="h-4 w-40" />
           <Skeleton className="h-9 w-full" />
@@ -107,7 +93,7 @@ export function OrgSettingsForm() {
 
   if (orgQuery.isError || !orgQuery.data) {
     return (
-      <div className="rounded-lg border border-border bg-card p-6">
+      <div className="rounded-xl bg-card p-6 ring-1 ring-foreground/10">
         <p className="text-sm font-medium text-foreground">
           Unable to load organization
         </p>
@@ -131,73 +117,92 @@ export function OrgSettingsForm() {
 
   const org = orgQuery.data;
 
+  const limits = [
+    { label: "Plan", value: org.plan.name ?? org.plan.code },
+    { label: "Subscription", value: org.subscriptionStatus ?? "—" },
+    { label: "Seat limit", value: String(org.seatLimit) },
+    { label: "Shop limit", value: String(org.shopLimit) },
+    { label: "Bot limit", value: String(org.botLimit) },
+    { label: "Daily invite quota", value: String(org.dailyInviteQuota) },
+  ];
+
   return (
-    <div className="rounded-lg border border-border bg-card p-6">
-      <form
-        id="org-settings-form"
-        noValidate
-        className="max-w-lg"
-        onSubmit={form.handleSubmit(onSubmit)}
+    <div className="grid gap-6 lg:grid-cols-2">
+      <SectionCard
+        title="Organization"
+        description="Your organization's display name across Tiksly."
+        footer={
+          canEditName ? (
+            <Button
+              type="submit"
+              form="org-settings-form"
+              size="lg"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Saving…" : "Save changes"}
+            </Button>
+          ) : undefined
+        }
       >
-        <FieldGroup>
-          <Controller
-            name="name"
-            control={form.control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={field.name}>Organization name</FieldLabel>
-                <Input
-                  id={field.name}
-                  {...field}
-                  aria-invalid={fieldState.invalid}
-                  disabled={!canEditName || isSubmitting}
-                  readOnly={!canEditName}
-                  className={!canEditName ? "bg-muted/40" : undefined}
-                  autoComplete="organization"
-                  type="text"
-                  placeholder="Organization name"
-                />
-                {!hasProductAccess ? (
-                  <FieldDescription>
-                    Choose a plan on onboarding or billing before changing
-                    organization settings.
-                  </FieldDescription>
-                ) : !canEditName ? (
-                  <FieldDescription>
-                    Only owners and admins can change the organization name.
-                  </FieldDescription>
-                ) : null}
-                {fieldState.error ? (
-                  <FieldError errors={[fieldState.error]} />
-                ) : null}
-              </Field>
-            )}
-          />
+        <form
+          id="org-settings-form"
+          noValidate
+          onSubmit={form.handleSubmit(onSubmit)}
+        >
+          <FieldGroup>
+            <Controller
+              name="name"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor={field.name}>
+                    Organization name
+                  </FieldLabel>
+                  <Input
+                    id={field.name}
+                    {...field}
+                    aria-invalid={fieldState.invalid}
+                    disabled={!canEditName || isSubmitting}
+                    readOnly={!canEditName}
+                    className={!canEditName ? "bg-muted/40" : undefined}
+                    autoComplete="organization"
+                    type="text"
+                    placeholder="Organization name"
+                  />
+                  {!hasProductAccess ? (
+                    <FieldDescription>
+                      Choose a plan on onboarding or billing before changing
+                      organization settings.
+                    </FieldDescription>
+                  ) : !canEditName ? (
+                    <FieldDescription>
+                      Only owners and admins can change the organization name.
+                    </FieldDescription>
+                  ) : null}
+                  {fieldState.error ? (
+                    <FieldError errors={[fieldState.error]} />
+                  ) : null}
+                </Field>
+              )}
+            />
+            {formError ? <FieldError errors={[formError]} /> : null}
+          </FieldGroup>
+        </form>
+      </SectionCard>
 
-          <ReadOnlyField label="Plan" value={org.plan.code} />
-          <ReadOnlyField label="Seat limit" value={String(org.seatLimit)} />
-          <ReadOnlyField label="Shop limit" value={String(org.shopLimit)} />
-          <ReadOnlyField label="Bot limit" value={String(org.botLimit)} />
-          <ReadOnlyField
-            label="Daily invite quota"
-            value={String(org.dailyInviteQuota)}
-          />
-          <ReadOnlyField
-            label="Subscription status"
-            value={org.subscriptionStatus ?? "—"}
-          />
-
-          {formError ? <FieldError errors={[formError]} /> : null}
-
-          {canEditName ? (
-            <Field>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Saving…" : "Save changes"}
-              </Button>
-            </Field>
-          ) : null}
-        </FieldGroup>
-      </form>
+      <SectionCard
+        title="Plan & limits"
+        description="Set by your subscription. Change plans from Billing."
+      >
+        <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border bg-border">
+          {limits.map((l) => (
+            <div key={l.label} className="bg-card px-4 py-3">
+              <dt className="text-xs text-muted-foreground">{l.label}</dt>
+              <dd className="mt-0.5 truncate text-sm font-medium">{l.value}</dd>
+            </div>
+          ))}
+        </dl>
+      </SectionCard>
     </div>
   );
 }

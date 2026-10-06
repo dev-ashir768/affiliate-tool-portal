@@ -12,8 +12,11 @@ import {
 } from "@/components/ui/react-select";
 import { useShops } from "@/hooks/use-shops";
 import { useShopProductsInfinite } from "@/hooks/use-shop-products";
-import { cn } from "cn";
 
+import { Field, FieldLabel } from "@/components/ui/field";
+import { PageHeader } from "@/components/layout/page-header";
+import { SectionCard } from "@/components/layout/section-card";
+import { Badge } from "@/components/ui/badge";
 export function ProductsPageContent() {
   const shopsQuery = useShops();
   const oauthShops = useMemo(
@@ -48,106 +51,118 @@ export function ProductsPageContent() {
   }, [productsQuery.data?.pages, filter]);
 
   if (shopsQuery.isLoading) {
-    return <Skeleton className="h-48 w-full" />;
+    return (
+      <div className="flex flex-col gap-6">
+        <Skeleton className="h-14 w-full max-w-md" />
+        <Skeleton className="h-80 w-full" />
+      </div>
+    );
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Products</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Active TikTok Shop catalog (read-only). Use these products when
-            creating affiliate invites and campaigns.
-          </p>
-        </div>
-        <Link
-          href="/invites"
-          className={cn(buttonVariants({ variant: "outline" }), "shrink-0")}
-        >
-          Create invite
-        </Link>
-      </div>
+    <div className="flex flex-col gap-6">
+      <PageHeader
+        title="Products"
+        description="Active TikTok Shop catalog (read-only). Use these products when creating affiliate invites and campaigns."
+        actions={
+          <Link
+            href="/invites"
+            className={buttonVariants({ variant: "outline", size: "lg" })}
+          >
+            Create invite
+          </Link>
+        }
+      />
 
       {oauthShops.length === 0 ? (
-        <div className="rounded-md border border-border px-4 py-6 text-sm">
-          <p className="font-medium">No OAuth-connected shop</p>
-          <p className="mt-1 text-muted-foreground">
-            Connect and authorize a TikTok Shop to load its product catalog.
-          </p>
-          <Link
-            href="/shops"
-            className={cn(buttonVariants(), "mt-4 inline-flex")}
-          >
+        <SectionCard
+          title="No authorized shop"
+          description="Connect and authorize a TikTok Shop to load its product catalog."
+        >
+          <Link href="/shops" className={buttonVariants({ size: "lg" })}>
             Go to Shops
           </Link>
-        </div>
+        </SectionCard>
       ) : (
-        <>
-          <div className="flex flex-wrap gap-3">
-            <AppReactSelect
-              className="min-w-55 max-w-sm flex-1"
-              options={shopOptions}
-              value={stringSelectValue(shopOptions, activeShopId ?? "")}
-              onChange={(opt) =>
-                setShopId(opt?.value ? String(opt.value) : "")
-              }
-              isSearchable
-              aria-label="Shop"
-            />
-            <Input
-              className="max-w-xs"
-              placeholder="Filter by title or id…"
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-              aria-label="Filter products"
-            />
+        <SectionCard
+          title="Catalog"
+          description={`${products.length} product${products.length === 1 ? "" : "s"} loaded`}
+          contentClassName="px-0"
+        >
+          <div className="grid gap-4 px-4 pb-4 sm:grid-cols-2">
+            <Field>
+              <FieldLabel>Shop</FieldLabel>
+              <AppReactSelect
+                options={shopOptions}
+                value={stringSelectValue(shopOptions, activeShopId ?? "")}
+                onChange={(opt) =>
+                  setShopId(opt?.value ? String(opt.value) : "")
+                }
+                isSearchable
+                aria-label="Shop"
+              />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="product-filter">Search</FieldLabel>
+              <Input
+                id="product-filter"
+                placeholder="Filter by title or id…"
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+              />
+            </Field>
           </div>
 
           {productsQuery.isLoading ? (
-            <Skeleton className="h-40 w-full" />
+            <div className="px-4">
+              <Skeleton className="h-40 w-full" />
+            </div>
           ) : productsQuery.isError ? (
-            <div className="rounded-md border border-destructive/40 px-4 py-3 text-sm text-destructive">
+            <p className="px-4 text-sm text-destructive" role="alert">
               {productsQuery.error instanceof Error
                 ? productsQuery.error.message
                 : "Failed to load products"}
-            </div>
+            </p>
+          ) : products.length === 0 ? (
+            <p className="border-t px-4 py-8 text-center text-sm text-muted-foreground">
+              No active (ACTIVATE) products returned for this shop. Add
+              products in TikTok Seller Center, then refresh.
+            </p>
           ) : (
-            <>
-              <ul className="divide-y divide-border rounded-md border border-border">
-                {products.length === 0 ? (
-                  <li className="px-3 py-6 text-sm text-muted-foreground">
-                    No active (ACTIVATE) products returned for this shop. Add
-                    products in TikTok Seller Center, then refresh.
-                  </li>
-                ) : (
-                  products.map((p) => (
-                    <li key={p.id} className="px-3 py-2.5 text-sm">
-                      <span className="font-medium">{p.title || p.id}</span>
-                      <span className="mt-0.5 block text-xs text-muted-foreground">
-                        {p.id}
-                        {p.status ? ` · ${p.status}` : ""}
-                      </span>
-                    </li>
-                  ))
-                )}
-              </ul>
-
-              {productsQuery.hasNextPage ? (
-                <Button
-                  variant="outline"
-                  className="self-start"
-                  disabled={productsQuery.isFetchingNextPage}
-                  onClick={() => void productsQuery.fetchNextPage()}
+            <ul className="divide-y border-t">
+              {products.map((p) => (
+                <li
+                  key={p.id}
+                  className="flex items-center justify-between gap-3 px-4 py-3 text-sm"
                 >
-                  {productsQuery.isFetchingNextPage
-                    ? "Loading…"
-                    : "Load more"}
-                </Button>
-              ) : null}
-            </>
+                  <div className="min-w-0">
+                    <p className="truncate font-medium">{p.title || p.id}</p>
+                    <p className="truncate font-mono text-xs text-muted-foreground">
+                      {p.id}
+                    </p>
+                  </div>
+                  {p.status ? (
+                    <Badge variant="secondary" className="shrink-0">
+                      {p.status}
+                    </Badge>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
           )}
-        </>
+
+          {productsQuery.hasNextPage ? (
+            <div className="flex justify-center border-t px-4 pt-4">
+              <Button
+                variant="outline"
+                disabled={productsQuery.isFetchingNextPage}
+                onClick={() => void productsQuery.fetchNextPage()}
+              >
+                {productsQuery.isFetchingNextPage ? "Loading…" : "Load more"}
+              </Button>
+            </div>
+          ) : null}
+        </SectionCard>
       )}
     </div>
   );

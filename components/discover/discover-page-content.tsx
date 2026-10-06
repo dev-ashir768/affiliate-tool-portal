@@ -21,6 +21,9 @@ import {
 } from "@/hooks/use-commerce";
 import { createDiscoverColumns } from "./discover-columns";
 
+import { Field, FieldLabel } from "@/components/ui/field";
+import { PageHeader } from "@/components/layout/page-header";
+import { FormGrid, SectionCard } from "@/components/layout/section-card";
 const REGION_OPTIONS: SelectOption[] = [
   { value: "", label: "All regions" },
   { value: "US", label: "US" },
@@ -185,169 +188,210 @@ export function DiscoverPageContent() {
   ];
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Discover</h1>
-        <p className="text-sm text-muted-foreground">
-          Sync creators from your authorized TikTok Shop, then filter the shared
-          index by followers, GMV band, units sold, and email.
-        </p>
-      </div>
-      <section className="space-y-3 rounded-xl border border-border p-4">
-        <div className="flex flex-wrap items-start justify-between gap-2">
-          <div>
-            <h2 className="text-sm font-semibold">Sync from your shop</h2>
-            <p className="mt-1 text-xs text-muted-foreground">
-              {tiktok.data?.config?.note ??
-                "Uses your shop OAuth token + Creator Marketplace search."}
-            </p>
-          </div>
+      <PageHeader
+        title="Discover"
+        description="Sync creators from your authorized TikTok Shop, then filter the shared index by followers, GMV band, units sold, and email."
+      />
+
+      <SectionCard
+        title="Sync from your shop"
+        description={
+          tiktok.data?.config?.note ??
+          "Uses your shop OAuth token + Creator Marketplace search."
+        }
+        actions={
           <Link
             href="/shops"
-            className={buttonVariants({
-              variant: "link",
-              className: "h-auto p-0 text-xs",
-            })}
+            className={buttonVariants({ variant: "outline", size: "sm" })}
           >
             Manage shops
           </Link>
-        </div>
+        }
+      >
         {oauthShops.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             No OAuth-connected shop yet.{" "}
-            <Link href="/shops" className="underline">
+            <Link href="/shops" className="font-medium text-primary underline">
               Authorize TikTok Shop
             </Link>{" "}
             first, then sync creators by niche.
           </p>
         ) : (
-          <div className="flex flex-wrap gap-2">
-            <AppReactSelect
-              className="min-w-56"
-              options={shopOptions}
-              value={stringSelectValue(shopOptions, selectedShopId)}
-              onChange={(opt) =>
-                setShopId(opt?.value ? String(opt.value) : "")
-              }
-              placeholder="Shop"
-              isSearchable
-              aria-label="Shop"
-            />
-            <Input
-              placeholder="Niche keyword (e.g. skincare)"
-              value={nicheKeyword}
-              onChange={(e) => setNicheKeyword(e.target.value)}
-              className="max-w-xs"
-            />
-            <Input
-              placeholder="Min followers"
-              inputMode="numeric"
-              value={minFollowers}
-              onChange={(e) => setMinFollowers(e.target.value)}
-              className="w-32"
-            />
-            <Button
-              type="button"
-              disabled={!appReady || busy}
-              onClick={() => void onSync(false)}
-            >
-              {sync.isPending ? "Starting…" : "Queue sync"}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              disabled={!appReady || busy}
-              onClick={() => void onSync(true)}
-            >
-              Sync now
-            </Button>
-            <Button
-              type="button"
-              variant="secondary"
-              disabled={!appReady || busy}
-              onClick={() => void onRefreshCrmMetrics(false)}
-            >
-              Refresh CRM metrics
-            </Button>
+          <div className="flex flex-col gap-4">
+            <FormGrid columns={3}>
+              <Field>
+                <FieldLabel>Shop</FieldLabel>
+                <AppReactSelect
+                  options={shopOptions}
+                  value={stringSelectValue(shopOptions, selectedShopId)}
+                  onChange={(opt) =>
+                    setShopId(opt?.value ? String(opt.value) : "")
+                  }
+                  placeholder="Shop"
+                  isSearchable
+                  aria-label="Shop"
+                />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="sync-niche">Niche keyword</FieldLabel>
+                <Input
+                  id="sync-niche"
+                  placeholder="e.g. skincare"
+                  value={nicheKeyword}
+                  onChange={(e) => setNicheKeyword(e.target.value)}
+                />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="sync-min-followers">
+                  Min followers
+                </FieldLabel>
+                <Input
+                  id="sync-min-followers"
+                  inputMode="numeric"
+                  placeholder="Any"
+                  value={minFollowers}
+                  onChange={(e) => setMinFollowers(e.target.value)}
+                />
+              </Field>
+            </FormGrid>
+            <div className="flex flex-wrap justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="lg"
+                disabled={!appReady || busy}
+                onClick={() => void onRefreshCrmMetrics(false)}
+              >
+                Refresh CRM metrics
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="lg"
+                disabled={!appReady || busy}
+                onClick={() => void onSync(true)}
+              >
+                Sync now
+              </Button>
+              <Button
+                type="button"
+                size="lg"
+                disabled={!appReady || busy}
+                onClick={() => void onSync(false)}
+              >
+                {sync.isPending ? "Starting…" : "Queue sync"}
+              </Button>
+            </div>
           </div>
         )}
-      </section>
-      <div className="flex flex-wrap items-center gap-2">
-        <Input
-          placeholder="Search handle / name / bio"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="max-w-xs"
-        />
-        <AppReactSelect
-          className="min-w-40"
-          options={REGION_OPTIONS}
-          value={stringSelectValue(REGION_OPTIONS, region)}
-          onChange={(opt) => setRegion(opt?.value ? String(opt.value) : "")}
-          isSearchable={false}
-          aria-label="Region filter"
-        />
-        <Input
-          placeholder="Min followers"
-          inputMode="numeric"
-          value={minFollowersFilter}
-          onChange={(e) => setMinFollowersFilter(e.target.value)}
-          className="w-28"
-        />
-        <Input
-          placeholder="Max followers"
-          inputMode="numeric"
-          value={maxFollowersFilter}
-          onChange={(e) => setMaxFollowersFilter(e.target.value)}
-          className="w-28"
-        />
-        <Input
-          placeholder="Min units sold"
-          inputMode="numeric"
-          value={minUnitsSold}
-          onChange={(e) => setMinUnitsSold(e.target.value)}
-          className="w-32"
-        />
-        <AppReactSelect
-          className="min-w-44"
-          options={GMV_BAND_OPTIONS}
-          value={stringSelectValue(GMV_BAND_OPTIONS, gmvRangeContains)}
-          onChange={(opt) =>
-            setGmvRangeContains(opt?.value ? String(opt.value) : "")
-          }
-          isSearchable={false}
-          aria-label="GMV band"
-        />
-        <AppReactSelect
-          className="min-w-36"
-          options={emailOptions}
-          value={stringSelectValue(emailOptions, hasEmail)}
-          onChange={(opt) =>
-            setHasEmail(
-              opt?.value === "true" || opt?.value === "false"
-                ? opt.value
-                : "",
-            )
-          }
-          isSearchable={false}
-          aria-label="Email filter"
-        />
-        <AppReactSelect
-          className="min-w-44"
-          options={SORT_OPTIONS}
-          value={stringSelectValue(SORT_OPTIONS, sortBy)}
-          onChange={(opt) => {
-            const v = opt?.value ? String(opt.value) : "followers";
-            if (v === "units" || v === "updated" || v === "followers") {
-              setSortBy(v);
-            }
-          }}
-          isSearchable={false}
-          aria-label="Sort"
-        />
-        <span className="text-xs text-muted-foreground">
-          {query.data?.meta.total ?? 0} matches
-        </span>
-      </div>
+      </SectionCard>
+
+      <SectionCard
+        title="Filters"
+        description={`${query.data?.meta.total ?? 0} matching creators`}
+      >
+        <FormGrid columns={3} className="lg:grid-cols-4">
+          <Field>
+            <FieldLabel htmlFor="discover-search">Search</FieldLabel>
+            <Input
+              id="discover-search"
+              placeholder="Handle, name or bio"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </Field>
+          <Field>
+            <FieldLabel>Region</FieldLabel>
+            <AppReactSelect
+              options={REGION_OPTIONS}
+              value={stringSelectValue(REGION_OPTIONS, region)}
+              onChange={(opt) =>
+                setRegion(opt?.value ? String(opt.value) : "")
+              }
+              isSearchable={false}
+              aria-label="Region filter"
+            />
+          </Field>
+          <Field>
+            <FieldLabel>GMV band</FieldLabel>
+            <AppReactSelect
+              options={GMV_BAND_OPTIONS}
+              value={stringSelectValue(GMV_BAND_OPTIONS, gmvRangeContains)}
+              onChange={(opt) =>
+                setGmvRangeContains(opt?.value ? String(opt.value) : "")
+              }
+              isSearchable={false}
+              aria-label="GMV band"
+            />
+          </Field>
+          <Field>
+            <FieldLabel>Email</FieldLabel>
+            <AppReactSelect
+              options={emailOptions}
+              value={stringSelectValue(emailOptions, hasEmail)}
+              onChange={(opt) =>
+                setHasEmail(
+                  opt?.value === "true" || opt?.value === "false"
+                    ? opt.value
+                    : "",
+                )
+              }
+              isSearchable={false}
+              aria-label="Email filter"
+            />
+          </Field>
+          <Field>
+            <FieldLabel htmlFor="discover-min-followers">
+              Min followers
+            </FieldLabel>
+            <Input
+              id="discover-min-followers"
+              inputMode="numeric"
+              placeholder="Any"
+              value={minFollowersFilter}
+              onChange={(e) => setMinFollowersFilter(e.target.value)}
+            />
+          </Field>
+          <Field>
+            <FieldLabel htmlFor="discover-max-followers">
+              Max followers
+            </FieldLabel>
+            <Input
+              id="discover-max-followers"
+              inputMode="numeric"
+              placeholder="Any"
+              value={maxFollowersFilter}
+              onChange={(e) => setMaxFollowersFilter(e.target.value)}
+            />
+          </Field>
+          <Field>
+            <FieldLabel htmlFor="discover-min-units">Min units sold</FieldLabel>
+            <Input
+              id="discover-min-units"
+              inputMode="numeric"
+              placeholder="Any"
+              value={minUnitsSold}
+              onChange={(e) => setMinUnitsSold(e.target.value)}
+            />
+          </Field>
+          <Field>
+            <FieldLabel>Sort by</FieldLabel>
+            <AppReactSelect
+              options={SORT_OPTIONS}
+              value={stringSelectValue(SORT_OPTIONS, sortBy)}
+              onChange={(opt) => {
+                const v = opt?.value ? String(opt.value) : "followers";
+                if (v === "units" || v === "updated" || v === "followers") {
+                  setSortBy(v);
+                }
+              }}
+              isSearchable={false}
+              aria-label="Sort"
+            />
+          </Field>
+        </FormGrid>
+      </SectionCard>
+
       {query.isError ? (
         <p className="text-sm text-destructive" role="alert">
           {query.error instanceof Error

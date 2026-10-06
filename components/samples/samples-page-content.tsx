@@ -23,6 +23,9 @@ import { useCreators } from "@/hooks/use-creators";
 import { useShops } from "@/hooks/use-shops";
 import { createSamplesColumns } from "./samples-columns";
 
+import { Field, FieldLabel } from "@/components/ui/field";
+import { PageHeader } from "@/components/layout/page-header";
+import { FormGrid, SectionCard } from "@/components/layout/section-card";
 const STATUS_OPTIONS: SelectOption[] = [
   { value: "", label: "All statuses" },
   { value: "PENDING", label: "Pending" },
@@ -167,82 +170,113 @@ export function SamplesPageContent() {
     }
   }
 
-  if (query.isLoading) return <Skeleton className="h-48 w-full" />;
+  if (query.isLoading) {
+    return (
+      <div className="flex flex-col gap-6">
+        <Skeleton className="h-14 w-full max-w-md" />
+        <div className="grid gap-6 lg:grid-cols-2">
+          <Skeleton className="h-40 w-full" />
+          <Skeleton className="h-40 w-full" />
+        </div>
+        <Skeleton className="h-80 w-full" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">
-          Sample requests
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Sync TikTok free-sample applications, then approve / reject and track
-          fulfillment.
-        </p>
+      <PageHeader
+        title="Sample requests"
+        description="Sync TikTok free-sample applications, then approve / reject and track fulfillment."
+      />
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <SectionCard
+          title="Sync from TikTok"
+          description="Pull sample applications for a shop and filter by status."
+        >
+          <div className="flex h-full flex-col gap-4">
+            <FormGrid columns={2}>
+              <Field>
+                <FieldLabel>Shop</FieldLabel>
+                <AppReactSelect
+                  options={shopOptions}
+                  value={stringSelectValue(shopOptions, selectedShopId)}
+                  onChange={(opt) =>
+                    setShopId(opt?.value ? String(opt.value) : "")
+                  }
+                  isDisabled={oauthShops.length === 0}
+                  isSearchable={oauthShops.length > 8}
+                  aria-label="Shop"
+                />
+              </Field>
+              <Field>
+                <FieldLabel>Status</FieldLabel>
+                <AppReactSelect
+                  options={STATUS_OPTIONS}
+                  value={stringSelectValue(STATUS_OPTIONS, status)}
+                  onChange={(opt) =>
+                    setStatus(opt?.value ? String(opt.value) : "")
+                  }
+                  isSearchable={false}
+                  aria-label="Status filter"
+                />
+              </Field>
+            </FormGrid>
+            <Button
+              type="button"
+              size="lg"
+              className="mt-auto self-end"
+              disabled={!selectedShopId || sync.isPending}
+              onClick={() => void onSync()}
+            >
+              {sync.isPending ? "Syncing…" : "Sync from TikTok"}
+            </Button>
+          </div>
+        </SectionCard>
+
+        <SectionCard
+          title="Log manual request"
+          description="Track a sample request made outside TikTok."
+        >
+          <form
+            onSubmit={(e) => void onManual(e)}
+            className="flex h-full flex-col gap-4"
+          >
+            <FormGrid columns={2}>
+              <Field>
+                <FieldLabel htmlFor="sample-product">Product title</FieldLabel>
+                <Input
+                  id="sample-product"
+                  value={productTitle}
+                  onChange={(e) => setProductTitle(e.target.value)}
+                  placeholder="Optional"
+                />
+              </Field>
+              <Field>
+                <FieldLabel>Creator</FieldLabel>
+                <AppReactSelect
+                  options={creatorOptions}
+                  value={stringSelectValue(creatorOptions, manualCreatorId)}
+                  onChange={(opt) =>
+                    setManualCreatorId(opt?.value ? String(opt.value) : "")
+                  }
+                  isSearchable
+                  aria-label="Creator"
+                />
+              </Field>
+            </FormGrid>
+            <Button
+              type="submit"
+              size="lg"
+              className="mt-auto self-end"
+              disabled={createManual.isPending}
+            >
+              Log manual request
+            </Button>
+          </form>
+        </SectionCard>
       </div>
-
-      <section className="flex flex-wrap items-end gap-2 rounded-xl border border-border p-4">
-        <div className="min-w-[12rem] space-y-1">
-          <label className="text-xs text-muted-foreground">Shop</label>
-          <AppReactSelect
-            className="min-w-48"
-            options={shopOptions}
-            value={stringSelectValue(shopOptions, selectedShopId)}
-            onChange={(opt) => setShopId(opt?.value ? String(opt.value) : "")}
-            isDisabled={oauthShops.length === 0}
-            isSearchable={oauthShops.length > 8}
-            aria-label="Shop"
-          />
-        </div>
-        <AppReactSelect
-          className="min-w-40"
-          options={STATUS_OPTIONS}
-          value={stringSelectValue(STATUS_OPTIONS, status)}
-          onChange={(opt) => setStatus(opt?.value ? String(opt.value) : "")}
-          isSearchable={false}
-          aria-label="Status filter"
-        />
-        <Button
-          type="button"
-          disabled={!selectedShopId || sync.isPending}
-          onClick={() => void onSync()}
-        >
-          {sync.isPending ? "Syncing…" : "Sync from TikTok"}
-        </Button>
-      </section>
-
-      <form
-        onSubmit={(e) => void onManual(e)}
-        className="flex flex-wrap items-end gap-2 rounded-xl border border-border p-4"
-      >
-        <div className="min-w-[10rem] flex-1 space-y-1">
-          <label className="text-xs text-muted-foreground">
-            Manual product title
-          </label>
-          <Input
-            value={productTitle}
-            onChange={(e) => setProductTitle(e.target.value)}
-            placeholder="Optional product"
-          />
-        </div>
-        <AppReactSelect
-          className="min-w-44"
-          options={creatorOptions}
-          value={stringSelectValue(creatorOptions, manualCreatorId)}
-          onChange={(opt) =>
-            setManualCreatorId(opt?.value ? String(opt.value) : "")
-          }
-          isSearchable
-          aria-label="Creator"
-        />
-        <Button
-          type="submit"
-          variant="outline"
-          disabled={createManual.isPending}
-        >
-          Log manual request
-        </Button>
-      </form>
 
       {query.isError ? (
         <p className="text-sm text-destructive" role="alert">

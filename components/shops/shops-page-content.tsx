@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/react-select";
 import type { ShopStatus } from "@/types/shops";
 
+import { PageHeader } from "@/components/layout/page-header";
 const OAUTH_REGION_OPTIONS: SelectOption[] = [
   { value: "US", label: "US" },
   { value: "UK", label: "UK" },
@@ -183,14 +184,14 @@ export function ShopsPageContent() {
   const oauthReady = oauthStatus.data?.configured === true;
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Shops</h1>
-          <p className="text-sm text-muted-foreground">
-            Authorize your TikTok Shop (OpenAPI) so Tiksly can discover creators
-            for your niche. Bot verify remains optional for collaborator
-            sessions.
+    <div className="flex flex-col gap-6">
+      <PageHeader
+        title="Shops"
+        description={
+          <>
+            Authorize your TikTok Shop (OpenAPI) so Tiksly can discover
+            creators for your niche. Bot verify remains optional for
+            collaborator sessions.
             {orgQuery.data ? (
               <>
                 {" "}
@@ -198,80 +199,79 @@ export function ShopsPageContent() {
                 {shopLimit === 1 ? "" : "s"}.
               </>
             ) : null}
-          </p>
-        </div>
-        {canManage ? (
-          <div className="flex flex-wrap items-center gap-2">
-            <AppReactSelect
-              className="min-w-20"
-              options={OAUTH_REGION_OPTIONS}
-              value={stringSelectValue(OAUTH_REGION_OPTIONS, oauthRegion)}
-              onChange={(opt) =>
-                setOauthRegion(opt?.value === "UK" ? "UK" : "US")
-              }
-              isSearchable={false}
-              aria-label="Shop region"
-            />
-            <Button
-              type="button"
-              disabled={
-                atLimit || zeroLimit || !oauthReady || startOauth.isPending
-              }
-              onClick={() => void handleOauthConnectNew()}
-            >
-              {startOauth.isPending ? "Starting…" : "Authorize TikTok Shop"}
-            </Button>
-            <ConnectShopDialog
-              disabled={atLimit || zeroLimit}
-              disabledReason={
-                zeroLimit
-                  ? "Your plan does not include connected shops."
-                  : atLimit
-                    ? "You have reached your shop limit."
-                    : null
-              }
-              onPlanLimit={() => setShowUpgradeHint(true)}
-            />
-          </div>
-        ) : null}
-      </div>
+          </>
+        }
+        actions={
+          canManage ? (
+            <>
+              <AppReactSelect
+                className="w-24"
+                options={OAUTH_REGION_OPTIONS}
+                value={stringSelectValue(OAUTH_REGION_OPTIONS, oauthRegion)}
+                onChange={(opt) =>
+                  setOauthRegion(opt?.value === "UK" ? "UK" : "US")
+                }
+                isSearchable={false}
+                aria-label="Shop region"
+              />
+              <Button
+                type="button"
+                size="lg"
+                disabled={
+                  atLimit || zeroLimit || !oauthReady || startOauth.isPending
+                }
+                onClick={() => void handleOauthConnectNew()}
+              >
+                {startOauth.isPending ? "Starting…" : "Authorize TikTok Shop"}
+              </Button>
+              <ConnectShopDialog
+                disabled={atLimit || zeroLimit}
+                disabledReason={
+                  zeroLimit
+                    ? "Your plan does not include connected shops."
+                    : atLimit
+                      ? "You have reached your shop limit."
+                      : null
+                }
+                onPlanLimit={() => setShowUpgradeHint(true)}
+              />
+            </>
+          ) : undefined
+        }
+      />
 
       {canManage && oauthStatus.data && !oauthReady ? (
-        <div className="rounded-xl border border-border bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
-          TikTok OAuth not configured on the API. Set{" "}
-          <code className="text-xs">TIKTOK_SHOP_APP_KEY</code>,{" "}
-          <code className="text-xs">TIKTOK_SHOP_APP_SECRET</code>, and{" "}
-          <code className="text-xs">TIKTOK_SHOP_REDIRECT_URI</code>{" "}
-          (e.g.{" "}
-          <code className="text-xs">
-            {process.env.TIKTOK_SHOP_REDIRECT_URI!}
-          </code>
-          ).
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm text-muted-foreground">
+          <span className="font-medium text-foreground">
+            TikTok OAuth is not configured on the API.
+          </span>{" "}
+          Set <code className="text-xs">TIKTOK_SHOP_APP_KEY</code>,{" "}
+          <code className="text-xs">TIKTOK_SHOP_APP_SECRET</code> and{" "}
+          <code className="text-xs">TIKTOK_SHOP_REDIRECT_URI</code> (your
+          portal&apos;s <code className="text-xs">/shops/tiktok/callback</code>{" "}
+          URL) on the API server.
         </div>
       ) : null}
 
       {!canManage ? (
-        <p className="text-sm text-muted-foreground">
+        <div className="rounded-xl border bg-card px-4 py-3 text-sm text-muted-foreground">
           Only organization owners and admins can connect or verify shops.
-        </p>
+        </div>
       ) : null}
 
       {(zeroLimit || atLimit || showUpgradeHint) && canManage ? (
-        <div className="rounded-xl border border-border bg-muted/30 px-4 py-3 text-sm">
-          <p className="text-muted-foreground">
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border bg-card px-4 py-3 text-sm">
+          <span className="text-muted-foreground">
             {zeroLimit
               ? "Upgrade your plan to connect shops."
-              : "Shop limit reached. Upgrade to connect more shops."}{" "}
-            <Link
-              href="/billing"
-              className={buttonVariants({
-                variant: "link",
-                className: "h-auto p-0",
-              })}
-            >
-              View billing
-            </Link>
-          </p>
+              : "Shop limit reached. Upgrade to connect more shops."}
+          </span>
+          <Link
+            href="/billing"
+            className={buttonVariants({ variant: "outline", size: "sm" })}
+          >
+            View billing
+          </Link>
         </div>
       ) : null}
 

@@ -252,7 +252,7 @@ export function PlansAdminPage() {
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-foreground">Plans</h1>
-        <p className="text-sm text-muted-foreground">
+        <p className="mt-1 text-sm text-muted-foreground">
           Edit catalog pricing, limits, and trial length. Changing cents here
           updates display; Stripe charges use the linked Stripe price id.
         </p>

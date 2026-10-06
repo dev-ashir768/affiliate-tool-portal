@@ -126,7 +126,7 @@ export function AuditLogPage() {
         <h1 className="text-2xl font-bold tracking-tight text-foreground">
           Audit log
         </h1>
-        <p className="text-sm text-muted-foreground">
+        <p className="mt-1 text-sm text-muted-foreground">
           Recent platform security and staff actions.
         </p>
       </div>
