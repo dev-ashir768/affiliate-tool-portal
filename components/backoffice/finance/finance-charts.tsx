@@ -353,8 +353,17 @@ export function FinanceCharts({ data }: Props) {
 
 function EmptyChart({ label = "No data yet" }: { label?: string }) {
   return (
-    <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-      {label}
+    <div className="flex h-full flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed border-muted">
+      <div className="flex h-12 items-end gap-1.5 opacity-20">
+        {[40, 65, 50, 80, 55, 90, 70].map((h, i) => (
+          <div
+            key={i}
+            className="w-4 rounded-t-md bg-muted-foreground"
+            style={{ height: `${h}%` }}
+          />
+        ))}
+      </div>
+      <p className="text-xs text-muted-foreground">{label}</p>
     </div>
   );
 }

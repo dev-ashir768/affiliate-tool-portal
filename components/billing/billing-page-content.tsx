@@ -4,14 +4,8 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 import { PlanCard } from "@/components/billing/plan-card";
 import {
   useCheckoutSession,
@@ -20,6 +14,8 @@ import {
 import { useBillingOverview } from "@/hooks/use-billing-overview";
 import { useMe } from "@/hooks/use-me";
 import { redirectToBillingUrl } from "@/lib/billing/stripe-redirect";
+import { PageHeader } from "@/components/layout/page-header";
+import { SectionCard } from "@/components/layout/section-card";
 
 function formatStatus(status: string | null | undefined) {
   if (!status) return "None";
@@ -37,6 +33,64 @@ function ctaForPlan(kind: string | undefined, trialDays: number) {
     default:
       return "Switch plan";
   }
+}
+
+/** Visual usage bar for a single resource limit */
+function UsageBar({
+  label,
+  used,
+  limit,
+  href,
+}: {
+  label: string;
+  used: number;
+  limit: number;
+  href?: string;
+}) {
+  const unlimited = limit <= 0;
+  const pct = unlimited ? 0 : Math.min(100, Math.round((used / limit) * 100));
+  const over = !unlimited && used > limit;
+  const warn = !unlimited && pct >= 80;
+
+  const barColor = over
+    ? "bg-destructive"
+    : warn
+      ? "bg-amber-500"
+      : "bg-primary";
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <div className="flex items-center justify-between text-sm">
+        <span className="font-medium">{label}</span>
+        <span
+          className={
+            over
+              ? "text-destructive font-semibold"
+              : "text-muted-foreground"
+          }
+        >
+          {used}
+          {unlimited ? "" : ` / ${limit}`}
+          {over ? " (over limit)" : ""}
+        </span>
+      </div>
+      {!unlimited ? (
+        <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+          <div
+            className={`h-full rounded-full transition-all ${barColor}`}
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+      ) : (
+        <p className="text-xs text-muted-foreground">Unlimited</p>
+      )}
+      {href ? (
+        <Link href={href} className="text-xs text-primary underline-offset-4 hover:underline">
+          Manage →
+        </Link>
+      ) : null}
+    </div>
+  );
 }
 
 export function BillingPageContent() {
@@ -104,8 +158,9 @@ export function BillingPageContent() {
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
-        <Skeleton className="h-32 w-full" />
+      <div className="flex flex-col gap-6">
+        <Skeleton className="h-14 w-64" />
+        <Skeleton className="h-44 w-full" />
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {Array.from({ length: 3 }).map((_, i) => (
             <Skeleton key={i} className="h-64 w-full" />
@@ -117,16 +172,16 @@ export function BillingPageContent() {
 
   if (overviewQuery.isError || !data) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Billing unavailable</CardTitle>
-          <CardDescription>
+      <div className="flex flex-col gap-6">
+        <PageHeader title="Billing" description="Manage your workspace plan and limits." />
+        <SectionCard title="Billing unavailable">
+          <p className="text-sm text-destructive">
             {overviewQuery.error instanceof Error
               ? overviewQuery.error.message
               : "Unable to load billing information."}
-          </CardDescription>
-        </CardHeader>
-      </Card>
+          </p>
+        </SectionCard>
+      </div>
     );
   }
 
@@ -134,132 +189,130 @@ export function BillingPageContent() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Billing</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Upgrade, downgrade, and manage limits for your workspace.
-          </p>
-        </div>
-        {canManage && hasPaidSubscription ? (
-          <Button
-            variant="outline"
-            disabled={portal.isPending}
-            onClick={() => void handleManageSubscription()}
-          >
-            {portal.isPending ? "Opening…" : "Manage / cancel in Stripe"}
-          </Button>
-        ) : null}
-      </div>
+      <PageHeader
+        title="Billing"
+        description="Upgrade, downgrade, and manage limits for your workspace."
+        actions={
+          canManage && hasPaidSubscription ? (
+            <Button
+              variant="outline"
+              disabled={portal.isPending}
+              onClick={() => void handleManageSubscription()}
+            >
+              {portal.isPending ? "Opening…" : "Manage / cancel in Stripe"}
+            </Button>
+          ) : undefined
+        }
+      />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Current plan & usage</CardTitle>
-          <CardDescription>
-            Limits are enforced when adding seats, shops, or bots.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <div>
-            <p className="text-xs text-muted-foreground">Plan</p>
-            <p className="font-medium">{org.planName}</p>
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground">Subscription</p>
-            <p className="font-medium">
-              {formatStatus(data.subscription?.status)}
-            </p>
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground">Seats</p>
-            <p className="font-medium">
-              {data.usage.seats} / {org.seatLimit}
-            </p>
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground">Shops</p>
-            <p className="font-medium">
-              {data.usage.shops} / {org.shopLimit}
-            </p>
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground">Bots</p>
-            <p className="font-medium">
-              {data.usage.bots} / {org.botLimit}
-            </p>
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground">Daily invites</p>
-            <p className="font-medium">{org.dailyInviteQuota}</p>
-          </div>
-          {data.subscription?.currentPeriodEnd ? (
-            <div>
-              <p className="text-xs text-muted-foreground">Period ends</p>
-              <p className="font-medium">
-                {new Date(data.subscription.currentPeriodEnd).toLocaleDateString()}
-              </p>
+      {/* ── Current plan & usage ──────────────────────────────────── */}
+      <SectionCard
+        title="Current plan & usage"
+        description="Limits are enforced when adding seats, shops, or bots."
+        actions={
+          <Badge variant="outline" className="text-xs">
+            {org.planName}
+          </Badge>
+        }
+      >
+        <div className="grid gap-5 sm:grid-cols-2">
+          {/* Subscription info */}
+          <div className="flex flex-col gap-3 text-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Subscription</span>
+              <span className="font-medium">
+                {formatStatus(data.subscription?.status)}
+              </span>
             </div>
-          ) : null}
-        </CardContent>
-      </Card>
+            {data.subscription?.currentPeriodEnd ? (
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Renews</span>
+                <span className="font-medium">
+                  {new Date(
+                    data.subscription.currentPeriodEnd,
+                  ).toLocaleDateString()}
+                </span>
+              </div>
+            ) : null}
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Daily invites</span>
+              <span className="font-medium">{org.dailyInviteQuota}</span>
+            </div>
+          </div>
 
+          {/* Usage bars */}
+          <div className="flex flex-col gap-4">
+            <UsageBar
+              label="Seats"
+              used={data.usage.seats}
+              limit={org.seatLimit}
+              href="/team"
+            />
+            <UsageBar
+              label="Shops"
+              used={data.usage.shops}
+              limit={org.shopLimit}
+              href="/shops"
+            />
+            <UsageBar
+              label="Bots"
+              used={data.usage.bots}
+              limit={org.botLimit}
+            />
+          </div>
+        </div>
+      </SectionCard>
+
+      {/* ── Overage warning ──────────────────────────────────────── */}
       {data.hasOverage ? (
-        <Card className="border-destructive/40">
-          <CardHeader>
-            <CardTitle className="text-destructive">Over plan limits</CardTitle>
-            <CardDescription>
-              Reduce usage before downgrading further. New adds stay blocked
-              until you are under the caps.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="text-sm text-muted-foreground">
-            {[
-              data.overage.seats > 0
-                ? `${data.overage.seats} seat(s) over — manage /team`
-                : null,
-              data.overage.shops > 0
-                ? `${data.overage.shops} shop(s) over — manage /shops`
-                : null,
-              data.overage.bots > 0
-                ? `${data.overage.bots} bot(s) over — disconnect shops using bots`
-                : null,
-            ]
-              .filter(Boolean)
-              .join(" · ")}
-          </CardContent>
-        </Card>
+        <div className="rounded-xl border border-destructive/40 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+          <span className="font-medium">Over plan limits.</span>{" "}
+          {[
+            data.overage.seats > 0
+              ? `${data.overage.seats} seat(s) over`
+              : null,
+            data.overage.shops > 0
+              ? `${data.overage.shops} shop(s) over`
+              : null,
+            data.overage.bots > 0
+              ? `${data.overage.bots} bot(s) over`
+              : null,
+          ]
+            .filter(Boolean)
+            .join(" · ")}{" "}
+          — reduce usage before downgrading.
+        </div>
       ) : null}
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Upgrade & downgrade rules</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2 text-sm text-muted-foreground">
-          <p>
-            <span className="font-medium text-foreground">Upgrade: </span>
-            {data.rules.upgrade}
-          </p>
-          <p>
-            <span className="font-medium text-foreground">Downgrade: </span>
-            {data.rules.downgrade}
-          </p>
-          <p>
-            <span className="font-medium text-foreground">Cancel: </span>
-            {data.rules.cancel}
-          </p>
-          <p className="font-medium text-foreground">Affected by plan change:</p>
-          <ul className="list-disc pl-5">
-            {data.rules.effects.map((e) => (
-              <li key={e}>{e}</li>
-            ))}
-          </ul>
-        </CardContent>
-      </Card>
+      {/* ── Upgrade / downgrade rules ─────────────────────────────── */}
+      <SectionCard title="Plan change rules">
+        <dl className="flex flex-col gap-3 text-sm">
+          {[
+            { label: "Upgrade", text: data.rules.upgrade },
+            { label: "Downgrade", text: data.rules.downgrade },
+            { label: "Cancel", text: data.rules.cancel },
+          ].map((r) => (
+            <div key={r.label} className="flex flex-col gap-0.5">
+              <dt className="font-medium">{r.label}</dt>
+              <dd className="text-muted-foreground">{r.text}</dd>
+            </div>
+          ))}
+          <div>
+            <dt className="font-medium">Affected by plan change</dt>
+            <dd>
+              <ul className="mt-1 list-disc pl-4 text-muted-foreground">
+                {data.rules.effects.map((e) => (
+                  <li key={e}>{e}</li>
+                ))}
+              </ul>
+            </dd>
+          </div>
+        </dl>
+      </SectionCard>
 
       {!canManage ? (
         <p className="text-sm text-muted-foreground">
-          Only organization owners and admins can change billing. You can view
-          plan details below.
+          Only organization owners and admins can change billing.
         </p>
       ) : null}
 
@@ -269,6 +322,7 @@ export function BillingPageContent() {
         </p>
       ) : null}
 
+      {/* ── Plan cards ──────────────────────────────────────────────── */}
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {data.plans.map((plan) => (
           <PlanCard
