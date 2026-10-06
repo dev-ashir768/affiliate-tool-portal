@@ -208,6 +208,25 @@ export function PlatformBotsPage() {
         </div>
       ) : null}
 
+      <SectionCard title="Before a bot can be assigned">
+        <ol className="flex list-decimal flex-col gap-1.5 pl-5 text-sm text-muted-foreground">
+          <li>Create a TikTok account for the bot email (the address must deliver to the bot inbox).</li>
+          <li>Add the email below.</li>
+          <li>
+            On a computer with the API repo and production env, run{" "}
+            <code className="rounded bg-muted px-1 py-0.5 text-xs text-foreground">
+              npm run bot:login -- bot1@yourdomain.com US
+            </code>
+            , sign in as the bot in the browser that opens, then press Enter.
+          </li>
+          <li>
+            With live verify enabled, only bots whose TikTok login shows{" "}
+            <span className="font-medium text-foreground">Saved</span> are given to merchants.
+            If a login expires, verify fails with a re-login message — run the command again.
+          </li>
+        </ol>
+      </SectionCard>
+
       <AddBotsCard />
 
       <SectionCard
@@ -256,6 +275,7 @@ export function PlatformBotsPage() {
               <TableRow>
                 <TableHead className="pl-4">Email</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>TikTok login</TableHead>
                 <TableHead>Linked shop</TableHead>
                 <TableHead>Added</TableHead>
                 <TableHead className="pr-4 text-right">Actions</TableHead>
@@ -282,6 +302,17 @@ export function PlatformBotsPage() {
                     >
                       {bot.status.toLowerCase()}
                     </Badge>
+                  </TableCell>
+                  <TableCell className="text-xs">
+                    {bot.sessionCapturedAt ? (
+                      <span className="text-emerald-700 dark:text-emerald-400">
+                        Saved {new Date(bot.sessionCapturedAt).toLocaleDateString()}
+                      </span>
+                    ) : (
+                      <span className="text-amber-700 dark:text-amber-400">
+                        Missing
+                      </span>
+                    )}
                   </TableCell>
                   <TableCell className="text-sm">
                     {bot.shop ? (

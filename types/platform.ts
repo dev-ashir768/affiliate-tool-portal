@@ -198,6 +198,7 @@ export type PlatformBotRow = {
   email: string;
   status: PlatformBotStatus;
   reservedAt: string | null;
+  sessionCapturedAt: string | null;
   createdAt: string;
   shop: {
     id: string;
