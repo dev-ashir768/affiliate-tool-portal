@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
-export const SITE_NAME = "Tiksly";
+export const SITE_NAME = "influxa";
 
 export const DEFAULT_DESCRIPTION =
-  "Run TikTok Shop affiliate programs from one place—discover creators, manage campaigns, samples, and outreach with Tiksly.";
+  "Run TikTok Shop affiliate programs from one place—discover creators, manage campaigns, samples, and outreach with influxa.";
 
 function resolveMetadataBase(): URL {
   const raw =

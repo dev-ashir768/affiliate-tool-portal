@@ -3,7 +3,7 @@ import { pageMetadata } from "@/lib/site-metadata";
 
 export const metadata = pageMetadata({
   title: "Reset password",
-  description: "Set a new password for your Tiksly account using your secure reset link.",
+  description: "Set a new password for your influxa account using your secure reset link.",
   noIndex: true,
 });
 

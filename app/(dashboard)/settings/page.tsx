@@ -5,7 +5,7 @@ import { pageMetadata } from "@/lib/site-metadata";
 export const metadata = pageMetadata({
   title: "Settings",
   description:
-    "Update your organization profile, timezone, and plan limits in Tiksly.",
+    "Update your organization profile, timezone, and plan limits in influxa.",
 });
 
 export default function SettingsPage() {

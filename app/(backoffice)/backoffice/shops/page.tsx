@@ -6,7 +6,7 @@ import { pageMetadata } from "@/lib/site-metadata";
 export const metadata = pageMetadata({
   title: "Shops",
   description:
-    "View TikTok Shop connections across all organizations on the Tiksly platform.",
+    "View TikTok Shop connections across all organizations on the influxa platform.",
 });
 
 export default function BackofficeShopsPage() {

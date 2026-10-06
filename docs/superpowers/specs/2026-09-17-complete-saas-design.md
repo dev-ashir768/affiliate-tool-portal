@@ -1,4 +1,4 @@
-# Tiksly Complete SaaS — Master Design (Portal)
+# influxa Complete SaaS — Master Design (Portal)
 
 Canonical full spec lives in the APIs repo:
 

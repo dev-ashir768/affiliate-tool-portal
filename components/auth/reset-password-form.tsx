@@ -89,7 +89,7 @@ function ResetPasswordFormInner() {
       <CardHeader className="flex flex-col items-center">
         <Image
           src="/images/brandings/logo.png"
-          alt="Tiksly"
+          alt="influxa"
           width={100}
           height={60}
           className="mb-4"

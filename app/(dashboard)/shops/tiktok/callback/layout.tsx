@@ -3,7 +3,7 @@ import { pageMetadata } from "@/lib/site-metadata";
 
 export const metadata = pageMetadata({
   title: "Connecting TikTok Shop",
-  description: "Completing TikTok Shop authorization for your Tiksly organization.",
+  description: "Completing TikTok Shop authorization for your influxa organization.",
   noIndex: true,
 });
 

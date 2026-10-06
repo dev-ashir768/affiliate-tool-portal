@@ -6,7 +6,7 @@ import { pageMetadata } from "@/lib/site-metadata";
 export const metadata = pageMetadata({
   title: "Organizations",
   description:
-    "Browse customer organizations, subscriptions, and tenant status across Tiksly.",
+    "Browse customer organizations, subscriptions, and tenant status across influxa.",
 });
 
 export default function OrganizationsPage() {

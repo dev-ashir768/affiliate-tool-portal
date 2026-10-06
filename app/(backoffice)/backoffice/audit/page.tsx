@@ -6,7 +6,7 @@ import { pageMetadata } from "@/lib/site-metadata";
 export const metadata = pageMetadata({
   title: "Audit log",
   description:
-    "Review platform-wide audit events and administrative actions in Tiksly backoffice.",
+    "Review platform-wide audit events and administrative actions in influxa backoffice.",
 });
 
 export default function BackofficeAuditPage() {

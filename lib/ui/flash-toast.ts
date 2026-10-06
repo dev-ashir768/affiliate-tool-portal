@@ -1,4 +1,4 @@
-const KEY = "tiksly:flash-toast";
+const KEY = "influxa:flash-toast";
 
 export type FlashToast = {
   message: string;

@@ -104,7 +104,7 @@ export function OnboardingPageContent() {
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 py-10">
       <div className="max-w-2xl space-y-2">
         <p className="text-sm font-medium text-muted-foreground">
-          Welcome to Tiksly
+          Welcome to influxa
         </p>
         <h1 className="text-3xl font-semibold tracking-tight">
           Choose a plan for {orgName}

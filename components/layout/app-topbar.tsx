@@ -73,7 +73,7 @@ export function AppTopbar({
         <Link href={brand?.href ?? "#"} className="shrink-0">
           <Image
             src="/images/brandings/logo.png"
-            alt={brand?.name ?? "Tiksly"}
+            alt={brand?.name ?? "influxa"}
             width={100}
             height={36}
             className="h-8 w-auto"

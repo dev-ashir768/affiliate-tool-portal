@@ -6,7 +6,7 @@ import { pageMetadata } from "@/lib/site-metadata";
 export const metadata = pageMetadata({
   title: "Choose a plan",
   description:
-    "Pick a Tiksly subscription plan to unlock shops, creators, campaigns, and the rest of your workspace.",
+    "Pick a influxa subscription plan to unlock shops, creators, campaigns, and the rest of your workspace.",
 });
 
 export default function OnboardingPage() {

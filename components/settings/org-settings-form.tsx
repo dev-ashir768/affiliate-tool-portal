@@ -130,7 +130,7 @@ export function OrgSettingsForm() {
     <div className="grid gap-6 lg:grid-cols-2">
       <SectionCard
         title="Organization"
-        description="Your organization's display name across Tiksly."
+        description="Your organization's display name across influxa."
         footer={
           canEditName ? (
             <Button

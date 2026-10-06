@@ -4,7 +4,7 @@ import { pageMetadata } from "@/lib/site-metadata";
 export const metadata = pageMetadata({
   title: "Accept invite",
   description:
-    "Join your team on Tiksly by accepting this organization invite and setting up your account.",
+    "Join your team on influxa by accepting this organization invite and setting up your account.",
   noIndex: true,
 });
 
