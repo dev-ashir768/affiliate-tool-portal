@@ -1,4 +1,4 @@
-import { jwtVerify } from "jose";
+import { decodeJwt, errors, jwtVerify } from "jose";
 
 export type AccessClaims = {
   orgId: string | null;
@@ -6,10 +6,62 @@ export type AccessClaims = {
   hasProductAccess: boolean;
 };
 
+/** Why an access token cannot be used for routing. */
+export type AccessTokenStatus =
+  | { status: "valid"; claims: AccessClaims }
+  | { status: "expired" }
+  | { status: "misconfigured" }
+  | { status: "invalid" };
+
 function accessSecretKey(): Uint8Array | null {
   const secret = process.env.JWT_ACCESS_SECRET;
   if (!secret || secret.length < 32) return null;
   return new TextEncoder().encode(secret);
+}
+
+function claimsFromPayload(payload: Record<string, unknown>): AccessClaims {
+  return {
+    orgId:
+      payload.orgId == null || payload.orgId === ""
+        ? null
+        : String(payload.orgId),
+    platformRole:
+      payload.platformRole == null || payload.platformRole === ""
+        ? null
+        : String(payload.platformRole),
+    hasProductAccess: Boolean(payload.hasProductAccess),
+  };
+}
+
+/**
+ * Distinguish expiry (safe to refresh) from secret mismatch (must not rotate —
+ * rotating would revoke the refresh cookie while discarding the new tokens).
+ */
+export async function inspectAccessToken(
+  token: string
+): Promise<AccessTokenStatus> {
+  const key = accessSecretKey();
+  if (!key) {
+    return { status: "misconfigured" };
+  }
+  try {
+    const { payload } = await jwtVerify(token, key, { algorithms: ["HS256"] });
+    return {
+      status: "valid",
+      claims: claimsFromPayload(payload as Record<string, unknown>),
+    };
+  } catch (err) {
+    if (err instanceof errors.JWTExpired) {
+      return { status: "expired" };
+    }
+    // Decodable JWT + failed verify ⇒ almost always wrong JWT_ACCESS_SECRET.
+    try {
+      decodeJwt(token);
+      return { status: "misconfigured" };
+    } catch {
+      return { status: "invalid" };
+    }
+  }
 }
 
 /**
@@ -19,27 +71,8 @@ function accessSecretKey(): Uint8Array | null {
 export async function verifyAccessClaims(
   token: string
 ): Promise<AccessClaims | null> {
-  const key = accessSecretKey();
-  if (!key) {
-    // Misconfigured portal — never trust an unverified payload for authz.
-    return null;
-  }
-  try {
-    const { payload } = await jwtVerify(token, key, { algorithms: ["HS256"] });
-    return {
-      orgId:
-        payload.orgId == null || payload.orgId === ""
-          ? null
-          : String(payload.orgId),
-      platformRole:
-        payload.platformRole == null || payload.platformRole === ""
-          ? null
-          : String(payload.platformRole),
-      hasProductAccess: Boolean(payload.hasProductAccess),
-    };
-  } catch {
-    return null;
-  }
+  const inspected = await inspectAccessToken(token);
+  return inspected.status === "valid" ? inspected.claims : null;
 }
 
 /** Default post-login destination from claims. */

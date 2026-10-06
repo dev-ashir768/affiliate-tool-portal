@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { apiFetch, ApiClientError } from "@/lib/auth/api";
+import { inspectAccessToken } from "@/lib/auth/access-token";
 import {
   clearSessionCookies,
   getRefreshToken,
@@ -8,7 +9,7 @@ import {
 
 type RefreshResponse = {
   accessToken: string;
-  refreshToken: string;
+  refreshToken?: string;
 };
 
 export async function POST() {
@@ -28,16 +29,30 @@ export async function POST() {
     });
 
     if (!data.accessToken?.trim() || !data.refreshToken?.trim()) {
-      await clearSessionCookies();
+      // Do not wipe cookies on BFF mismatch — the refresh token may still be valid.
       return NextResponse.json(
         {
           error: {
-            code: "UNAUTHORIZED",
+            code: "INTERNAL",
             message:
               "Auth tokens missing from API. Check PORTAL_BFF_SECRET matches on portal and APIs.",
           },
         },
-        { status: 401 },
+        { status: 502 },
+      );
+    }
+
+    const inspected = await inspectAccessToken(data.accessToken);
+    if (inspected.status !== "valid") {
+      return NextResponse.json(
+        {
+          error: {
+            code: "INTERNAL",
+            message:
+              "Refreshed token could not be verified. JWT_ACCESS_SECRET must match on portal and APIs.",
+          },
+        },
+        { status: 502 },
       );
     }
 
@@ -48,8 +63,10 @@ export async function POST() {
 
     return NextResponse.json({ ok: true });
   } catch (err) {
-    await clearSessionCookies();
     if (err instanceof ApiClientError) {
+      if (err.status === 401 || err.status === 403) {
+        await clearSessionCookies();
+      }
       return NextResponse.json(
         { error: { code: err.code, message: err.message, details: err.details } },
         { status: err.status }

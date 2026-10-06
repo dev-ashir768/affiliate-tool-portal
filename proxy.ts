@@ -11,6 +11,7 @@ import {
 } from "@/lib/auth/constants";
 import {
   defaultRedirectForClaims,
+  inspectAccessToken,
   verifyAccessClaims,
 } from "@/lib/auth/access-token";
 import {
@@ -20,7 +21,11 @@ import {
   type RouteClass,
 } from "@/lib/auth/route-policy";
 
-async function rotateTokens(refreshToken: string) {
+type RotateResult =
+  | { ok: true; accessToken: string; refreshToken: string }
+  | { ok: false; reason: "unauthorized" | "misconfigured" | "error" };
+
+async function rotateTokens(refreshToken: string): Promise<RotateResult> {
   try {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -33,26 +38,42 @@ async function rotateTokens(refreshToken: string) {
       body: JSON.stringify({ refreshToken }),
       cache: "no-store",
     });
-    if (!res.ok) return null;
+    if (res.status === 401 || res.status === 403) {
+      return { ok: false, reason: "unauthorized" };
+    }
+    if (!res.ok) return { ok: false, reason: "error" };
     const data = (await res.json()) as {
       accessToken: string;
       refreshToken?: string;
     };
-    if (!data.accessToken || !data.refreshToken) return null;
-    // Must verify with the portal JWT secret — mismatch means misconfigured env.
-    if (!(await verifyAccessClaims(data.accessToken))) {
+    if (!data.accessToken || !data.refreshToken) {
+      console.error(
+        "[proxy] refresh response missing tokens — PORTAL_BFF_SECRET likely differs from APIs",
+      );
+      return { ok: false, reason: "misconfigured" };
+    }
+    const inspected = await inspectAccessToken(data.accessToken);
+    if (inspected.status !== "valid") {
       console.error(
         "[proxy] refreshed access token failed verification — JWT_ACCESS_SECRET likely differs from APIs",
       );
-      return null;
+      return { ok: false, reason: "misconfigured" };
     }
     return {
+      ok: true,
       accessToken: data.accessToken,
       refreshToken: data.refreshToken,
     };
   } catch (err) {
     console.error("[proxy] token refresh failed", err);
-    return null;
+    const message = err instanceof Error ? err.message : String(err);
+    if (
+      message.includes("PORTAL_BFF_SECRET") ||
+      message.includes("JWT_ACCESS_SECRET")
+    ) {
+      return { ok: false, reason: "misconfigured" };
+    }
+    return { ok: false, reason: "error" };
   }
 }
 
@@ -169,6 +190,8 @@ async function enforceAreaAccess(
 
 /**
  * Prefer a valid (signature-verified) access token; otherwise rotate via refresh.
+ * Never rotate on JWT secret mismatch — that burns the refresh token while
+ * discarding the new pair and causes login→logout loops.
  */
 async function ensureAccessToken(
   accessToken: string | undefined,
@@ -177,9 +200,38 @@ async function ensureAccessToken(
   accessToken: string | null;
   sessionResponse: NextResponse | null;
   cleared: boolean;
+  misconfigured: boolean;
 }> {
-  if (accessToken && (await verifyAccessClaims(accessToken))) {
-    return { accessToken, sessionResponse: null, cleared: false };
+  if (accessToken) {
+    const inspected = await inspectAccessToken(accessToken);
+    if (inspected.status === "valid") {
+      return {
+        accessToken,
+        sessionResponse: null,
+        cleared: false,
+        misconfigured: false,
+      };
+    }
+    if (inspected.status === "misconfigured") {
+      console.error(
+        "[proxy] access token unusable — JWT_ACCESS_SECRET missing or differs from APIs",
+      );
+      return {
+        accessToken: null,
+        sessionResponse: null,
+        cleared: false,
+        misconfigured: true,
+      };
+    }
+    // expired or invalid signature/malformed → try refresh below when available
+    if (inspected.status === "invalid" && !refreshToken) {
+      return {
+        accessToken: null,
+        sessionResponse: null,
+        cleared: true,
+        misconfigured: false,
+      };
+    }
   }
 
   if (!refreshToken) {
@@ -187,20 +239,28 @@ async function ensureAccessToken(
       accessToken: null,
       sessionResponse: null,
       cleared: Boolean(accessToken),
+      misconfigured: false,
     };
   }
 
-  const tokens = await rotateTokens(refreshToken);
-  if (!tokens) {
-    return { accessToken: null, sessionResponse: null, cleared: true };
+  const rotated = await rotateTokens(refreshToken);
+  if (!rotated.ok) {
+    return {
+      accessToken: null,
+      sessionResponse: null,
+      // Only wipe cookies when the refresh token itself is rejected.
+      cleared: rotated.reason === "unauthorized",
+      misconfigured: rotated.reason === "misconfigured",
+    };
   }
 
   const sessionResponse = NextResponse.next();
-  applySessionCookies(sessionResponse, tokens);
+  applySessionCookies(sessionResponse, rotated);
   return {
-    accessToken: tokens.accessToken,
+    accessToken: rotated.accessToken,
     sessionResponse,
     cleared: false,
+    misconfigured: false,
   };
 }
 
@@ -232,9 +292,13 @@ export async function proxy(request: NextRequest) {
     if (isProtectedRoute(kind)) {
       const ensured = await ensureAccessToken(rawAccess, refreshToken);
 
-      if (ensured.cleared || !ensured.accessToken) {
+      if (!ensured.accessToken) {
         const login = redirectToLogin(request, pathname);
-        clearSessionCookies(login);
+        // Keep cookies on JWT/BFF misconfig so ops can fix secrets without
+        // forcing a dead refresh-token rotate loop.
+        if (ensured.cleared && !ensured.misconfigured) {
+          clearSessionCookies(login);
+        }
         return login;
       }
 

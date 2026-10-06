@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { apiFetch, ApiClientError } from "@/lib/auth/api";
+import { verifyAccessClaims } from "@/lib/auth/access-token";
 import { setSessionCookies } from "@/lib/auth/session";
 
 type LoginResponse = {
@@ -30,6 +31,22 @@ export async function POST(request: Request) {
             code: "INTERNAL",
             message:
               "Auth tokens missing from API. Check PORTAL_BFF_SECRET matches on portal and APIs.",
+          },
+        },
+        { status: 502 },
+      );
+    }
+
+    // Fail closed if portal cannot verify the API-issued JWT — otherwise the
+    // UI shows "Logged in" then proxy immediately sends the user back to login.
+    const claims = await verifyAccessClaims(data.accessToken);
+    if (!claims) {
+      return NextResponse.json(
+        {
+          error: {
+            code: "INTERNAL",
+            message:
+              "Login token could not be verified. JWT_ACCESS_SECRET must match on portal and APIs.",
           },
         },
         { status: 502 },
