@@ -15,6 +15,10 @@ import {
   revokePlatformOrganizationAccess,
   fetchPlatformPlans,
   fetchPlatformShops,
+  fetchPlatformBots,
+  createPlatformBots,
+  setPlatformBotEnabled,
+  deletePlatformBot,
   fetchPlatformStaff,
   patchAdminNavItem,
   patchPlatformPlan,
@@ -230,6 +234,46 @@ export function usePatchPlatformPlan() {
     }) => patchPlatformPlan(id, body),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["platform", "plans"] });
+    },
+  });
+}
+
+export function usePlatformBots(params: { search?: string; status?: string }) {
+  return useQuery({
+    queryKey: ["platform", "bots", params],
+    queryFn: ({ signal }) => fetchPlatformBots(params, signal),
+    placeholderData: (prev) => prev,
+    retry: false,
+  });
+}
+
+export function useCreatePlatformBots() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: createPlatformBots,
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["platform", "bots"] });
+    },
+  });
+}
+
+export function useSetPlatformBotEnabled() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, enabled }: { id: string; enabled: boolean }) =>
+      setPlatformBotEnabled(id, enabled),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["platform", "bots"] });
+    },
+  });
+}
+
+export function useDeletePlatformBot() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: deletePlatformBot,
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["platform", "bots"] });
     },
   });
 }

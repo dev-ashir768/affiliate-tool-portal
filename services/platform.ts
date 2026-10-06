@@ -2,6 +2,8 @@ import type {
   AdminNavItem,
   AdminNavResponse,
   BillingOverview,
+  PlatformBotListResponse,
+  PlatformBotRow,
   PlatformCreatorListResponse,
   PlatformCreatorRow,
   PlatformListParams,
@@ -280,4 +282,49 @@ export async function patchPlatformPlan(
     body: JSON.stringify(body),
   });
   return (await parseJson(res)) as import("@/types/billing").PlatformPlan;
+}
+
+export async function fetchPlatformBots(
+  params: { search?: string; status?: string; page?: number; pageSize?: number },
+  signal?: AbortSignal,
+): Promise<PlatformBotListResponse> {
+  const qs = toQuery(params);
+  const res = await fetch(`/api/platform/bots?${qs}`, {
+    credentials: "include",
+    signal,
+  });
+  return (await parseJson(res)) as PlatformBotListResponse;
+}
+
+export async function createPlatformBots(
+  emails: string[],
+): Promise<{ created: string[]; skipped: string[] }> {
+  const res = await fetch("/api/platform/bots", {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ emails }),
+  });
+  return (await parseJson(res)) as { created: string[]; skipped: string[] };
+}
+
+export async function setPlatformBotEnabled(
+  id: string,
+  enabled: boolean,
+): Promise<PlatformBotRow> {
+  const res = await fetch(`/api/platform/bots/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ enabled }),
+  });
+  return (await parseJson(res)) as PlatformBotRow;
+}
+
+export async function deletePlatformBot(id: string): Promise<void> {
+  const res = await fetch(`/api/platform/bots/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+  if (!res.ok) await parseJson(res);
 }

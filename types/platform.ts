@@ -190,3 +190,28 @@ export type AdminNavResponse = {
   area: "dashboard" | "backoffice";
   sections: AdminNavSection[];
 };
+
+export type PlatformBotStatus = "AVAILABLE" | "RESERVED" | "ASSIGNED" | "DISABLED";
+
+export type PlatformBotRow = {
+  id: string;
+  email: string;
+  status: PlatformBotStatus;
+  reservedAt: string | null;
+  createdAt: string;
+  shop: {
+    id: string;
+    status: string;
+    region: string;
+    displayName: string | null;
+    organization: { id: string; name: string };
+  } | null;
+};
+
+export type PlatformBotListResponse = {
+  data: PlatformBotRow[];
+  total: number;
+  page: number;
+  pageSize: number;
+  counts: Record<PlatformBotStatus, number>;
+};
