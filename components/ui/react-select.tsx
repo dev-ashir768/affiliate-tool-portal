@@ -194,7 +194,10 @@ export type AppReactSelectProps<
 > & {
   size?: "sm" | "default";
   className?: string;
-  /** Use when select is inside overflow:hidden (tables, dialogs). */
+  /**
+   * Render the menu on document.body so cards / tables / dialogs with
+   * overflow:hidden never clip it. On by default.
+   */
   portalMenu?: boolean;
 };
 
@@ -204,7 +207,7 @@ export function AppReactSelect<
 >({
   size = "default",
   className,
-  portalMenu = false,
+  portalMenu = true,
   components: userComponents,
   ...props
 }: AppReactSelectProps<Option, IsMulti>) {
@@ -248,6 +251,14 @@ export function AppReactSelect<
             : undefined
         }
         menuPosition={portalMenu ? "fixed" : undefined}
+        // A fixed menu would detach from its control when the page scrolls.
+        closeMenuOnScroll={
+          portalMenu
+            ? (e) =>
+                !(e.target instanceof Element) ||
+                !e.target.closest(".app-rs__menu-list")
+            : undefined
+        }
         components={{
           DropdownIndicator,
           IndicatorSeparator: () => null,

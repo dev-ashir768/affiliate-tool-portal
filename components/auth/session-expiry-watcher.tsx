@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "nextjs-toploader/app";
 
 /** Auth endpoints answer 401 for bad credentials — never treat those as expiry. */
 const IGNORED = [

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState, type MouseEvent } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ChevronRightIcon } from "lucide-react";
 import { cn } from "cn";
@@ -15,19 +15,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import type { NavItem } from "@/types/navigation";
-
-/**
- * Full document navigation for same-origin app links.
- * Soft RSC navigations have been failing behind some reverse proxies
- * (`?_rsc=` → 404 → Next global-error). Modifier-clicks still use the browser default.
- */
-function navigateApp(e: MouseEvent<HTMLAnchorElement>, href: string) {
-  if (e.defaultPrevented) return;
-  if (e.button !== 0) return;
-  if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-  e.preventDefault();
-  window.location.assign(href);
-}
 
 function IconRailLink({
   href,
@@ -50,9 +37,8 @@ function IconRailLink({
           render={
             <Link
               href={href}
-              onClick={(e) => {
+              onClick={() => {
                 onNavigate?.();
-                navigateApp(e, href);
               }}
               aria-label={label}
               className={cn(
@@ -152,10 +138,9 @@ function IconRailFlyout({
                     key={child.id}
                     role="menuitem"
                     href={child.href}
-                    onClick={(e) => {
+                    onClick={() => {
                       setOpen(false);
                       onNavigate?.();
-                      navigateApp(e, child.href);
                     }}
                     className={cn(
                       "flex items-center gap-2 rounded-md px-2.5 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground",
@@ -264,9 +249,8 @@ export function SidebarNavItem({
   return (
     <Link
       href={item.href}
-      onClick={(e) => {
+      onClick={() => {
         onNavigate?.();
-        navigateApp(e, item.href);
       }}
       className={cn(
         "relative flex h-9 items-center gap-2 rounded-lg px-2.5 text-sm text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
