@@ -15,14 +15,49 @@ import { useAnalyticsOverview } from "@/hooks/use-commerce";
 import { analyticsTopCreatorsColumns } from "./analytics-top-creators-columns";
 
 import { PageHeader } from "@/components/layout/page-header";
-import { StatCard } from "@/components/layout/stat-card";
 import { SectionCard } from "@/components/layout/section-card";
+import {
+  CreatorGmvChart,
+  FunnelChart,
+  GmvByDayChart,
+  OrderStatusDonut,
+  Sparkline,
+} from "./analytics-charts";
+
 function formatMoney(cents: number, currency = "USD") {
   return new Intl.NumberFormat(undefined, {
     style: "currency",
     currency: currency.length === 3 ? currency : "USD",
     maximumFractionDigits: 0,
   }).format(cents / 100);
+}
+
+/** KPI card with optional sparkline */
+function KpiCard({
+  label,
+  value,
+  sub,
+  spark,
+  sparkColor,
+}: {
+  label: string;
+  value: string;
+  sub?: string;
+  spark?: number[];
+  sparkColor?: string;
+}) {
+  return (
+    <div className="flex flex-col gap-1 rounded-xl bg-card p-4 ring-1 ring-foreground/[0.08]">
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="text-2xl font-bold tracking-tight">{value}</p>
+      {sub ? <p className="text-xs text-muted-foreground">{sub}</p> : null}
+      {spark !== undefined ? (
+        <div className="mt-1">
+          <Sparkline data={spark} color={sparkColor} />
+        </div>
+      ) : null}
+    </div>
+  );
 }
 
 export function AnalyticsPageContent() {
@@ -73,14 +108,18 @@ export function AnalyticsPageContent() {
     return (
       <div className="flex flex-col gap-6">
         {header}
-        <div className="grid gap-4 lg:grid-cols-2">
-          <Skeleton className="h-40 w-full" />
-          <Skeleton className="h-40 w-full" />
-        </div>
-        <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-5">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className="h-24 w-full" />
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-28 w-full" />
           ))}
+        </div>
+        <div className="grid gap-6 lg:grid-cols-3">
+          <Skeleton className="h-64 lg:col-span-2" />
+          <Skeleton className="h-64" />
+        </div>
+        <div className="grid gap-6 lg:grid-cols-2">
+          <Skeleton className="h-52" />
+          <Skeleton className="h-52" />
         </div>
       </div>
     );
@@ -108,84 +147,130 @@ export function AnalyticsPageContent() {
   const shopPrimaryCurrency = shop?.byCurrency[0]?.currency ?? "USD";
   const marketPrimaryCurrency = marketplace?.byCurrency[0]?.currency ?? "USD";
 
-  const funnelCards = [
-    { label: "Creators", value: String(f.creators) },
-    { label: "Invited / active", value: String(f.contactedOrInvited) },
-    { label: "Outreach sent", value: String(f.outreachSent) },
-    { label: "Orders", value: String(f.orders) },
-    {
-      label: "Commission",
-      value: formatMoney(f.commissionCents, shopPrimaryCurrency),
-    },
-  ];
-
+  const gmvByDay = data.charts?.gmvByDay ?? [];
   const shopGmvByCreator = data.shopGmvByCreator ?? [];
   const campaignsPerformance = data.campaignsPerformance ?? [];
   const recentOrders = data.recentOrders ?? [];
+
+  // sparkline data: daily gmv values (last 14 days max) for mini charts
+  const gmvSpark = gmvByDay.slice(-14).map((d) => d.gmvCents);
+
+  const funnelData = [
+    { name: "Creators", value: f.creators },
+    { name: "Invited", value: f.contactedOrInvited },
+    { name: "Outreach", value: f.outreachSent },
+    { name: "Orders", value: f.orders },
+  ];
 
   return (
     <div className="flex flex-col gap-6">
       {header}
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <StatCard
-          label={shop?.label ?? "Shop attributed GMV"}
+      {/* ── KPI cards ────────────────────────────────────────────── */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <KpiCard
+          label="Shop GMV"
           value={
             shop
               ? formatMoney(shop.gmvCents, shopPrimaryCurrency)
               : formatMoney(f.gmvCents)
           }
-          hint={shop?.description ?? "Orders attributed to your TikTok Shop."}
-        >
-          <p>
-            {shop?.orders ?? f.orders} orders · commission{" "}
-            {formatMoney(
-              shop?.commissionCents ?? f.commissionCents,
-              shopPrimaryCurrency,
-            )}
-          </p>
-          {(shop?.byCurrency.length ?? 0) > 1 ? (
-            <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
-              {shop!.byCurrency.map((b) => (
-                <li key={b.currency}>
-                  {b.currency}: {formatMoney(b.gmvCents, b.currency)} (
-                  {b.orders} orders)
-                </li>
-              ))}
-            </ul>
-          ) : null}
-        </StatCard>
-
-        <StatCard
-          label={marketplace?.label ?? "Creator marketplace GMV"}
+          sub={`${shop?.orders ?? f.orders} orders`}
+          spark={gmvSpark}
+          sparkColor="var(--chart-2)"
+        />
+        <KpiCard
+          label="Commission"
+          value={formatMoney(
+            shop?.commissionCents ?? f.commissionCents,
+            shopPrimaryCurrency,
+          )}
+          sub="Attributed to creators"
+          spark={gmvSpark.map((v) => Math.round(v * 0.1))}
+          sparkColor="var(--chart-1)"
+        />
+        <KpiCard
+          label="Marketplace GMV"
           value={
             marketplace
               ? marketplace.multiCurrency
                 ? `${marketplace.byCurrency.length} currencies`
-                : formatMoney(marketplace.parsedGmvCents, marketPrimaryCurrency)
+                : formatMoney(
+                    marketplace.parsedGmvCents,
+                    marketPrimaryCurrency,
+                  )
               : "—"
           }
-          hint={
-            marketplace?.description ??
-            "TikTok Creator Marketplace affiliate GMV snapshots — not shop sales."
-          }
+          sub={`${marketplace?.creatorsWithMetrics ?? 0} creators synced`}
+        />
+        <KpiCard
+          label="Outreach sent"
+          value={String(f.outreachSent)}
+          sub={`${f.contactedOrInvited} invited`}
+        />
+      </div>
+
+      {/* ── GMV by day + Order status ────────────────────────────── */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        <SectionCard
+          title="Shop GMV by day"
+          description="Paid and pending attributed orders in the selected range"
+          className="lg:col-span-2"
         >
-          <p>
-            {marketplace?.creatorsWithParsableGmv ?? 0} with amount ·{" "}
-            {marketplace?.creatorsWithRangeOnly ?? 0} range-only ·{" "}
-            {marketplace?.creatorsWithMetrics ?? 0} synced
-          </p>
-          {(marketplace?.byCurrency.length ?? 0) > 0 ? (
-            <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
-              {marketplace!.byCurrency.map((b) => (
-                <li key={b.currency}>
-                  {b.currency}: {formatMoney(b.gmvCents, b.currency)} (
-                  {b.creators} creators)
-                </li>
-              ))}
-            </ul>
+          <GmvByDayChart data={gmvByDay} />
+        </SectionCard>
+
+        <SectionCard title="Order status" description="Recent order breakdown">
+          <OrderStatusDonut orders={recentOrders} />
+        </SectionCard>
+      </div>
+
+      {/* ── Funnel + Creator GMV ─────────────────────────────────── */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <SectionCard
+          title="Affiliate funnel"
+          description="Creators through outreach to attributed orders"
+        >
+          <FunnelChart data={funnelData} />
+        </SectionCard>
+
+        <SectionCard
+          title="Shop GMV by creator"
+          description="Top creators by attributed shop order GMV"
+        >
+          <CreatorGmvChart data={shopGmvByCreator} />
+        </SectionCard>
+      </div>
+
+      {/* ── Marketplace GMV detail ───────────────────────────────── */}
+      {marketplace && (marketplace.byCurrency.length > 0) ? (
+        <SectionCard
+          title="Marketplace GMV by currency"
+          description="TikTok Creator Marketplace affiliate GMV snapshots — not shop sales."
+        >
+          <ul className="divide-y text-sm">
+            {marketplace.byCurrency.map((b) => (
+              <li
+                key={b.currency}
+                className="flex items-center justify-between gap-3 py-2"
+              >
+                <span className="text-muted-foreground">{b.currency}</span>
+                <span className="font-semibold tabular-nums">
+                  {formatMoney(b.gmvCents, b.currency)}
+                  <span className="ml-2 text-xs text-muted-foreground">
+                    ({b.creators} creators)
+                  </span>
+                </span>
+              </li>
+            ))}
+          </ul>
+          {marketplace.lastSyncedAt ? (
+            <p className="mt-3 text-xs text-muted-foreground">
+              Last metrics sync{" "}
+              {new Date(marketplace.lastSyncedAt).toLocaleString()}
+            </p>
           ) : (
-            <p className="mt-2 text-xs text-muted-foreground">
+            <p className="mt-3 text-xs text-muted-foreground">
               No marketplace amounts yet.{" "}
               <Link
                 href="/discover"
@@ -198,27 +283,11 @@ export function AnalyticsPageContent() {
               </Link>
             </p>
           )}
-          {marketplace?.lastSyncedAt ? (
-            <p className="mt-1 text-xs text-muted-foreground">
-              Last metrics sync{" "}
-              {new Date(marketplace.lastSyncedAt).toLocaleString()}
-            </p>
-          ) : null}
-        </StatCard>
-      </div>
+        </SectionCard>
+      ) : null}
 
-      <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-5">
-        {funnelCards.map((c) => (
-          <StatCard key={c.label} label={c.label} value={c.value} />
-        ))}
-      </div>
-
-      {topCreators.length === 0 ? (
-        <SectionCard
-          title="Top CRM creators by marketplace GMV"
-          description="No marketplace GMV on CRM creators yet."
-        />
-      ) : (
+      {/* ── Top CRM creators table ───────────────────────────────── */}
+      {topCreators.length > 0 ? (
         <div className="flex flex-col gap-3">
           <h2 className="text-base font-semibold">
             Top CRM creators by marketplace GMV
@@ -239,43 +308,10 @@ export function AnalyticsPageContent() {
             pageSizeOptions={[10, 20, 50]}
           />
         </div>
-      )}
+      ) : null}
 
+      {/* ── Campaign performance ─────────────────────────────────── */}
       <div className="grid gap-6 lg:grid-cols-2">
-        <SectionCard
-          title="Shop GMV by attributed creator"
-          contentClassName="px-0"
-        >
-          {shopGmvByCreator.length === 0 ? (
-            <p className="px-4 text-sm text-muted-foreground">
-              No shop orders linked to creators yet. Sync affiliate orders or
-              attribute manually.
-            </p>
-          ) : (
-            <ul className="divide-y text-sm">
-              {shopGmvByCreator.map((c) => (
-                <li
-                  key={c.creatorId}
-                  className="flex items-center justify-between gap-3 px-4 py-3"
-                >
-                  <div className="min-w-0">
-                    <p className="truncate font-medium">
-                      @{c.handle ?? "unknown"}
-                    </p>
-                    <p className="truncate text-xs text-muted-foreground">
-                      {c.displayName ? `${c.displayName} · ` : ""}
-                      {c.orders} orders
-                    </p>
-                  </div>
-                  <span className="shrink-0 font-medium tabular-nums">
-                    {formatMoney(c.gmvCents, shopPrimaryCurrency)}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </SectionCard>
-
         <SectionCard title="Campaign performance" contentClassName="px-0">
           {campaignsPerformance.length === 0 ? (
             <p className="px-4 text-sm text-muted-foreground">
@@ -293,43 +329,49 @@ export function AnalyticsPageContent() {
                     <p className="text-xs text-muted-foreground">{c.status}</p>
                   </div>
                   <span className="shrink-0 text-xs text-muted-foreground">
-                    {c.invites} invites · {c.outreachSent} emails sent
+                    {c.invites} invites · {c.outreachSent} emails
                   </span>
                 </li>
               ))}
             </ul>
           )}
         </SectionCard>
-      </div>
 
-      <SectionCard title="Recent shop orders" contentClassName="px-0">
-        {recentOrders.length === 0 ? (
-          <p className="px-4 text-sm text-muted-foreground">No orders yet.</p>
-        ) : (
-          <ul className="divide-y text-sm">
-            {recentOrders.map((o) => (
-              <li
-                key={o.id}
-                className="flex items-center justify-between gap-3 px-4 py-3"
-              >
-                <div className="min-w-0">
-                  <p className="truncate font-mono text-xs">
-                    {o.externalOrderId}
-                  </p>
-                  {o.creatorHandle ? (
-                    <p className="text-xs text-muted-foreground">
-                      @{o.creatorHandle}
+        {/* ── Recent orders ──────────────────────────────────────── */}
+        <SectionCard title="Recent shop orders" contentClassName="px-0">
+          {recentOrders.length === 0 ? (
+            <p className="px-4 text-sm text-muted-foreground">No orders yet.</p>
+          ) : (
+            <ul className="divide-y text-sm">
+              {recentOrders.map((o) => (
+                <li
+                  key={o.id}
+                  className="flex items-center justify-between gap-3 px-4 py-3"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate font-mono text-xs">
+                      {o.externalOrderId}
                     </p>
-                  ) : null}
-                </div>
-                <span className="shrink-0 font-medium tabular-nums">
-                  {formatMoney(o.gmvCents, o.currency ?? "USD")}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </SectionCard>
+                    {o.creatorHandle ? (
+                      <p className="text-xs text-muted-foreground">
+                        @{o.creatorHandle}
+                      </p>
+                    ) : null}
+                  </div>
+                  <div className="flex shrink-0 flex-col items-end gap-0.5">
+                    <span className="font-semibold tabular-nums">
+                      {formatMoney(o.gmvCents, o.currency ?? "USD")}
+                    </span>
+                    <span className="text-xs capitalize text-muted-foreground">
+                      {o.status.toLowerCase()}
+                    </span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </SectionCard>
+      </div>
     </div>
   );
 }

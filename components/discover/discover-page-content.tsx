@@ -195,9 +195,11 @@ export function DiscoverPageContent() {
 
       <SectionCard
         title="Sync from your shop"
+        // Merchant-facing copy only — the API note is operator detail.
         description={
-          tiktok.data?.config?.note ??
-          "Uses your shop OAuth token + Creator Marketplace search."
+          appReady
+            ? "Search TikTok Creator Marketplace through your authorized shop and add matches to the index."
+            : "TikTok Shop integration isn't enabled yet. Please contact support."
         }
         actions={
           <Link
@@ -210,7 +212,7 @@ export function DiscoverPageContent() {
       >
         {oauthShops.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            No OAuth-connected shop yet.{" "}
+            No authorized shop yet.{" "}
             <Link href="/shops" className="font-medium text-primary underline">
               Authorize TikTok Shop
             </Link>{" "}

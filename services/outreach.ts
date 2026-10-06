@@ -73,12 +73,10 @@ export async function fetchOutreachEmailStatus(signal?: AbortSignal) {
     signal,
   });
   return (await parseJson(res)) as {
-    provider: "console" | "smtp";
-    fromSet: boolean;
-    live: boolean;
+    /** False when email cannot be sent (details stay server-side). */
     ready: boolean;
-    missing: string[];
-    note: string;
+    /** False in test mode: emails are logged, not delivered. */
+    live: boolean;
   };
 }
 

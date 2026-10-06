@@ -446,11 +446,7 @@ export async function fetchOrgDiscoveryTikTokStatus(signal?: AbortSignal) {
   });
   return (await parseJson(res)) as {
     config: {
-      configured: boolean;
-      appConfigured?: boolean;
-      envTokenConfigured?: boolean;
-      missing: string[];
-      note: string;
+      appConfigured: boolean;
     };
     shops: Array<{
       id: string;
