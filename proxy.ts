@@ -39,11 +39,19 @@ async function rotateTokens(refreshToken: string) {
       refreshToken?: string;
     };
     if (!data.accessToken || !data.refreshToken) return null;
+    // Must verify with the portal JWT secret — mismatch means misconfigured env.
+    if (!(await verifyAccessClaims(data.accessToken))) {
+      console.error(
+        "[proxy] refreshed access token failed verification — JWT_ACCESS_SECRET likely differs from APIs",
+      );
+      return null;
+    }
     return {
       accessToken: data.accessToken,
       refreshToken: data.refreshToken,
     };
-  } catch {
+  } catch (err) {
+    console.error("[proxy] token refresh failed", err);
     return null;
   }
 }
@@ -254,11 +262,16 @@ export async function proxy(request: NextRequest) {
     }
 
     return NextResponse.next();
-  } catch {
-    // Fail closed for protected / entry routes — never skip auth on proxy errors.
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("[proxy] unexpected error", message);
+    // Config errors (missing secrets) — do not wipe cookies; surface as login redirect only.
+    const isConfigError =
+      message.includes("PORTAL_BFF_SECRET") ||
+      message.includes("JWT_ACCESS_SECRET");
     if (isProtectedRoute(kind) || kind === "entry") {
       const login = redirectToLogin(request, pathname);
-      clearSessionCookies(login);
+      if (!isConfigError) clearSessionCookies(login);
       return login;
     }
     return NextResponse.next();
