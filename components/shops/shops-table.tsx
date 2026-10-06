@@ -37,6 +37,7 @@ type ShopsTableProps = {
   verifyingId: string | null;
   disconnectingId: string | null;
   authorizingId: string | null;
+  oauthAvailable: boolean;
   onVerify: (id: string) => Promise<void>;
   onAuthorizeTikTok: (id: string) => Promise<void>;
   onDisconnect: (id: string) => Promise<void>;
@@ -48,6 +49,7 @@ export function ShopsTable({
   verifyingId,
   disconnectingId,
   authorizingId,
+  oauthAvailable,
   onVerify,
   onAuthorizeTikTok,
   onDisconnect,
@@ -80,7 +82,8 @@ export function ShopsTable({
             const canVerify =
               Boolean(shop.botEmail) &&
               (shop.status === "PENDING_INVITE" || shop.status === "FAILED");
-            const canAuthorize = !shop.oauthConnected && shop.status !== "DISCONNECTED";
+            const canAuthorize =
+              oauthAvailable && !shop.oauthConnected && shop.status !== "DISCONNECTED";
             const canDisconnect = shop.status !== "DISCONNECTED";
             const isConfirming = confirmId === shop.id;
 
