@@ -55,7 +55,7 @@ export function ProductsPageContent() {
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-lg font-semibold tracking-tight">Products</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Products</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Active TikTok Shop catalog (read-only). Use these products when
             creating affiliate invites and campaigns.

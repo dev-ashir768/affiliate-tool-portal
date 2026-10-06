@@ -186,7 +186,7 @@ export function DiscoverPageContent() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-lg font-semibold tracking-tight">Discover</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Discover</h1>
         <p className="text-sm text-muted-foreground">
           Sync creators from your authorized TikTok Shop, then filter the shared
           index by followers, GMV band, units sold, and email.

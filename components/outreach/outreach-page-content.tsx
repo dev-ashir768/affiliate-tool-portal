@@ -229,7 +229,7 @@ export function OutreachPageContent() {
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h1 className="text-lg font-semibold tracking-tight">Outreach</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Outreach</h1>
         <p className="text-sm text-muted-foreground">
           Email templates with {"{{handle}}"} / {"{{displayName}}"} tokens.
           Single or bulk send to CRM creators.

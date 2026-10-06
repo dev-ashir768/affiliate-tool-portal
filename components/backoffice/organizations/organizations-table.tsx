@@ -290,7 +290,7 @@ export function OrganizationsTable() {
   return (
     <div className="flex flex-col gap-4">
       <div>
-        <h1 className="text-lg font-semibold tracking-tight">Organizations</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Organizations</h1>
         <p className="text-sm text-muted-foreground">
           Customers (tenants) — filter by subscription health and plan.
         </p>

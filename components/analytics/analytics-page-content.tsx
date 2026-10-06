@@ -86,7 +86,7 @@ export function AnalyticsPageContent() {
     <div className="flex flex-col gap-8">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-lg font-semibold tracking-tight">Analytics</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Analytics</h1>
           <p className="text-sm text-muted-foreground">
             Funnel plus a clear split: shop order GMV vs creator marketplace GMV
             snapshots.

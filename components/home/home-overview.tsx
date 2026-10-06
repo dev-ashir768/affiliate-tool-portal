@@ -76,7 +76,7 @@ export function HomeOverview() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-lg font-semibold tracking-tight">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
             Welcome{me?.user.name ? `, ${me.user.name.split(" ")[0]}` : ""}
           </h1>
           <p className="text-sm text-muted-foreground">

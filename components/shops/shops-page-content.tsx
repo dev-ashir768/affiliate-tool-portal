@@ -186,7 +186,7 @@ export function ShopsPageContent() {
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-lg font-semibold tracking-tight">Shops</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Shops</h1>
           <p className="text-sm text-muted-foreground">
             Authorize your TikTok Shop (OpenAPI) so Tiksly can discover creators
             for your niche. Bot verify remains optional for collaborator
@@ -244,7 +244,7 @@ export function ShopsPageContent() {
           <code className="text-xs">TIKTOK_SHOP_REDIRECT_URI</code>{" "}
           (e.g.{" "}
           <code className="text-xs">
-            http://localhost:3000/shops/tiktok/callback
+            {process.env.TIKTOK_SHOP_REDIRECT_URI!}
           </code>
           ).
         </div>

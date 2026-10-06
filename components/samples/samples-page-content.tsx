@@ -172,7 +172,7 @@ export function SamplesPageContent() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-lg font-semibold tracking-tight">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">
           Sample requests
         </h1>
         <p className="text-sm text-muted-foreground">

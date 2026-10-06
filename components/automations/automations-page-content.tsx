@@ -200,7 +200,7 @@ export function AutomationsPageContent() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-lg font-semibold tracking-tight">Automations</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Automations</h1>
         <p className="text-sm text-muted-foreground">
           Queue multi-step outreach: email first, then TikTok affiliate invite
           via workers (with optional delay).

@@ -4,7 +4,6 @@ import { useState, useSyncExternalStore, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { AppTopbar } from "@/components/layout/app-topbar";
-import { AppPageHeader } from "@/components/layout/app-page-header";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { useNavigation } from "@/hooks/use-navigation";
 import type { NavArea } from "@/types/navigation";
@@ -41,7 +40,6 @@ export function AppShell({
     getDesktopSnapshot,
     getDesktopServerSnapshot,
   );
-  const sections = data?.sections ?? [];
   // Expanded → hamburger; collapsed / mobile sheet open → X
   const showCloseIcon = isDesktop ? !desktopExpanded : mobileOpen;
 
@@ -90,11 +88,11 @@ export function AppShell({
           </SheetContent>
         </Sheet>
 
+        {/* Each page renders its own title + actions; equal padding on all sides. */}
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-tr-2xl bg-muted">
-          <AppPageHeader sections={sections} pathname={pathname} />
-          <div className="min-w-0 flex-1 overflow-y-auto px-4 pt-2 pb-4">
+          <main className="min-w-0 flex-1 overflow-y-auto p-4 sm:p-6">
             {children}
-          </div>
+          </main>
         </div>
       </div>
     </div>
