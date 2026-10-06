@@ -16,7 +16,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import Image from "next/image";
 import { Controller, useForm } from "react-hook-form";
 import {
@@ -115,10 +115,9 @@ function ResetPasswordFormInner() {
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid || undefined}>
                     <FieldLabel htmlFor={field.name}>New password</FieldLabel>
-                    <Input
+                    <PasswordInput
                       id={field.name}
                       {...field}
-                      type="password"
                       autoComplete="new-password"
                       aria-invalid={fieldState.invalid || undefined}
                     />
