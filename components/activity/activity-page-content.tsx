@@ -102,7 +102,7 @@ export function ActivityPageContent() {
     return (
       <div className="flex flex-col gap-4">
         <div>
-          <h1 className="text-lg font-semibold tracking-tight">Activity</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Activity</h1>
           <p className="text-sm text-muted-foreground">
             Organization audit trail for security-sensitive actions.
           </p>
@@ -124,7 +124,7 @@ export function ActivityPageContent() {
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-lg font-semibold tracking-tight">Activity</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Activity</h1>
           <p className="text-sm text-muted-foreground">
             Recent changes and actions in your organization.
           </p>

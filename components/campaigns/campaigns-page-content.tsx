@@ -179,7 +179,7 @@ export function CampaignsPageContent() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-lg font-semibold tracking-tight">Campaigns</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Campaigns</h1>
         <p className="text-sm text-muted-foreground">
           Briefs and multi-shop invite runs for creator outreach.
         </p>

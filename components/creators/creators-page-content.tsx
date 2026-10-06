@@ -196,7 +196,7 @@ export function CreatorsPageContent() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-lg font-semibold tracking-tight">Creators</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Creators</h1>
           <p className="text-sm text-muted-foreground">
             CRM for TikTok Shop creators. Followers / GMV refresh from TikTok
             when you re-sync discovery or run Refresh metrics.

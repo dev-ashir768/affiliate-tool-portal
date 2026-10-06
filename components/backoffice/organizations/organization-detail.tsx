@@ -85,7 +85,7 @@ export function OrganizationDetail({ id }: { id: string }) {
           >
             ← Organizations
           </Link>
-          <h1 className="mt-1 text-lg font-semibold tracking-tight">
+          <h1 className="mt-1 text-2xl font-bold tracking-tight text-foreground">
             {org.name}
           </h1>
           <p className="text-sm text-muted-foreground">{org.slug}</p>

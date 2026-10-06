@@ -94,7 +94,7 @@ export function StaffTable() {
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-lg font-semibold tracking-tight">Staff users</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Staff users</h1>
           <p className="text-sm text-muted-foreground">
             Platform staff with SUPERADMIN, FINANCE, or OPS access.
           </p>

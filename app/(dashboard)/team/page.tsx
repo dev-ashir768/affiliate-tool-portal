@@ -15,7 +15,7 @@ export default function TeamPage() {
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-lg font-semibold tracking-tight">Team</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Team</h1>
           <p className="text-sm text-muted-foreground">
             Manage members and invites for your organization.
           </p>

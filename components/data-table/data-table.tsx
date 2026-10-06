@@ -105,10 +105,10 @@ function DataTableHeaderCell<TData extends object>({
   const canResize = enableColumnResizing && header.column.getCanResize();
   const showDragHandle =
     enableColumnOrdering && dragHandle != null && !header.isPlaceholder;
-  const totalSize = header.getContext().table.getTotalSize();
+  // Pixel widths: resizing one column changes only that column (the table
+  // scrolls horizontally) instead of squeezing every other column.
   const sizeStyle = {
-    width: `${(header.getSize() / totalSize) * 100}%`,
-    minWidth: header.column.columnDef.minSize ?? 80,
+    width: header.getSize(),
     ...(dragHandle?.draggableProps.style ?? {}),
   };
 
@@ -119,9 +119,9 @@ function DataTableHeaderCell<TData extends object>({
       aria-sort={getAriaSort(header)}
       {...dragHandle?.draggableProps}
       style={sizeStyle}
-      className="group/th relative h-9 px-3 bg-gray-200"
+      className="group/th relative h-9 overflow-hidden bg-gray-200 px-3"
     >
-      <div className="flex items-center gap-1.5">
+      <div className="flex min-w-0 items-center gap-1.5">
         {showDragHandle ? (
           <span
             className="inline-flex size-5 shrink-0 cursor-grab items-center justify-center text-muted-foreground/60 hover:text-foreground"
@@ -149,9 +149,11 @@ function DataTableHeaderCell<TData extends object>({
           aria-orientation="vertical"
           aria-label="Resize column"
           className={cn(
-            "absolute inset-y-0 right-0 w-1 cursor-col-resize touch-none select-none bg-border opacity-0 group-hover/th:opacity-100 hover:opacity-100",
+            "absolute inset-y-0 right-0 z-10 w-1.5 cursor-col-resize touch-none select-none bg-border opacity-0 group-hover/th:opacity-100 hover:opacity-100",
             header.column.getIsResizing() && "bg-primary opacity-100",
           )}
+          onDoubleClick={() => header.column.resetSize()}
+          title="Drag to resize · double-click to reset"
           onMouseDown={header.getResizeHandler()}
           onTouchStart={header.getResizeHandler()}
           onPointerDown={(event) => event.stopPropagation()}
@@ -270,8 +272,8 @@ export function DataTable<TData extends object>({
     columnResizeMode: "onChange",
     defaultColumn: {
       minSize: 80,
-      size: 160,
-      maxSize: 480,
+      size: 180,
+      maxSize: 1000,
     },
   });
 
@@ -302,10 +304,13 @@ export function DataTable<TData extends object>({
   const visibleColumnCount = Math.max(table.getVisibleLeafColumns().length, 1);
   const headerGroups = table.getHeaderGroups();
 
-  const totalSize = Math.max(table.getTotalSize(), 1);
-
   const tableGrid = (
-    <Table aria-label={ariaLabel} className="w-full table-fixed">
+    <Table
+      aria-label={ariaLabel}
+      className="table-fixed"
+      // Sum of column widths, but never narrower than the card.
+      style={{ width: table.getTotalSize(), minWidth: "100%" }}
+    >
       <TableHeader className="bg-gray-200">
         {headerGroups.map((headerGroup) => (
           <DataTableHeaderRow
@@ -329,18 +334,30 @@ export function DataTable<TData extends object>({
         ) : (
           rows.map((row) => (
             <TableRow key={row.id} className="hover:bg-muted/40">
-              {row.getVisibleCells().map((cell) => (
-                <TableCell
-                  key={cell.id}
-                  style={{
-                    width: `${(cell.column.getSize() / totalSize) * 100}%`,
-                    minWidth: cell.column.columnDef.minSize ?? 80,
-                  }}
-                  className="p-3 text-sm text-foreground"
-                >
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </TableCell>
-              ))}
+              {row.getVisibleCells().map((cell) => {
+                const value = cell.getValue();
+                return (
+                  <TableCell
+                    key={cell.id}
+                    style={{ width: cell.column.getSize() }}
+                    // Clip to the column: long values end in "…" instead of
+                    // spilling over the neighbouring column.
+                    className="overflow-hidden p-3 text-sm text-ellipsis text-foreground"
+                    title={
+                      typeof value === "string" || typeof value === "number"
+                        ? String(value)
+                        : undefined
+                    }
+                  >
+                    <div className="min-w-0 truncate">
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </div>
+                  </TableCell>
+                );
+              })}
             </TableRow>
           ))
         )}

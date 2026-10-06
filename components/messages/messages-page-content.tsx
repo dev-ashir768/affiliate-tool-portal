@@ -120,7 +120,7 @@ export function MessagesPageContent() {
   return (
     <div className="flex flex-col gap-4">
       <div>
-        <h1 className="text-lg font-semibold tracking-tight">Messages</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Messages</h1>
         <p className="text-sm text-muted-foreground">
           TikTok Shop affiliate IM with creators (OpenAPI conversations).
           Requires IM scopes enabled + shop OAuth.

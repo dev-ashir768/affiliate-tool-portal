@@ -251,7 +251,7 @@ export function PlatformDiscoveryPageContent() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-lg font-semibold tracking-tight">Discovery index</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Discovery index</h1>
         <p className="text-sm text-muted-foreground">
           Shared creator catalog for merchant /discover. Sync from TikTok Shop
           Affiliate Seller API, or grow the index with the crawl grid.
