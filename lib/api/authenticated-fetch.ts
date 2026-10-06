@@ -1,13 +1,53 @@
 import { apiFetch, ApiClientError } from "@/lib/auth/api";
-import { getAccessToken } from "@/lib/auth/session";
+import { inspectAccessToken } from "@/lib/auth/access-token";
+import {
+  getAccessToken,
+  refreshSessionFromCookies,
+} from "@/lib/auth/session";
 
+/** Code the client watches for to send the user back to /login. */
+export const SESSION_EXPIRED = "SESSION_EXPIRED";
+
+function sessionExpired() {
+  return new ApiClientError(401, SESSION_EXPIRED, "Session expired");
+}
+
+/** Valid access token from cookies, rotating via the refresh cookie when needed. */
+async function ensureAccessToken(): Promise<string> {
+  const current = await getAccessToken();
+  if (current) {
+    const inspected = await inspectAccessToken(current);
+    if (inspected.status === "valid") return current;
+    if (inspected.status === "misconfigured") {
+      throw new ApiClientError(
+        500,
+        "INTERNAL",
+        "Portal cannot verify session tokens. Check JWT_PUBLIC_KEY / JWT_ACCESS_SECRET."
+      );
+    }
+  }
+  const rotated = await refreshSessionFromCookies();
+  if (rotated.ok) return rotated.accessToken;
+  if (rotated.reason === "unauthorized") throw sessionExpired();
+  throw new ApiClientError(503, "SERVICE_UNAVAILABLE", "Could not refresh session");
+}
+
+/**
+ * BFF → API call with the session's access token. Route Handlers are outside
+ * the proxy matcher, so this refreshes an expired token itself and retries once
+ * if the API still answers 401 (e.g. token revoked mid-flight).
+ */
 export async function authenticatedApiFetch<T>(
   path: string,
   init: RequestInit = {}
 ): Promise<T> {
-  const accessToken = await getAccessToken();
-  if (!accessToken) {
-    throw new ApiClientError(401, "UNAUTHORIZED", "Not authenticated");
+  const accessToken = await ensureAccessToken();
+  try {
+    return await apiFetch<T>(path, { ...init, accessToken });
+  } catch (err) {
+    if (!(err instanceof ApiClientError) || err.status !== 401) throw err;
+    const rotated = await refreshSessionFromCookies();
+    if (!rotated.ok) throw sessionExpired();
+    return apiFetch<T>(path, { ...init, accessToken: rotated.accessToken });
   }
-  return apiFetch<T>(path, { ...init, accessToken });
 }

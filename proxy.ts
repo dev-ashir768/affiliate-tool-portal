@@ -5,77 +5,22 @@ import {
   accessCookieOptions,
   clearAccessCookieOptions,
   clearRefreshCookieOptions,
-  getApiBaseUrl,
-  requirePortalBffSecret,
   refreshCookieOptions,
 } from "@/lib/auth/constants";
 import {
   defaultRedirectForClaims,
   inspectAccessToken,
+  secondsUntilExpiry,
   verifyAccessClaims,
 } from "@/lib/auth/access-token";
+import { rotateSessionTokens } from "@/lib/auth/rotate";
+import { clientIpFromHeaders } from "@/lib/auth/client-ip";
 import {
   classifyRoute,
   isProtectedRoute,
   isSubscriptionExemptPath,
   type RouteClass,
 } from "@/lib/auth/route-policy";
-
-type RotateResult =
-  | { ok: true; accessToken: string; refreshToken: string }
-  | { ok: false; reason: "unauthorized" | "misconfigured" | "error" };
-
-async function rotateTokens(refreshToken: string): Promise<RotateResult> {
-  try {
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-      "X-Portal-Bff-Secret": requirePortalBffSecret(),
-    };
-
-    const res = await fetch(`${getApiBaseUrl()}/api/v1/auth/refresh`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify({ refreshToken }),
-      cache: "no-store",
-    });
-    if (res.status === 401 || res.status === 403) {
-      return { ok: false, reason: "unauthorized" };
-    }
-    if (!res.ok) return { ok: false, reason: "error" };
-    const data = (await res.json()) as {
-      accessToken: string;
-      refreshToken?: string;
-    };
-    if (!data.accessToken || !data.refreshToken) {
-      console.error(
-        "[proxy] refresh response missing tokens — PORTAL_BFF_SECRET likely differs from APIs",
-      );
-      return { ok: false, reason: "misconfigured" };
-    }
-    const inspected = await inspectAccessToken(data.accessToken);
-    if (inspected.status !== "valid") {
-      console.error(
-        "[proxy] refreshed access token failed verification — JWT_ACCESS_SECRET likely differs from APIs",
-      );
-      return { ok: false, reason: "misconfigured" };
-    }
-    return {
-      ok: true,
-      accessToken: data.accessToken,
-      refreshToken: data.refreshToken,
-    };
-  } catch (err) {
-    console.error("[proxy] token refresh failed", err);
-    const message = err instanceof Error ? err.message : String(err);
-    if (
-      message.includes("PORTAL_BFF_SECRET") ||
-      message.includes("JWT_ACCESS_SECRET")
-    ) {
-      return { ok: false, reason: "misconfigured" };
-    }
-    return { ok: false, reason: "error" };
-  }
-}
 
 function applySessionCookies(
   response: NextResponse,
@@ -84,7 +29,7 @@ function applySessionCookies(
   response.cookies.set(
     ACCESS_TOKEN_COOKIE,
     tokens.accessToken,
-    accessCookieOptions()
+    accessCookieOptions(secondsUntilExpiry(tokens.accessToken))
   );
   response.cookies.set(
     REFRESH_TOKEN_COOKIE,
@@ -194,6 +139,7 @@ async function enforceAreaAccess(
  * discarding the new pair and causes login→logout loops.
  */
 async function ensureAccessToken(
+  request: NextRequest,
   accessToken: string | undefined,
   refreshToken: string | undefined
 ): Promise<{
@@ -214,7 +160,7 @@ async function ensureAccessToken(
     }
     if (inspected.status === "misconfigured") {
       console.error(
-        "[proxy] access token unusable — JWT_ACCESS_SECRET missing or differs from APIs",
+        "[proxy] access token unusable — JWT_PUBLIC_KEY / JWT_ACCESS_SECRET missing or differs from APIs",
       );
       return {
         accessToken: null,
@@ -243,7 +189,10 @@ async function ensureAccessToken(
     };
   }
 
-  const rotated = await rotateTokens(refreshToken);
+  const rotated = await rotateSessionTokens(refreshToken, {
+    accessToken,
+    clientIp: clientIpFromHeaders(request.headers),
+  });
   if (!rotated.ok) {
     return {
       accessToken: null,
@@ -254,7 +203,13 @@ async function ensureAccessToken(
     };
   }
 
-  const sessionResponse = NextResponse.next();
+  // Forward the new pair to this request too, so layouts rendered downstream
+  // read the fresh access token instead of the expired one.
+  request.cookies.set(ACCESS_TOKEN_COOKIE, rotated.accessToken);
+  request.cookies.set(REFRESH_TOKEN_COOKIE, rotated.refreshToken);
+  const sessionResponse = NextResponse.next({
+    request: { headers: request.headers },
+  });
   applySessionCookies(sessionResponse, rotated);
   return {
     accessToken: rotated.accessToken,
@@ -273,7 +228,7 @@ export async function proxy(request: NextRequest) {
     const refreshToken = request.cookies.get(REFRESH_TOKEN_COOKIE)?.value;
 
     if (kind === "entry") {
-      const ensured = await ensureAccessToken(rawAccess, refreshToken);
+      const ensured = await ensureAccessToken(request, rawAccess, refreshToken);
       if (ensured.accessToken) {
         const response = await redirectAuthedAwayFromAuth(
           request,
@@ -290,7 +245,7 @@ export async function proxy(request: NextRequest) {
     }
 
     if (isProtectedRoute(kind)) {
-      const ensured = await ensureAccessToken(rawAccess, refreshToken);
+      const ensured = await ensureAccessToken(request, rawAccess, refreshToken);
 
       if (!ensured.accessToken) {
         const login = redirectToLogin(request, pathname);
@@ -303,11 +258,22 @@ export async function proxy(request: NextRequest) {
       }
 
       const base = ensured.sessionResponse ?? NextResponse.next();
-      return enforceAreaAccess(request, ensured.accessToken, kind, base);
+      const response = await enforceAreaAccess(
+        request,
+        ensured.accessToken,
+        kind,
+        base
+      );
+      // Area redirects build a fresh response — keep the rotated pair, or the
+      // browser would retry with the now-revoked refresh token.
+      if (ensured.sessionResponse && response !== base) {
+        copySessionCookies(ensured.sessionResponse, response);
+      }
+      return response;
     }
 
     if (kind === "guest_auth") {
-      const ensured = await ensureAccessToken(rawAccess, refreshToken);
+      const ensured = await ensureAccessToken(request, rawAccess, refreshToken);
       if (ensured.accessToken) {
         const response = await redirectAuthedAwayFromAuth(
           request,
@@ -332,7 +298,8 @@ export async function proxy(request: NextRequest) {
     // Config errors (missing secrets) — do not wipe cookies; surface as login redirect only.
     const isConfigError =
       message.includes("PORTAL_BFF_SECRET") ||
-      message.includes("JWT_ACCESS_SECRET");
+      message.includes("JWT_ACCESS_SECRET") ||
+      message.includes("JWT_PUBLIC_KEY");
     if (isProtectedRoute(kind) || kind === "entry") {
       const login = redirectToLogin(request, pathname);
       if (!isConfigError) clearSessionCookies(login);

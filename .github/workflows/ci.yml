@@ -18,3 +18,8 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm run lint
+      - run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+          API_URL: http://localhost:4000
+          PORTAL_BFF_SECRET: ci-portal-bff-secret

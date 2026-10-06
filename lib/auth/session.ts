@@ -1,4 +1,4 @@
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import {
   ACCESS_TOKEN_COOKIE,
   REFRESH_TOKEN_COOKIE,
@@ -7,7 +7,9 @@ import {
   clearRefreshCookieOptions,
   refreshCookieOptions,
 } from "./constants";
-import { verifyAccessClaims } from "./access-token";
+import { secondsUntilExpiry, verifyAccessClaims } from "./access-token";
+import { rotateSessionTokens, type RotateResult } from "./rotate";
+import { clientIpFromHeaders } from "./client-ip";
 
 export type SessionTokens = {
   accessToken: string;
@@ -19,7 +21,11 @@ export async function setSessionCookies(tokens: SessionTokens) {
     throw new Error("Both accessToken and refreshToken are required");
   }
   const jar = await cookies();
-  jar.set(ACCESS_TOKEN_COOKIE, tokens.accessToken, accessCookieOptions());
+  jar.set(
+    ACCESS_TOKEN_COOKIE,
+    tokens.accessToken,
+    accessCookieOptions(secondsUntilExpiry(tokens.accessToken))
+  );
   jar.set(REFRESH_TOKEN_COOKIE, tokens.refreshToken, refreshCookieOptions());
 }
 
@@ -40,6 +46,31 @@ export async function getAccessToken() {
 export async function getRefreshToken() {
   const jar = await cookies();
   return jar.get(REFRESH_TOKEN_COOKIE)?.value;
+}
+
+/**
+ * Route Handler helper: rotate the session from the refresh cookie and persist
+ * the new pair. Clears cookies only when the API rejects the refresh token.
+ */
+export async function refreshSessionFromCookies(): Promise<RotateResult> {
+  const refreshToken = await getRefreshToken();
+  if (!refreshToken) return { ok: false, reason: "unauthorized" };
+  let clientIp: string | undefined;
+  try {
+    clientIp = clientIpFromHeaders(await headers());
+  } catch {
+    clientIp = undefined;
+  }
+  const result = await rotateSessionTokens(refreshToken, {
+    accessToken: await getAccessToken(),
+    clientIp,
+  });
+  if (result.ok) {
+    await setSessionCookies(result);
+  } else if (result.reason === "unauthorized") {
+    await clearSessionCookies();
+  }
+  return result;
 }
 
 /** Server layout helper — verified session claims or null. */
