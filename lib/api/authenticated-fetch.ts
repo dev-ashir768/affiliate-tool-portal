@@ -45,9 +45,20 @@ export async function authenticatedApiFetch<T>(
   try {
     return await apiFetch<T>(path, { ...init, accessToken });
   } catch (err) {
-    if (!(err instanceof ApiClientError) || err.status !== 401) throw err;
+    // Only the API's own auth rejection means "token no longer valid"; other
+    // 401s (e.g. an upstream TikTok error) must not rotate the session.
+    if (
+      !(err instanceof ApiClientError) ||
+      err.status !== 401 ||
+      err.code !== "UNAUTHORIZED"
+    ) {
+      throw err;
+    }
     const rotated = await refreshSessionFromCookies();
-    if (!rotated.ok) throw sessionExpired();
+    if (!rotated.ok) {
+      if (rotated.reason === "unauthorized") throw sessionExpired();
+      throw new ApiClientError(503, "SERVICE_UNAVAILABLE", "Could not refresh session");
+    }
     return apiFetch<T>(path, { ...init, accessToken: rotated.accessToken });
   }
 }

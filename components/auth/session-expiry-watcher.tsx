@@ -17,6 +17,15 @@ const PUBLIC_PAGES = ["/login", "/signup", "/forgot-password", "/reset-password"
 
 let redirecting = false;
 
+async function isSessionExpired(res: Response): Promise<boolean> {
+  try {
+    const body = (await res.clone().json()) as { error?: { code?: string } };
+    return body?.error?.code === "SESSION_EXPIRED";
+  } catch {
+    return false;
+  }
+}
+
 function isWatchedApi(input: RequestInfo | URL): boolean {
   const raw =
     typeof input === "string"
@@ -42,7 +51,13 @@ export function SessionExpiryWatcher() {
     const original = window.fetch;
     window.fetch = async (input, init) => {
       const res = await original(input, init);
-      if (res.status === 401 && !redirecting && isWatchedApi(input)) {
+      if (
+        res.status === 401 &&
+        !redirecting &&
+        isWatchedApi(input) &&
+        // Only a genuinely ended session — not an upstream 401 (e.g. TikTok).
+        (await isSessionExpired(res))
+      ) {
         const path = window.location.pathname;
         if (!PUBLIC_PAGES.some((p) => path === p || path.startsWith(`${p}/`))) {
           redirecting = true;

@@ -16,6 +16,7 @@ import {
 import { DataTable } from "@/components/data-table";
 import {
   DateRangePicker,
+  emptyDateRange,
   type DateRangeValue,
 } from "@/components/ui/date-range-picker";
 import { useOrgAudit } from "@/hooks/use-org-audit";
@@ -132,6 +133,7 @@ export function ActivityPageContent() {
         <DateRangePicker
           value={dateRange}
           onChange={onDateRangeChange}
+          defaultValue={emptyDateRange()}
           disabled={query.isFetching}
         />
       </div>

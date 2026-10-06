@@ -63,53 +63,75 @@ function labelFor(value: DateRangeValue, presetId: string): string {
 type Props = {
   value: DateRangeValue;
   onChange: (next: DateRangeValue) => void;
+  /** Range restored by "Reset" (defaults to the last 30 days). */
+  defaultValue?: DateRangeValue;
   className?: string;
   disabled?: boolean;
 };
 
-/** shadcn date range picker: Popover + range Calendar with quick presets. */
+function presetFor(value: DateRangeValue): string {
+  if (!value.from && !value.to) return "all";
+  for (const p of PRESETS) {
+    if (!p.days) continue;
+    const expected = rangeFromDays(p.days);
+    if (expected.from === value.from && expected.to === value.to) return p.id;
+  }
+  return "custom";
+}
+
+function toDayRange(value: DateRangeValue): DateRange | undefined {
+  const from = fromIso(value.from);
+  if (!from) return undefined;
+  return { from, to: fromIso(value.to) };
+}
+
+/**
+ * shadcn date range picker: Popover + range Calendar with presets.
+ * Picks are staged in a draft; "Apply" commits them, "Reset" restores the
+ * page's default range, closing without Apply discards the draft.
+ */
 export function DateRangePicker({
   value,
   onChange,
+  defaultValue,
   className,
   disabled,
 }: Props) {
   const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState<DateRangeValue>(value);
 
-  const activePreset = useMemo(() => {
-    if (!value.from && !value.to) return "all";
-    for (const p of PRESETS) {
-      if (!p.days) continue;
-      const expected = rangeFromDays(p.days);
-      if (expected.from === value.from && expected.to === value.to) return p.id;
-    }
-    return "custom";
-  }, [value.from, value.to]);
+  const appliedPreset = useMemo(() => presetFor(value), [value]);
+  const draftPreset = useMemo(() => presetFor(draft), [draft]);
+  const draftRange = useMemo(() => toDayRange(draft), [draft]);
 
-  const selected: DateRange | undefined = useMemo(() => {
-    const from = fromIso(value.from);
-    if (!from) return undefined;
-    return { from, to: fromIso(value.to) };
-  }, [value.from, value.to]);
-
-  function applyPreset(p: Preset) {
-    onChange(p.days ? rangeFromDays(p.days) : emptyDateRange());
-    setOpen(false);
+  function onOpenChange(next: boolean) {
+    // Start every session from the applied value.
+    if (next) setDraft(value);
+    setOpen(next);
   }
 
   function onSelect(range: DateRange | undefined) {
-    onChange({
+    setDraft({
       from: range?.from ? toIso(range.from) : "",
       to: range?.to ? toIso(range.to) : "",
     });
-    // Close once both ends are picked.
-    if (range?.from && range.to && range.from.getTime() !== range.to.getTime()) {
-      setOpen(false);
-    }
+  }
+
+  function apply() {
+    // A single picked day means a one-day range.
+    onChange(draft.from && !draft.to ? { from: draft.from, to: draft.from } : draft);
+    setOpen(false);
+  }
+
+  function reset() {
+    const initial = defaultValue ?? rangeFromDays(30);
+    setDraft(initial);
+    onChange(initial);
+    setOpen(false);
   }
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={onOpenChange}>
       <PopoverTrigger
         disabled={disabled}
         render={
@@ -117,16 +139,12 @@ export function DateRangePicker({
             type="button"
             variant="outline"
             size="lg"
-            className={cn(
-              "min-w-56 justify-start font-normal",
-              activePreset === "custom" && !selected && "text-muted-foreground",
-              className,
-            )}
+            className={cn("min-w-56 justify-start font-normal", className)}
           />
         }
       >
         <CalendarIcon className="text-muted-foreground" />
-        <span className="truncate">{labelFor(value, activePreset)}</span>
+        <span className="truncate">{labelFor(value, appliedPreset)}</span>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="end">
         <div className="flex flex-col sm:flex-row">
@@ -136,9 +154,11 @@ export function DateRangePicker({
                 key={p.id}
                 type="button"
                 size="sm"
-                variant={activePreset === p.id ? "secondary" : "ghost"}
+                variant={draftPreset === p.id ? "secondary" : "ghost"}
                 className="justify-start"
-                onClick={() => applyPreset(p)}
+                onClick={() =>
+                  setDraft(p.days ? rangeFromDays(p.days) : emptyDateRange())
+                }
               >
                 {p.label}
               </Button>
@@ -146,12 +166,25 @@ export function DateRangePicker({
           </div>
           <Calendar
             mode="range"
-            defaultMonth={selected?.from ?? subDays(new Date(), 30)}
-            selected={selected}
+            defaultMonth={draftRange?.from ?? subDays(new Date(), 30)}
+            selected={draftRange}
             onSelect={onSelect}
             numberOfMonths={2}
             disabled={{ after: new Date() }}
           />
+        </div>
+        <div className="flex items-center justify-between gap-2 border-t p-3">
+          <span className="truncate text-xs text-muted-foreground">
+            {labelFor(draft, draftPreset)}
+          </span>
+          <div className="flex shrink-0 gap-2">
+            <Button type="button" variant="outline" onClick={reset}>
+              Reset
+            </Button>
+            <Button type="button" onClick={apply}>
+              Apply
+            </Button>
+          </div>
         </div>
       </PopoverContent>
     </Popover>
