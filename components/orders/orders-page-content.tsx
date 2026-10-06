@@ -21,6 +21,9 @@ import { useCreators } from "@/hooks/use-creators";
 import { useShops } from "@/hooks/use-shops";
 import { ordersColumns } from "./orders-columns";
 
+import { Field, FieldLabel } from "@/components/ui/field";
+import { PageHeader } from "@/components/layout/page-header";
+import { FormGrid, SectionCard } from "@/components/layout/section-card";
 export function OrdersPageContent() {
   const query = useOrders();
   const creators = useCreators();
@@ -118,77 +121,123 @@ export function OrdersPageContent() {
     }
   }
 
-  if (query.isLoading) return <Skeleton className="h-48 w-full" />;
+  if (query.isLoading) {
+    return (
+      <div className="flex flex-col gap-6">
+        <Skeleton className="h-14 w-full max-w-md" />
+        <div className="grid gap-6 lg:grid-cols-3">
+          <Skeleton className="h-40 w-full" />
+          <Skeleton className="h-40 w-full lg:col-span-2" />
+        </div>
+        <Skeleton className="h-80 w-full" />
+      </div>
+    );
+  }
+
+  const creatorChoices = [{ value: "", label: "No creator" }, ...creatorOptions];
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Orders</h1>
-        <p className="text-sm text-muted-foreground">
-          Sync affiliate-attributed orders from TikTok, or record them manually.
-        </p>
-      </div>
+      <PageHeader
+        title="Orders"
+        description="Sync affiliate-attributed orders from TikTok, or record them manually."
+      />
 
-      <section className="flex flex-wrap items-end gap-2 rounded-xl border border-border p-4">
-        <div className="min-w-[12rem] space-y-1">
-          <label className="text-xs text-muted-foreground">Shop</label>
-          <AppReactSelect
-            className="min-w-48"
-            options={shopOptions}
-            value={stringSelectValue(shopOptions, selectedSyncShopId)}
-            onChange={(opt) =>
-              setSyncShopId(opt?.value ? String(opt.value) : "")
-            }
-            isDisabled={oauthShops.length === 0}
-            isSearchable={oauthShops.length > 8}
-            aria-label="Shop for order sync"
-          />
-        </div>
-        <Button
-          type="button"
-          disabled={!selectedSyncShopId || syncOrders.isPending}
-          onClick={() => void onSync()}
+      <div className="grid gap-6 lg:grid-cols-3">
+        <SectionCard
+          title="Sync from TikTok"
+          description="Pull affiliate-attributed orders for a shop."
         >
-          {syncOrders.isPending ? "Syncing…" : "Sync TikTok affiliate orders"}
-        </Button>
-      </section>
+          <div className="flex h-full flex-col gap-4">
+            <Field>
+              <FieldLabel>Shop</FieldLabel>
+              <AppReactSelect
+                options={shopOptions}
+                value={stringSelectValue(shopOptions, selectedSyncShopId)}
+                onChange={(opt) =>
+                  setSyncShopId(opt?.value ? String(opt.value) : "")
+                }
+                isDisabled={oauthShops.length === 0}
+                isSearchable={oauthShops.length > 8}
+                aria-label="Shop for order sync"
+              />
+            </Field>
+            <Button
+              type="button"
+              size="lg"
+              className="mt-auto self-end"
+              disabled={!selectedSyncShopId || syncOrders.isPending}
+              onClick={() => void onSync()}
+            >
+              {syncOrders.isPending ? "Syncing…" : "Sync affiliate orders"}
+            </Button>
+          </div>
+        </SectionCard>
 
-      <form
-        onSubmit={(e) => void onCreate(e)}
-        className="grid gap-2 rounded-xl border border-border p-4 sm:grid-cols-2 lg:grid-cols-5"
-      >
-        <Input
-          placeholder="External order id"
-          value={externalOrderId}
-          onChange={(e) => setExternalOrderId(e.target.value)}
-        />
-        <Input
-          placeholder="GMV (e.g. 49.99)"
-          value={gmv}
-          onChange={(e) => setGmv(e.target.value)}
-        />
-        <Input
-          placeholder="Commission (optional)"
-          value={commission}
-          onChange={(e) => setCommission(e.target.value)}
-        />
-        <AppReactSelect
-          options={[
-            { value: "", label: "No creator" },
-            ...creatorOptions,
-          ]}
-          value={stringSelectValue(
-            [{ value: "", label: "No creator" }, ...creatorOptions],
-            creatorId,
-          )}
-          onChange={(opt) => setCreatorId(opt?.value ? String(opt.value) : "")}
-          isSearchable
-          aria-label="Creator"
-        />
-        <Button type="submit" disabled={create.isPending}>
-          {create.isPending ? "Saving…" : "Add manual order"}
-        </Button>
-      </form>
+        <SectionCard
+          className="lg:col-span-2"
+          title="Add manual order"
+          description="Record an order that did not come through the TikTok sync."
+        >
+          <form
+            onSubmit={(e) => void onCreate(e)}
+            className="flex h-full flex-col gap-4"
+          >
+            <FormGrid columns={2}>
+              <Field>
+                <FieldLabel htmlFor="order-external-id">
+                  External order id
+                </FieldLabel>
+                <Input
+                  id="order-external-id"
+                  value={externalOrderId}
+                  onChange={(e) => setExternalOrderId(e.target.value)}
+                />
+              </Field>
+              <Field>
+                <FieldLabel>Creator</FieldLabel>
+                <AppReactSelect
+                  options={creatorChoices}
+                  value={stringSelectValue(creatorChoices, creatorId)}
+                  onChange={(opt) =>
+                    setCreatorId(opt?.value ? String(opt.value) : "")
+                  }
+                  isSearchable
+                  aria-label="Creator"
+                />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="order-gmv">GMV</FieldLabel>
+                <Input
+                  id="order-gmv"
+                  inputMode="decimal"
+                  placeholder="e.g. 49.99"
+                  value={gmv}
+                  onChange={(e) => setGmv(e.target.value)}
+                />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="order-commission">Commission</FieldLabel>
+                <Input
+                  id="order-commission"
+                  inputMode="decimal"
+                  placeholder="Optional"
+                  value={commission}
+                  onChange={(e) => setCommission(e.target.value)}
+                />
+              </Field>
+            </FormGrid>
+            <Button
+              type="submit"
+              size="lg"
+              className="mt-auto self-end"
+              disabled={create.isPending}
+            >
+              {create.isPending ? "Saving…" : "Add manual order"}
+            </Button>
+          </form>
+        </SectionCard>
+      </div>
 
       {query.isError ? (
         <p className="text-sm text-destructive" role="alert">

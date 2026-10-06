@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
@@ -32,6 +32,7 @@ import {
 } from "@/hooks/use-commerce";
 import { platformDiscoveryColumns } from "./platform-discovery-columns";
 
+import { PageHeader } from "@/components/layout/page-header";
 const REGION_OPTIONS: SelectOption[] = [
   { value: "US", label: "US" },
   { value: "UK", label: "UK" },
@@ -250,18 +251,15 @@ export function PlatformDiscoveryPageContent() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Discovery index</h1>
-        <p className="text-sm text-muted-foreground">
-          Shared creator catalog for merchant /discover. Sync from TikTok Shop
-          Affiliate Seller API, or grow the index with the crawl grid.
-        </p>
-      </div>
+      <PageHeader
+        title="Discovery index"
+        description="Shared creator catalog for merchant /discover. Sync from TikTok Shop Affiliate Seller API, or grow the index with the crawl grid."
+      />
 
-      <section className="space-y-3 rounded-xl border border-border p-4">
+      <section className="space-y-4 rounded-xl bg-card p-4 ring-1 ring-foreground/10">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h2 className="text-sm font-semibold">Search engine & scheduler</h2>
+            <h2 className="text-base font-semibold">Search engine & scheduler</h2>
             <p className="mt-1 text-xs text-muted-foreground">
               Meilisearch is optional (falls back to Postgres). Multi-region
               scheduler uses env shop IDs + cron on the worker.
@@ -334,10 +332,10 @@ export function PlatformDiscoveryPageContent() {
         </p>
       </section>
 
-      <section className="space-y-3 rounded-xl border border-border p-4">
+      <section className="space-y-4 rounded-xl bg-card p-4 ring-1 ring-foreground/10">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h2 className="text-sm font-semibold">Crawl keywords</h2>
+            <h2 className="text-base font-semibold">Crawl keywords</h2>
             <p className="mt-1 text-xs text-muted-foreground">
               Editable grid terms. Empty DB auto-seeds from built-in list on
               first plan.
@@ -393,7 +391,7 @@ export function PlatformDiscoveryPageContent() {
         </form>
         <div className="max-h-48 overflow-y-auto">
           <table className="w-full text-left text-xs">
-            <thead className="sticky top-0 bg-background text-muted-foreground">
+            <thead className="sticky top-0 bg-card text-muted-foreground">
               <tr>
                 <th className="py-1 pr-2 font-medium">Keyword</th>
                 <th className="py-1 pr-2 font-medium">Region</th>
@@ -409,7 +407,7 @@ export function PlatformDiscoveryPageContent() {
                   <td className="py-1 pr-2">
                     <button
                       type="button"
-                      className="underline-offset-2 hover:underline"
+                      className={buttonVariants({ variant: "ghost", size: "xs" })}
                       disabled={patchTerm.isPending}
                       onClick={() => {
                         void patchTerm
@@ -430,7 +428,7 @@ export function PlatformDiscoveryPageContent() {
                   <td className="py-1">
                     <button
                       type="button"
-                      className="text-destructive underline-offset-2 hover:underline"
+                      className={buttonVariants({ variant: "ghost", size: "xs", className: "text-destructive" })}
                       disabled={deleteTerm.isPending}
                       onClick={() => {
                         void deleteTerm
@@ -456,10 +454,10 @@ export function PlatformDiscoveryPageContent() {
         </div>
       </section>
 
-      <section className="space-y-3 rounded-xl border border-border p-4">
+      <section className="space-y-4 rounded-xl bg-card p-4 ring-1 ring-foreground/10">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h2 className="text-sm font-semibold">Index crawl (scale)</h2>
+            <h2 className="text-base font-semibold">Index crawl (scale)</h2>
             <p className="mt-1 text-xs text-muted-foreground">
               Keyword × follower-band cells enqueue marketplace search with CRM
               propagate off. Use an OAuth-connected crawl shop.
@@ -581,10 +579,10 @@ export function PlatformDiscoveryPageContent() {
         ) : null}
       </section>
 
-      <section className="space-y-3 rounded-xl border border-border p-4">
+      <section className="space-y-4 rounded-xl bg-card p-4 ring-1 ring-foreground/10">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h2 className="text-sm font-semibold">TikTok OpenAPI sync</h2>
+            <h2 className="text-base font-semibold">TikTok OpenAPI sync</h2>
             <p className="mt-1 text-xs text-muted-foreground">
               {cfg?.note ??
                 "Prefer shop OAuth. Env token+cipher is ops fallback only."}
@@ -681,7 +679,7 @@ export function PlatformDiscoveryPageContent() {
         onSubmit={(e) => void onImport(e)}
         className="space-y-2 rounded-xl border border-border p-4"
       >
-        <h2 className="text-sm font-semibold">Bulk import (JSON)</h2>
+        <h2 className="text-base font-semibold">Bulk import (JSON)</h2>
         <Textarea
           value={importJson}
           onChange={(e) => setImportJson(e.target.value)}

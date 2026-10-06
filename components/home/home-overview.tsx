@@ -2,13 +2,6 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -23,6 +16,8 @@ import { useMembersQuery } from "@/hooks/use-members";
 import { useAnalyticsOverview } from "@/hooks/use-commerce";
 import { HomeAnalyticsCharts } from "@/components/home/home-analytics-charts";
 
+import { PageHeader } from "@/components/layout/page-header";
+import { StatCard } from "@/components/layout/stat-card";
 function cents(n: number) {
   return (n / 100).toLocaleString(undefined, {
     style: "currency",
@@ -72,164 +67,111 @@ export function HomeOverview() {
     (m) => m.organization.id === me.currentOrganizationId,
   );
 
+  const linkClass = buttonVariants({
+    variant: "link",
+    className: "h-auto px-0",
+  });
+
+  const tiles = [
+    {
+      label: "Shops",
+      value: (
+        <>
+          {activeShops}
+          {org ? (
+            <span className="text-base font-normal text-muted-foreground">
+              {" "}
+              / {org.shopLimit}
+            </span>
+          ) : null}
+        </>
+      ),
+      hint: "Connected TikTok Shops",
+      href: "/shops",
+      cta: "Manage shops",
+    },
+    {
+      label: "Team",
+      value: (
+        <>
+          {memberTotal ?? "—"}
+          {org ? (
+            <span className="text-base font-normal text-muted-foreground">
+              {" "}
+              / {org.seatLimit} seats
+            </span>
+          ) : null}
+        </>
+      ),
+      hint: "Members in your organization",
+      href: "/team",
+      cta: "Manage team",
+    },
+    {
+      label: "Billing",
+      value: org?.plan.name ?? "—",
+      hint: `Status: ${org?.subscriptionStatus ?? "None"}`,
+      href: "/billing",
+      cta: "View billing",
+    },
+    {
+      label: "Creators",
+      value: funnel?.creators ?? "—",
+      hint: "Creators in your CRM",
+      href: "/creators",
+      cta: "Open CRM",
+    },
+    {
+      label: "Outreach sent",
+      value: funnel?.outreachSent ?? "—",
+      hint: "Emails delivered in this range",
+      href: "/outreach",
+      cta: "Send outreach",
+    },
+    {
+      label: "Shop GMV",
+      value: funnel
+        ? cents(analyticsQuery.data?.gmv?.shop.gmvCents ?? funnel.gmvCents)
+        : "—",
+      hint: `${funnel?.orders ?? 0} attributed orders${
+        analyticsQuery.data?.gmv?.marketplace.creatorsWithParsableGmv
+          ? ` · ${analyticsQuery.data.gmv.marketplace.creatorsWithParsableGmv} creators w/ marketplace GMV`
+          : ""
+      }`,
+      href: "/analytics",
+      cta: "View analytics",
+    },
+  ];
+
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">
-            Welcome{me?.user.name ? `, ${me.user.name.split(" ")[0]}` : ""}
-          </h1>
-          <p className="text-sm text-muted-foreground">
+      <PageHeader
+        title={`Welcome${me?.user.name ? `, ${me.user.name.split(" ")[0]}` : ""}`}
+        description={
+          <>
             {org
               ? `${org.name} · ${org.plan.name} plan`
               : "Your organization dashboard"}
             {currentMembership ? ` · ${currentMembership.role}` : null}
-          </p>
-        </div>
-        <DateRangePicker
-          value={dateRange}
-          onChange={setDateRange}
-          disabled={analyticsQuery.isFetching}
-        />
-      </div>
+          </>
+        }
+        actions={
+          <DateRangePicker
+            value={dateRange}
+            onChange={setDateRange}
+            disabled={analyticsQuery.isFetching}
+          />
+        }
+      />
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        <Card size="sm">
-          <CardHeader>
-            <CardDescription>Shops</CardDescription>
-            <CardTitle>
-              {activeShops}
-              {org ? (
-                <span className="text-base font-normal text-muted-foreground">
-                  {" "}
-                  / {org.shopLimit}
-                </span>
-              ) : null}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Link
-              href="/shops"
-              className={buttonVariants({
-                variant: "link",
-                className: "h-auto px-0",
-              })}
-            >
-              Manage shops
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        {tiles.map((t) => (
+          <StatCard key={t.label} label={t.label} value={t.value} hint={t.hint}>
+            <Link href={t.href} className={linkClass}>
+              {t.cta}
             </Link>
-          </CardContent>
-        </Card>
-
-        <Card size="sm">
-          <CardHeader>
-            <CardDescription>Team</CardDescription>
-            <CardTitle>
-              {memberTotal ?? "—"}
-              {org ? (
-                <span className="text-base font-normal text-muted-foreground">
-                  {" "}
-                  / {org.seatLimit} seats
-                </span>
-              ) : null}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Link
-              href="/team"
-              className={buttonVariants({
-                variant: "link",
-                className: "h-auto px-0",
-              })}
-            >
-              Manage team
-            </Link>
-          </CardContent>
-        </Card>
-
-        <Card size="sm">
-          <CardHeader>
-            <CardDescription>Billing</CardDescription>
-            <CardTitle>{org?.plan.name ?? "—"}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="mb-2 text-xs text-muted-foreground">
-              Status: {org?.subscriptionStatus ?? "None"}
-            </p>
-            <Link
-              href="/billing"
-              className={buttonVariants({
-                variant: "link",
-                className: "h-auto px-0",
-              })}
-            >
-              View billing
-            </Link>
-          </CardContent>
-        </Card>
-
-        <Card size="sm">
-          <CardHeader>
-            <CardDescription>Creators</CardDescription>
-            <CardTitle>{funnel?.creators ?? "—"}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Link
-              href="/creators"
-              className={buttonVariants({
-                variant: "link",
-                className: "h-auto px-0",
-              })}
-            >
-              Open CRM
-            </Link>
-          </CardContent>
-        </Card>
-
-        <Card size="sm">
-          <CardHeader>
-            <CardDescription>Outreach sent</CardDescription>
-            <CardTitle>{funnel?.outreachSent ?? "—"}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Link
-              href="/outreach"
-              className={buttonVariants({
-                variant: "link",
-                className: "h-auto px-0",
-              })}
-            >
-              Send outreach
-            </Link>
-          </CardContent>
-        </Card>
-
-        <Card size="sm">
-          <CardHeader>
-            <CardDescription>Shop GMV</CardDescription>
-            <CardTitle>
-              {funnel
-                ? cents(analyticsQuery.data?.gmv?.shop.gmvCents ?? funnel.gmvCents)
-                : "—"}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="mb-2 text-xs text-muted-foreground">
-              {funnel?.orders ?? 0} attributed orders
-              {analyticsQuery.data?.gmv?.marketplace.creatorsWithParsableGmv
-                ? ` · ${analyticsQuery.data.gmv.marketplace.creatorsWithParsableGmv} creators w/ marketplace GMV`
-                : ""}
-            </p>
-            <Link
-              href="/analytics"
-              className={buttonVariants({
-                variant: "link",
-                className: "h-auto px-0",
-              })}
-            >
-              View analytics
-            </Link>
-          </CardContent>
-        </Card>
+          </StatCard>
+        ))}
       </div>
 
       {analyticsQuery.isLoading ? (

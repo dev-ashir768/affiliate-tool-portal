@@ -91,7 +91,7 @@ export function HomeAnalyticsCharts({ data }: Props) {
 
   return (
     <div className="grid gap-4 lg:grid-cols-2">
-      <div className="rounded-xl border border-border bg-card p-4 lg:col-span-2">
+      <div className="rounded-xl bg-card ring-1 ring-foreground/10 p-4 lg:col-span-2">
         <div className="mb-3">
           <h2 className="text-sm font-semibold tracking-tight">
             Shop GMV by day
@@ -137,7 +137,7 @@ export function HomeAnalyticsCharts({ data }: Props) {
         </div>
       </div>
 
-      <div className="rounded-xl border border-border bg-card p-4 lg:col-span-2">
+      <div className="rounded-xl bg-card ring-1 ring-foreground/10 p-4 lg:col-span-2">
         <div className="mb-3">
           <h2 className="text-sm font-semibold tracking-tight">
             Affiliate funnel

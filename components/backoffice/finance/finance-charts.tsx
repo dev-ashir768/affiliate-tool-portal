@@ -129,7 +129,7 @@ export function FinanceCharts({ data }: Props) {
 
   return (
     <div className="grid gap-4 lg:grid-cols-2">
-      <div className="rounded-xl border border-border bg-card p-4 lg:col-span-2">
+      <div className="rounded-xl bg-card ring-1 ring-foreground/10 p-4 lg:col-span-2">
         <div className="mb-3">
           <h2 className="text-sm font-semibold tracking-tight">
             Customer funnel
@@ -168,7 +168,7 @@ export function FinanceCharts({ data }: Props) {
         </div>
       </div>
 
-      <div className="rounded-xl border border-border bg-card p-4">
+      <div className="rounded-xl bg-card ring-1 ring-foreground/10 p-4">
         <div className="mb-3">
           <h2 className="text-sm font-semibold tracking-tight">
             Subscription health
@@ -207,7 +207,7 @@ export function FinanceCharts({ data }: Props) {
         </div>
       </div>
 
-      <div className="rounded-xl border border-border bg-card p-4">
+      <div className="rounded-xl bg-card ring-1 ring-foreground/10 p-4">
         <div className="mb-3">
           <h2 className="text-sm font-semibold tracking-tight">
             Access coverage
@@ -245,7 +245,7 @@ export function FinanceCharts({ data }: Props) {
         </div>
       </div>
 
-      <div className="rounded-xl border border-border bg-card p-4">
+      <div className="rounded-xl bg-card ring-1 ring-foreground/10 p-4">
         <div className="mb-3">
           <h2 className="text-sm font-semibold tracking-tight">
             Paying MRR by plan
@@ -291,7 +291,7 @@ export function FinanceCharts({ data }: Props) {
         </div>
       </div>
 
-      <div className="rounded-xl border border-border bg-card p-4">
+      <div className="rounded-xl bg-card ring-1 ring-foreground/10 p-4">
         <div className="mb-3">
           <h2 className="text-sm font-semibold tracking-tight">
             Customers by plan

@@ -56,14 +56,14 @@ export function ShopsTable({
 
   if (shops.length === 0) {
     return (
-      <div className="rounded-xl border border-border bg-card px-4 py-10 text-center text-sm text-muted-foreground">
+      <div className="rounded-xl bg-card ring-1 ring-foreground/10 px-4 py-10 text-center text-sm text-muted-foreground">
         No shops connected yet.
       </div>
     );
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-border bg-card">
+    <div className="overflow-hidden rounded-xl bg-card ring-1 ring-foreground/10">
       <Table>
         <TableHeader>
           <TableRow>

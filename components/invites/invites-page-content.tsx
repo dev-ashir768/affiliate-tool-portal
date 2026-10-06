@@ -19,6 +19,11 @@ import {
   type SelectOption,
 } from "@/components/ui/react-select";
 
+import { Field, FieldLabel } from "@/components/ui/field";
+import { Textarea } from "@/components/ui/textarea";
+import { CheckboxLabel } from "@/components/ui/checkbox";
+import { PageHeader } from "@/components/layout/page-header";
+import { FormGrid, SectionCard } from "@/components/layout/section-card";
 function defaultEndAt(): string {
   const d = new Date();
   d.setDate(d.getDate() + 30);
@@ -181,7 +186,13 @@ export function InvitesPageContent() {
   }
 
   if (shopsQuery.isLoading || creatorsQuery.isLoading) {
-    return <Skeleton className="h-48 w-full" />;
+    return (
+      <div className="flex flex-col gap-6">
+        <Skeleton className="h-14 w-full max-w-md" />
+        <Skeleton className="h-72 w-full" />
+        <Skeleton className="h-48 w-full" />
+      </div>
+    );
   }
 
   const products = productsQuery.data?.products ?? [];
@@ -189,260 +200,285 @@ export function InvitesPageContent() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">
-          Affiliate invites
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Create TikTok Shop target collaborations — private product invites
-          with commission. Creators need a{" "}
-          <code className="text-xs">creatorOpenId</code> from Discover sync.
-        </p>
-      </div>
+      <PageHeader
+        title="Affiliate invites"
+        description={
+          <>
+            Create TikTok Shop target collaborations — private product
+            invites with commission. Creators need a{" "}
+            <code className="rounded bg-muted px-1 text-xs">creatorOpenId</code>{" "}
+            from Discover sync.
+          </>
+        }
+      />
 
-      <form onSubmit={(e) => void onSubmit(e)} className="space-y-4">
-        <div className="flex flex-wrap gap-3">
-          <div className="min-w-[10rem] space-y-1">
-            <label className="text-xs text-muted-foreground">Shop</label>
-            <AppReactSelect
-              className="min-w-40 w-full"
-              options={shopOptions}
-              value={stringSelectValue(shopOptions, activeShopId ?? "")}
-              onChange={(opt) => {
-                setShopId(opt?.value ? String(opt.value) : "");
-                setSelectedProductIds(new Set());
-              }}
-              isSearchable={oauthShops.length > 8}
-              isDisabled={oauthShops.length === 0}
-              aria-label="Shop"
-            />
-          </div>
-          <div className="min-w-[10rem] flex-1 space-y-1">
-            <label className="text-xs text-muted-foreground">Invite name</label>
-            <Input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Spring collab"
-            />
-          </div>
-          <div className="min-w-[10rem] space-y-1">
-            <label className="text-xs text-muted-foreground">Ends</label>
-            <Input
-              type="datetime-local"
-              value={endAt}
-              onChange={(e) => setEndAt(e.target.value)}
-            />
-          </div>
-          <div className="min-w-[6rem] space-y-1">
-            <label className="text-xs text-muted-foreground">Commission %</label>
-            <Input
-              type="number"
-              min={10}
-              max={80}
-              step={0.01}
-              value={commissionPercent}
-              onChange={(e) => setCommissionPercent(e.target.value)}
-            />
-          </div>
-        </div>
-
-        <div className="flex flex-wrap gap-3">
-          <div className="min-w-[12rem] flex-1 space-y-1">
-            <label className="text-xs text-muted-foreground">
-              Message to creators
-            </label>
-            <Input
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-            />
-          </div>
-          <div className="min-w-[10rem] space-y-1">
-            <label className="text-xs text-muted-foreground">
-              Seller contact email
-            </label>
-            <Input
-              type="email"
-              value={sellerEmail}
-              onChange={(e) => setSellerEmail(e.target.value)}
-              placeholder="optional"
-            />
-          </div>
-          <div className="min-w-[10rem] space-y-1">
-            <label className="text-xs text-muted-foreground">Campaign</label>
-            <AppReactSelect
-              className="min-w-40 w-full"
-              options={campaignOptions}
-              value={stringSelectValue(campaignOptions, campaignId)}
-              onChange={(opt) =>
-                setCampaignId(opt?.value ? String(opt.value) : "")
-              }
-              isSearchable={campaigns.length > 8}
-              aria-label="Campaign"
-            />
-          </div>
-          <div className="min-w-[12rem] space-y-1">
-            <label className="text-xs text-muted-foreground">
-              Creator list (optional)
-            </label>
-            <AppReactSelect
-              className="min-w-48 w-full"
-              options={listOptions}
-              value={stringSelectValue(listOptions, listId)}
-              onChange={(opt) => {
-                const next = opt?.value ? String(opt.value) : "";
-                setListId(next);
-                if (next) setSelectedCreatorIds(new Set());
-              }}
-              isSearchable={(listsQuery.data?.lists?.length ?? 0) > 8}
-              aria-label="Creator list"
-            />
-          </div>
-          <label className="flex items-end gap-2 pb-2 text-sm">
-            <input
-              type="checkbox"
+      <form
+        onSubmit={(e) => void onSubmit(e)}
+        className="flex flex-col gap-6"
+      >
+        <SectionCard
+          title="Invite details"
+          description="Shop, terms and the message creators will see."
+        >
+          <div className="flex flex-col gap-5">
+            <FormGrid columns={3}>
+              <Field>
+                <FieldLabel>Shop</FieldLabel>
+                <AppReactSelect
+                  options={shopOptions}
+                  value={stringSelectValue(shopOptions, activeShopId ?? "")}
+                  onChange={(opt) => {
+                    setShopId(opt?.value ? String(opt.value) : "");
+                    setSelectedProductIds(new Set());
+                  }}
+                  isSearchable={oauthShops.length > 8}
+                  isDisabled={oauthShops.length === 0}
+                  aria-label="Shop"
+                />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="invite-name">Invite name</FieldLabel>
+                <Input
+                  id="invite-name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Spring collab"
+                />
+              </Field>
+              <Field>
+                <FieldLabel>Campaign</FieldLabel>
+                <AppReactSelect
+                  options={campaignOptions}
+                  value={stringSelectValue(campaignOptions, campaignId)}
+                  onChange={(opt) =>
+                    setCampaignId(opt?.value ? String(opt.value) : "")
+                  }
+                  isSearchable={campaigns.length > 8}
+                  aria-label="Campaign"
+                />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="invite-end">Ends</FieldLabel>
+                <Input
+                  id="invite-end"
+                  type="datetime-local"
+                  value={endAt}
+                  onChange={(e) => setEndAt(e.target.value)}
+                />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="invite-commission">Commission %</FieldLabel>
+                <Input
+                  id="invite-commission"
+                  type="number"
+                  min={10}
+                  max={80}
+                  step={0.01}
+                  value={commissionPercent}
+                  onChange={(e) => setCommissionPercent(e.target.value)}
+                />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="invite-seller-email">
+                  Seller contact email
+                </FieldLabel>
+                <Input
+                  id="invite-seller-email"
+                  type="email"
+                  value={sellerEmail}
+                  onChange={(e) => setSellerEmail(e.target.value)}
+                  placeholder="Optional"
+                />
+              </Field>
+            </FormGrid>
+            <Field>
+              <FieldLabel htmlFor="invite-message">Message to creators</FieldLabel>
+              <Textarea
+                id="invite-message"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                rows={3}
+              />
+            </Field>
+            <CheckboxLabel
               checked={hasFreeSample}
               onChange={(e) => setHasFreeSample(e.target.checked)}
-            />
-            Free sample
-          </label>
-        </div>
+            >
+              Offer a free sample
+            </CheckboxLabel>
+          </div>
+        </SectionCard>
 
-        <div className="grid gap-4 md:grid-cols-2">
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <h2 className="text-sm font-medium">
-                Products ({selectedProductIds.size} selected)
-              </h2>
-              {productsQuery.isFetching ? (
+        <div className="grid gap-6 lg:grid-cols-2">
+          <SectionCard
+            title={`Products (${selectedProductIds.size} selected)`}
+            description="Active products from the selected shop."
+            actions={
+              productsQuery.isFetching ? (
                 <span className="text-xs text-muted-foreground">Loading…</span>
-              ) : null}
-            </div>
+              ) : undefined
+            }
+          >
             {productsQuery.isError ? (
-              <p className="text-sm text-destructive" role="alert">
+              <p className="mb-3 text-sm text-destructive" role="alert">
                 {productsQuery.error instanceof Error
                   ? productsQuery.error.message
                   : "Failed to load products"}
               </p>
             ) : null}
-            <ul className="max-h-56 space-y-1 overflow-y-auto rounded-md border border-border p-2 text-sm">
+            <div className="max-h-72 overflow-y-auto rounded-lg border">
               {products.length === 0 ? (
-                <li className="text-muted-foreground">
-                  No active products — authorize shop and list catalog.
-                </li>
+                <p className="px-3 py-4 text-sm text-muted-foreground">
+                  No active products — authorize the shop and list its catalog.
+                </p>
               ) : (
-                products.map((p) => (
-                  <li key={p.id}>
-                    <label className="flex cursor-pointer items-start gap-2">
-                      <input
-                        type="checkbox"
-                        className="mt-1"
+                <ul className="divide-y">
+                  {products.map((p) => (
+                    <li key={p.id} className="px-3 py-2">
+                      <CheckboxLabel
                         checked={selectedProductIds.has(p.id)}
                         onChange={() => toggleProduct(p.id)}
-                      />
-                      <span>
-                        <span className="font-medium">
+                      >
+                        <span className="block truncate font-medium">
                           {p.title || p.id}
                         </span>
-                        <span className="block text-xs text-muted-foreground">
+                        <span className="block truncate font-mono text-xs text-muted-foreground">
                           {p.id}
                         </span>
-                      </span>
-                    </label>
-                  </li>
-                ))
+                      </CheckboxLabel>
+                    </li>
+                  ))}
+                </ul>
               )}
-            </ul>
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex items-center justify-between gap-2">
-              <h2 className="text-sm font-medium">
-                {listId
-                  ? "Creators (using list — manual pick ignored)"
-                  : `Creators (${selectedCreatorIds.size} selected)`}
-              </h2>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  setSelectedCreatorIds(new Set(withOpenId.map((c) => c.id)))
-                }
-                disabled={withOpenId.length === 0 || Boolean(listId)}
-              >
-                Select with open_id ({withOpenId.length})
-              </Button>
             </div>
-            <ul className="max-h-56 space-y-1 overflow-y-auto rounded-md border border-border p-2 text-sm">
-              {creators.length === 0 ? (
-                <li className="text-muted-foreground">No CRM creators yet.</li>
-              ) : (
-                creators.map((c) => (
-                  <li key={c.id}>
-                    <label className="flex cursor-pointer items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={selectedCreatorIds.has(c.id)}
-                        onChange={() => toggleCreator(c.id)}
-                        disabled={!c.creatorOpenId || Boolean(listId)}
-                      />
-                      <span className={!c.creatorOpenId ? "opacity-50" : ""}>
-                        @{c.handle}
-                        {c.displayName ? ` · ${c.displayName}` : ""}
-                      </span>
-                      {c.creatorOpenId ? (
-                        <Badge variant="secondary" className="text-[10px]">
-                          open_id
-                        </Badge>
-                      ) : (
-                        <Badge variant="outline" className="text-[10px]">
-                          no open_id
-                        </Badge>
-                      )}
-                    </label>
-                  </li>
-                ))
-              )}
-            </ul>
-          </div>
+          </SectionCard>
+
+          <SectionCard
+            title={
+              listId
+                ? "Creators (from list)"
+                : `Creators (${selectedCreatorIds.size} selected)`
+            }
+            description={
+              listId
+                ? "Sending to the selected list — manual picks are ignored."
+                : "Only creators with an open_id can be invited."
+            }
+          >
+            <div className="flex flex-col gap-4">
+              <Field>
+                <FieldLabel>Creator list (optional)</FieldLabel>
+                <AppReactSelect
+                  options={listOptions}
+                  value={stringSelectValue(listOptions, listId)}
+                  onChange={(opt) => {
+                    const next = opt?.value ? String(opt.value) : "";
+                    setListId(next);
+                    if (next) setSelectedCreatorIds(new Set());
+                  }}
+                  isSearchable={(listsQuery.data?.lists?.length ?? 0) > 8}
+                  aria-label="Creator list"
+                />
+              </Field>
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-sm font-medium">Pick creators</span>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setSelectedCreatorIds(new Set(withOpenId.map((c) => c.id)))
+                  }
+                  disabled={withOpenId.length === 0 || Boolean(listId)}
+                >
+                  Select with open_id ({withOpenId.length})
+                </Button>
+              </div>
+              <div className="max-h-56 overflow-y-auto rounded-lg border">
+                {creators.length === 0 ? (
+                  <p className="px-3 py-4 text-sm text-muted-foreground">
+                    No CRM creators yet.
+                  </p>
+                ) : (
+                  <ul className="divide-y">
+                    {creators.map((c) => (
+                      <li key={c.id} className="px-3 py-2">
+                        <CheckboxLabel
+                          checked={selectedCreatorIds.has(c.id)}
+                          onChange={() => toggleCreator(c.id)}
+                          disabled={!c.creatorOpenId || Boolean(listId)}
+                        >
+                          <span className="inline-flex items-center gap-2">
+                            <span
+                              className={!c.creatorOpenId ? "opacity-50" : ""}
+                            >
+                              @{c.handle}
+                              {c.displayName ? ` · ${c.displayName}` : ""}
+                            </span>
+                            {c.creatorOpenId ? (
+                              <Badge variant="secondary">open_id</Badge>
+                            ) : (
+                              <Badge variant="outline">no open_id</Badge>
+                            )}
+                          </span>
+                        </CheckboxLabel>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </div>
+          </SectionCard>
         </div>
 
-        <Button type="submit" disabled={createInvite.isPending || !activeShopId}>
-          {createInvite.isPending ? "Sending…" : "Queue TikTok invite"}
-        </Button>
+        <div className="flex justify-end">
+          <Button
+            type="submit"
+            size="lg"
+            disabled={createInvite.isPending || !activeShopId}
+          >
+            {createInvite.isPending ? "Sending…" : "Queue TikTok invite"}
+          </Button>
+        </div>
       </form>
 
-      <div className="space-y-2">
-        <h2 className="text-sm font-medium">Recent invites</h2>
+      <SectionCard
+        title="Recent invites"
+        description="Latest target collaborations and their delivery status."
+        contentClassName="px-0"
+      >
         {invitesQuery.isLoading ? (
-          <Skeleton className="h-24 w-full" />
+          <div className="px-4">
+            <Skeleton className="h-24 w-full" />
+          </div>
         ) : invites.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No invites yet.</p>
+          <p className="px-4 py-6 text-center text-sm text-muted-foreground">
+            No invites yet.
+          </p>
         ) : (
-          <ul className="divide-y divide-border rounded-md border border-border">
+          <ul className="divide-y">
             {invites.map((inv) => (
               <li
                 key={inv.id}
-                className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 text-sm"
+                className="flex flex-col gap-2 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between"
               >
-                <div>
-                  <span className="font-medium">{inv.name}</span>
-                  <span className="ml-2 text-muted-foreground">
+                <div className="min-w-0">
+                  <p className="truncate font-medium">{inv.name}</p>
+                  <p className="text-muted-foreground">
                     {inv.shopDisplayName || inv.shopId} ·{" "}
                     {inv.recipients.length} creators
-                  </span>
+                  </p>
                   {inv.externalCollaborationId ? (
-                    <span className="mt-0.5 block text-xs text-muted-foreground">
+                    <p className="text-xs text-muted-foreground">
                       TikTok id: {inv.externalCollaborationId}
-                    </span>
+                    </p>
                   ) : null}
                   {inv.lastError ? (
-                    <span className="mt-0.5 block text-xs text-destructive">
-                      {inv.lastError}
-                    </span>
+                    <p className="text-xs text-destructive">{inv.lastError}</p>
                   ) : null}
                 </div>
                 <Badge
+                  className="self-start sm:self-center"
                   variant={
                     inv.status === "SENT"
                       ? "default"
@@ -457,7 +493,7 @@ export function InvitesPageContent() {
             ))}
           </ul>
         )}
-      </div>
+      </SectionCard>
     </div>
   );
 }

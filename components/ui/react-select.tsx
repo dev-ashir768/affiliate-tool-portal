@@ -35,7 +35,8 @@ function useShadcnSelectStyles<
       size === "sm"
         ? "min(var(--radius-md, 0.5rem), 10px)"
         : "var(--radius-lg, 0.5rem)";
-    const minHeight = size === "sm" ? "1.75rem" : "2rem";
+    // Matches Input (h-9) and Button sizes so controls line up in a row.
+    const minHeight = size === "sm" ? "2rem" : "2.25rem";
     const fontSize = "0.875rem";
 
     return {
@@ -47,6 +48,8 @@ function useShadcnSelectStyles<
         ...base,
         minHeight,
         height: "auto",
+        // Border counts toward the height, like Input (h-9) and Button.
+        boxSizing: "border-box",
         borderRadius: radius,
         borderColor: state.isFocused
           ? "var(--ring)"
@@ -84,7 +87,7 @@ function useShadcnSelectStyles<
       }),
       indicatorsContainer: (base) => ({
         ...base,
-        height: minHeight,
+        alignSelf: "stretch",
       }),
       dropdownIndicator: (base) => ({
         ...base,

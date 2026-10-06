@@ -30,6 +30,9 @@ import {
 import type { CreatorStage } from "@/types/creators";
 import { createCreatorsColumns, listsToOptions } from "./creators-columns";
 
+import { Field, FieldLabel } from "@/components/ui/field";
+import { PageHeader } from "@/components/layout/page-header";
+import { FormGrid, SectionCard } from "@/components/layout/section-card";
 const STAGES: CreatorStage[] = [
   "LEAD",
   "CONTACTED",
@@ -189,86 +192,144 @@ export function CreatorsPageContent() {
   }
 
   if (creatorsQuery.isLoading) {
-    return <Skeleton className="h-48 w-full" />;
+    return (
+      <div className="flex flex-col gap-6">
+        <Skeleton className="h-14 w-full max-w-md" />
+        <div className="grid gap-6 lg:grid-cols-2">
+          <Skeleton className="h-40 w-full" />
+          <Skeleton className="h-40 w-full" />
+        </div>
+        <Skeleton className="h-80 w-full" />
+      </div>
+    );
   }
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Creators</h1>
-          <p className="text-sm text-muted-foreground">
-            CRM for TikTok Shop creators. Followers / GMV refresh from TikTok
-            when you re-sync discovery or run Refresh metrics.
-          </p>
-        </div>
-        {shopOptions.length > 0 ? (
-          <div className="flex flex-wrap items-center gap-2">
-            <AppReactSelect
-              className="min-w-48"
-              options={shopOptions}
-              value={stringSelectValue(shopOptions, selectedShopId)}
-              onChange={(opt) => setShopId(opt?.value ? String(opt.value) : "")}
-              placeholder="Shop"
-              isSearchable
-              aria-label="Shop for metrics refresh"
-            />
-            <Button
-              type="button"
-              variant="secondary"
-              disabled={refreshMetrics.isPending}
-              onClick={() => void onRefreshMetrics()}
+      <PageHeader
+        title="Creators"
+        description="CRM for TikTok Shop creators. Followers / GMV refresh from TikTok when you re-sync discovery or run Refresh metrics."
+        actions={
+          shopOptions.length > 0 ? (
+            <>
+              <AppReactSelect
+                className="w-52"
+                options={shopOptions}
+                value={stringSelectValue(shopOptions, selectedShopId)}
+                onChange={(opt) =>
+                  setShopId(opt?.value ? String(opt.value) : "")
+                }
+                placeholder="Shop"
+                isSearchable
+                aria-label="Shop for metrics refresh"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="lg"
+                disabled={refreshMetrics.isPending}
+                onClick={() => void onRefreshMetrics()}
+              >
+                {refreshMetrics.isPending ? "Queuing…" : "Refresh metrics"}
+              </Button>
+            </>
+          ) : (
+            <Link
+              href="/shops"
+              className={buttonVariants({ variant: "outline", size: "lg" })}
             >
-              {refreshMetrics.isPending ? "Queuing…" : "Refresh metrics"}
-            </Button>
-          </div>
-        ) : (
-          <Link
-            href="/shops"
-            className={buttonVariants({ variant: "outline", size: "sm" })}
-          >
-            Connect shop to refresh
-          </Link>
-        )}
-      </div>
+              Connect shop to refresh
+            </Link>
+          )
+        }
+      />
 
-      <form
-        onSubmit={(e) => void onAddCreator(e)}
-        className="flex flex-wrap items-end gap-2"
-      >
-        <div className="min-w-40 flex-1 space-y-1">
-          <label
-            htmlFor="creator-handle"
-            className="text-xs text-muted-foreground"
+      <div className="grid gap-6 lg:grid-cols-2">
+        <SectionCard
+          title="Add creator"
+          description="Add a TikTok creator to your CRM by handle."
+        >
+          <form
+            onSubmit={(e) => void onAddCreator(e)}
+            className="flex h-full flex-col gap-4"
           >
-            Handle
-          </label>
-          <Input
-            id="creator-handle"
-            placeholder="@creator"
-            value={handle}
-            onChange={(e) => setHandle(e.target.value)}
-          />
-        </div>
-        <div className="min-w-48 flex-1 space-y-1">
-          <label
-            htmlFor="creator-email"
-            className="text-xs text-muted-foreground"
-          >
-            Contact email
-          </label>
-          <Input
-            id="creator-email"
-            type="email"
-            placeholder="optional"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </div>
-        <Button type="submit" disabled={create.isPending}>
-          {create.isPending ? "Adding…" : "Add creator"}
-        </Button>
-      </form>
+            <FormGrid columns={2}>
+              <Field>
+                <FieldLabel htmlFor="creator-handle">Handle</FieldLabel>
+                <Input
+                  id="creator-handle"
+                  placeholder="@creator"
+                  value={handle}
+                  onChange={(e) => setHandle(e.target.value)}
+                />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="creator-email">Contact email</FieldLabel>
+                <Input
+                  id="creator-email"
+                  type="email"
+                  placeholder="Optional"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </Field>
+            </FormGrid>
+            <Button
+              type="submit"
+              size="lg"
+              className="mt-auto self-end"
+              disabled={create.isPending}
+            >
+              {create.isPending ? "Adding…" : "Add creator"}
+            </Button>
+          </form>
+        </SectionCard>
+
+        <SectionCard
+          title="Lists"
+          description="Group creators for campaigns, outreach and invites."
+        >
+          <div className="flex h-full flex-col gap-4">
+            <form
+              onSubmit={(e) => void onAddList(e)}
+              className="flex flex-col gap-2 sm:flex-row sm:items-end"
+            >
+              <Field className="flex-1">
+                <FieldLabel htmlFor="list-name">New list</FieldLabel>
+                <Input
+                  id="list-name"
+                  placeholder="List name"
+                  value={listName}
+                  onChange={(e) => setListName(e.target.value)}
+                />
+              </Field>
+              <Button
+                type="submit"
+                variant="outline"
+                size="lg"
+                disabled={createList.isPending}
+              >
+                Create list
+              </Button>
+            </form>
+            {lists.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No lists yet.</p>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {lists.map((l) => (
+                  <Badge
+                    key={l.id}
+                    variant="outline"
+                    className="h-7 rounded-md px-2.5"
+                  >
+                    {l.name} · {l.memberCount}
+                  </Badge>
+                ))}
+              </div>
+            )}
+          </div>
+        </SectionCard>
+      </div>
 
       {creatorsQuery.isError ? (
         <p className="text-sm text-destructive" role="alert">
@@ -299,42 +360,6 @@ export function CreatorsPageContent() {
         getRowId={(row) => row.id}
         ariaLabel="Creators"
       />
-
-      <div className="space-y-3">
-        <h2 className="text-sm font-semibold">Lists</h2>
-        <form
-          onSubmit={(e) => void onAddList(e)}
-          className="flex flex-wrap items-end gap-2"
-        >
-          <Input
-            placeholder="List name"
-            value={listName}
-            onChange={(e) => setListName(e.target.value)}
-            className="max-w-xs"
-          />
-          <Button
-            type="submit"
-            variant="outline"
-            disabled={createList.isPending}
-          >
-            Create list
-          </Button>
-        </form>
-        <div className="flex flex-wrap gap-2">
-          {lists.map((l) => (
-            <Badge
-              key={l.id}
-              variant="outline"
-              className="rounded-md px-2.5 py-1"
-            >
-              {l.name} · {l.memberCount}
-            </Badge>
-          ))}
-          {lists.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No lists yet.</p>
-          ) : null}
-        </div>
-      </div>
     </div>
   );
 }

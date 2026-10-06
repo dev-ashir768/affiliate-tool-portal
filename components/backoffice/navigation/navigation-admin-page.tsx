@@ -184,7 +184,7 @@ export function NavigationAdminPage() {
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-foreground">Navigation</h1>
-        <p className="text-sm text-muted-foreground">
+        <p className="mt-1 text-sm text-muted-foreground">
           Edit DB-backed menus for dashboard and backoffice (SUPERADMIN).
         </p>
       </div>
@@ -200,7 +200,7 @@ export function NavigationAdminPage() {
       {sections.map((section, sectionIndex) => (
         <div key={section.id} className="space-y-2">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <h2 className="text-sm font-medium">
+            <h2 className="text-base font-semibold">
               Section: {section.label ?? section.key}{" "}
               <span className="font-mono text-xs text-muted-foreground">
                 ({section.key})

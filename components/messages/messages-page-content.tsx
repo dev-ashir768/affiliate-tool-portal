@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -22,6 +23,9 @@ import {
 } from "@/components/ui/react-select";
 import { cn } from "cn";
 
+import { Field, FieldLabel } from "@/components/ui/field";
+import { PageHeader } from "@/components/layout/page-header";
+import { SectionCard } from "@/components/layout/section-card";
 export function MessagesPageContent() {
   const shopsQuery = useShops();
   const creatorsQuery = useCreators();
@@ -115,72 +119,79 @@ export function MessagesPageContent() {
     }
   }
 
-  if (shopsQuery.isLoading) return <Skeleton className="h-48 w-full" />;
+  if (shopsQuery.isLoading) {
+    return (
+      <div className="flex flex-col gap-6">
+        <Skeleton className="h-14 w-full max-w-md" />
+        <Skeleton className="h-24 w-full" />
+        <Skeleton className="h-[28rem] w-full" />
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col gap-4">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Messages</h1>
-        <p className="text-sm text-muted-foreground">
-          TikTok Shop affiliate IM with creators (OpenAPI conversations).
-          Requires IM scopes enabled + shop OAuth.
-        </p>
-      </div>
+    <div className="flex flex-col gap-6">
+      <PageHeader
+        title="Messages"
+        description="TikTok Shop affiliate IM with creators (OpenAPI conversations). Requires IM scopes and shop OAuth."
+        actions={
+          <Button
+            type="button"
+            variant="outline"
+            size="lg"
+            disabled={!activeShopId || conversationsQuery.isFetching}
+            onClick={() => void conversationsQuery.refetch()}
+          >
+            {conversationsQuery.isFetching ? "Syncing…" : "Sync inbox"}
+          </Button>
+        }
+      />
 
-      <div className="flex flex-wrap gap-3">
-        <AppReactSelect
-          className="min-w-48"
-          options={shopOptions}
-          value={stringSelectValue(shopOptions, activeShopId ?? "")}
-          onChange={(opt) => {
-            setShopId(opt?.value ? String(opt.value) : "");
-            setSelectedId(null);
-          }}
-          placeholder={
-            oauthShops.length === 0 ? "Authorize a shop first" : "Shop"
-          }
-          isSearchable
-          isDisabled={oauthShops.length === 0}
-          aria-label="Shop"
-        />
-        <Button
-          type="button"
-          variant="outline"
-          disabled={!activeShopId || conversationsQuery.isFetching}
-          onClick={() => void conversationsQuery.refetch()}
+      <SectionCard>
+        <form
+          onSubmit={(e) => void onOpenConversation(e)}
+          className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)_auto] sm:items-end"
         >
-          {conversationsQuery.isFetching ? "Syncing…" : "Sync inbox"}
-        </Button>
-      </div>
-
-      <form
-        onSubmit={(e) => void onOpenConversation(e)}
-        className="flex flex-wrap items-end gap-2"
-      >
-        <div className="min-w-[12rem] flex-1 space-y-1">
-          <label className="text-xs text-muted-foreground">
-            Start / open with CRM creator
-          </label>
-          <AppReactSelect
-            className="min-w-48 w-full"
-            options={creatorOptions}
-            value={stringSelectValue(creatorOptions, creatorId)}
-            onChange={(opt) =>
-              setCreatorId(opt?.value ? String(opt.value) : "")
-            }
-            placeholder="Select creator with open_id"
-            isClearable
-            isSearchable
-            aria-label="Start / open with CRM creator"
-          />
-        </div>
-        <Button
-          type="submit"
-          disabled={!creatorId || !activeShopId || openConversation.isPending}
-        >
-          {openConversation.isPending ? "Opening…" : "Open chat"}
-        </Button>
-      </form>
+          <Field>
+            <FieldLabel>Shop</FieldLabel>
+            <AppReactSelect
+              options={shopOptions}
+              value={stringSelectValue(shopOptions, activeShopId ?? "")}
+              onChange={(opt) => {
+                setShopId(opt?.value ? String(opt.value) : "");
+                setSelectedId(null);
+              }}
+              placeholder={
+                oauthShops.length === 0 ? "Authorize a shop first" : "Shop"
+              }
+              isSearchable
+              isDisabled={oauthShops.length === 0}
+              aria-label="Shop"
+            />
+          </Field>
+          <Field>
+            <FieldLabel>Start or open a chat with a CRM creator</FieldLabel>
+            <AppReactSelect
+              options={creatorOptions}
+              value={stringSelectValue(creatorOptions, creatorId)}
+              onChange={(opt) =>
+                setCreatorId(opt?.value ? String(opt.value) : "")
+              }
+              placeholder="Select creator with open_id"
+              isClearable
+              isSearchable
+              aria-label="Start / open with CRM creator"
+            />
+          </Field>
+          <Button
+            type="submit"
+            size="lg"
+            disabled={!creatorId || !activeShopId || openConversation.isPending}
+          >
+            {openConversation.isPending ? "Opening…" : "Open chat"}
+          </Button>
+        </form>
+      </SectionCard>
 
       {conversationsQuery.isError ? (
         <p className="text-sm text-destructive" role="alert">
@@ -190,59 +201,62 @@ export function MessagesPageContent() {
         </p>
       ) : null}
 
-      <div className="grid min-h-[28rem] gap-3 md:grid-cols-[16rem_1fr]">
-        <ul className="max-h-[32rem] space-y-1 overflow-y-auto rounded-md border border-border p-2 text-sm">
-          {conversations.length === 0 ? (
-            <li className="px-2 py-6 text-center text-muted-foreground">
-              No conversations yet.
-            </li>
-          ) : (
-            conversations.map((c) => (
-              <li key={c.id}>
-                <button
-                  type="button"
-                  className={cn(
-                    "flex w-full flex-col rounded-md px-2 py-2 text-left hover:bg-muted/50",
-                    selectedId === c.id && "bg-muted",
-                  )}
-                  onClick={() => void onSelectConversation(c.id)}
-                >
-                  <span className="flex items-center justify-between gap-2">
-                    <span className="font-medium">
-                      {c.creatorHandle
-                        ? `@${c.creatorHandle}`
-                        : c.creatorUsername || c.externalConversationId}
-                    </span>
-                    {c.unreadCount > 0 ? (
-                      <Badge variant="default" className="text-[10px]">
-                        {c.unreadCount}
-                      </Badge>
-                    ) : null}
-                  </span>
-                  {c.lastMessagePreview ? (
-                    <span className="truncate text-xs text-muted-foreground">
-                      {c.lastMessagePreview}
-                    </span>
-                  ) : null}
-                </button>
+      <Card className="grid min-h-[32rem] gap-0 overflow-hidden py-0 md:grid-cols-[18rem_1fr]">
+        <div className="flex min-h-0 flex-col border-b md:border-r md:border-b-0">
+          <div className="border-b px-4 py-3 text-sm font-semibold">
+            Conversations
+          </div>
+          <ul className="max-h-[32rem] flex-1 overflow-y-auto p-2 text-sm">
+            {conversations.length === 0 ? (
+              <li className="px-2 py-8 text-center text-muted-foreground">
+                No conversations yet.
               </li>
-            ))
-          )}
-        </ul>
+            ) : (
+              conversations.map((c) => (
+                <li key={c.id}>
+                  <button
+                    type="button"
+                    className={cn(
+                      "flex w-full flex-col gap-0.5 rounded-lg px-3 py-2 text-left transition-colors hover:bg-muted",
+                      selectedId === c.id && "bg-muted",
+                    )}
+                    onClick={() => void onSelectConversation(c.id)}
+                  >
+                    <span className="flex items-center justify-between gap-2">
+                      <span className="truncate font-medium">
+                        {c.creatorHandle
+                          ? `@${c.creatorHandle}`
+                          : c.creatorUsername || c.externalConversationId}
+                      </span>
+                      {c.unreadCount > 0 ? (
+                        <Badge variant="default">{c.unreadCount}</Badge>
+                      ) : null}
+                    </span>
+                    {c.lastMessagePreview ? (
+                      <span className="truncate text-xs text-muted-foreground">
+                        {c.lastMessagePreview}
+                      </span>
+                    ) : null}
+                  </button>
+                </li>
+              ))
+            )}
+          </ul>
+        </div>
 
-        <div className="flex min-h-[28rem] flex-col rounded-md border border-border">
+        <div className="flex min-h-[28rem] flex-col">
           {!selectedId ? (
             <div className="flex flex-1 items-center justify-center p-6 text-sm text-muted-foreground">
               Select a conversation
             </div>
           ) : (
             <>
-              <div className="border-b border-border px-3 py-2 text-sm font-medium">
+              <div className="border-b px-4 py-3 text-sm font-semibold">
                 {selected?.creatorHandle
                   ? `@${selected.creatorHandle}`
                   : selected?.creatorUsername || "Conversation"}
               </div>
-              <div className="flex-1 space-y-2 overflow-y-auto p-3">
+              <div className="flex-1 space-y-2 overflow-y-auto bg-muted/30 p-4">
                 {threadQuery.isLoading ? (
                   <Skeleton className="h-24 w-full" />
                 ) : threadQuery.isError ? (
@@ -252,18 +266,20 @@ export function MessagesPageContent() {
                       : "Failed to load thread"}
                   </p>
                 ) : messages.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">No messages yet.</p>
+                  <p className="text-sm text-muted-foreground">
+                    No messages yet.
+                  </p>
                 ) : (
                   messages.map((m) => (
                     <div
                       key={m.id}
                       className={cn(
-                        "max-w-[85%] rounded-md px-3 py-2 text-sm",
+                        "max-w-[85%] rounded-xl px-3 py-2 text-sm",
                         m.direction === "OUTBOUND"
                           ? "ml-auto bg-primary text-primary-foreground"
                           : m.direction === "SYSTEM"
                             ? "mx-auto bg-muted text-muted-foreground"
-                            : "bg-muted",
+                            : "bg-card ring-1 ring-foreground/10",
                       )}
                     >
                       <p className="whitespace-pre-wrap">
@@ -272,7 +288,8 @@ export function MessagesPageContent() {
                       <p
                         className={cn(
                           "mt-1 text-[10px] opacity-70",
-                          m.status === "FAILED" && "text-destructive opacity-100",
+                          m.status === "FAILED" &&
+                            "text-destructive opacity-100",
                         )}
                       >
                         {m.direction} · {m.status}
@@ -287,7 +304,7 @@ export function MessagesPageContent() {
               </div>
               <form
                 onSubmit={(e) => void onSend(e)}
-                className="flex gap-2 border-t border-border p-2"
+                className="flex gap-2 border-t p-3"
               >
                 <Input
                   value={draft}
@@ -297,6 +314,7 @@ export function MessagesPageContent() {
                 />
                 <Button
                   type="submit"
+                  size="lg"
                   disabled={!draft.trim() || sendMessage.isPending}
                 >
                   {sendMessage.isPending ? "Sending…" : "Send"}
@@ -305,7 +323,7 @@ export function MessagesPageContent() {
             </>
           )}
         </div>
-      </div>
+      </Card>
     </div>
   );
 }
