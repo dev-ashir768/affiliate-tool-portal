@@ -46,7 +46,7 @@ export async function POST(request: Request) {
           error: {
             code: "INTERNAL",
             message:
-              "Login token could not be verified. JWT_ACCESS_SECRET must match on portal and APIs.",
+              "Login token could not be verified. JWT_PUBLIC_KEY / JWT_ACCESS_SECRET must match the APIs.",
           },
         },
         { status: 502 },

@@ -1,4 +1,4 @@
-import { decodeJwt, errors, jwtVerify } from "jose";
+import { decodeJwt, errors, importSPKI, jwtVerify } from "jose";
 
 export type AccessClaims = {
   orgId: string | null;
@@ -13,10 +13,42 @@ export type AccessTokenStatus =
   | { status: "misconfigured" }
   | { status: "invalid" };
 
-function accessSecretKey(): Uint8Array | null {
+type VerifyKey = {
+  key: CryptoKey | Uint8Array;
+  algorithms: ["EdDSA"] | ["HS256"];
+};
+
+let publicKey: Promise<CryptoKey> | null = null;
+
+/**
+ * Preferred: JWT_PUBLIC_KEY (Ed25519 PEM, same as APIs) — the portal can only
+ * verify, never mint. Fallback: shared HS256 JWT_ACCESS_SECRET.
+ */
+async function accessVerifyKey(): Promise<VerifyKey | null> {
+  const pem = process.env.JWT_PUBLIC_KEY?.replace(/\\n/g, "\n").trim();
+  if (pem) {
+    publicKey ??= importSPKI(pem, "EdDSA");
+    try {
+      return { key: await publicKey, algorithms: ["EdDSA"] };
+    } catch {
+      publicKey = null;
+      return null;
+    }
+  }
   const secret = process.env.JWT_ACCESS_SECRET;
   if (!secret || secret.length < 32) return null;
-  return new TextEncoder().encode(secret);
+  return { key: new TextEncoder().encode(secret), algorithms: ["HS256"] };
+}
+
+/** Seconds until the token's `exp` (for cookie maxAge); fallback when unreadable. */
+export function secondsUntilExpiry(token: string, fallback = 900): number {
+  try {
+    const { exp } = decodeJwt(token);
+    if (typeof exp !== "number") return fallback;
+    return Math.max(0, exp - Math.floor(Date.now() / 1000));
+  } catch {
+    return fallback;
+  }
 }
 
 function claimsFromPayload(payload: Record<string, unknown>): AccessClaims {
@@ -40,12 +72,14 @@ function claimsFromPayload(payload: Record<string, unknown>): AccessClaims {
 export async function inspectAccessToken(
   token: string
 ): Promise<AccessTokenStatus> {
-  const key = accessSecretKey();
-  if (!key) {
+  const verify = await accessVerifyKey();
+  if (!verify) {
     return { status: "misconfigured" };
   }
   try {
-    const { payload } = await jwtVerify(token, key, { algorithms: ["HS256"] });
+    const { payload } = await jwtVerify(token, verify.key, {
+      algorithms: verify.algorithms,
+    });
     return {
       status: "valid",
       claims: claimsFromPayload(payload as Record<string, unknown>),

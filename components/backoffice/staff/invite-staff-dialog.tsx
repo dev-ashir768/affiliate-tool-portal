@@ -21,6 +21,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import {
   Select,
   SelectContent,
@@ -164,10 +165,9 @@ export function InviteStaffDialog() {
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid || undefined}>
                   <FieldLabel htmlFor="staff-password">Password</FieldLabel>
-                  <Input
+                  <PasswordInput
                     {...field}
                     id="staff-password"
-                    type="password"
                     autoComplete="new-password"
                   />
                   <p className="text-xs text-muted-foreground">

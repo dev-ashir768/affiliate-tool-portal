@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { apiFetch, ApiClientError } from "@/lib/auth/api";
-import { getAccessToken } from "@/lib/auth/session";
+import { authenticatedApiFetch } from "@/lib/api/authenticated-fetch";
+import { platformErrorResponse } from "@/lib/api/platform-bff";
 import type { NavArea, NavResponse } from "@/types/navigation";
 
 export async function GET(
@@ -15,35 +15,13 @@ export async function GET(
     );
   }
 
-  const accessToken = await getAccessToken();
-  if (!accessToken) {
-    return NextResponse.json(
-      { error: { code: "UNAUTHORIZED", message: "Not authenticated" } },
-      { status: 401 }
-    );
-  }
-
   try {
-    const data = await apiFetch<NavResponse>(
+    const data = await authenticatedApiFetch<NavResponse>(
       `/api/v1/navigation/${area as NavArea}`,
-      {
-        method: "GET",
-        accessToken,
-      }
+      { method: "GET" }
     );
     return NextResponse.json(data);
   } catch (err) {
-    if (err instanceof ApiClientError) {
-      return NextResponse.json(
-        {
-          error: { code: err.code, message: err.message, details: err.details },
-        },
-        { status: err.status }
-      );
-    }
-    return NextResponse.json(
-      { error: { code: "INTERNAL", message: "Failed to load navigation" } },
-      { status: 500 }
-    );
+    return platformErrorResponse(err, "Failed to load navigation");
   }
 }
