@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { rootMetadata } from "@/lib/site-metadata";
+import NextTopLoader from "nextjs-toploader";
 import { Providers } from "@/providers";
 
 const spaceGrotesk = Space_Grotesk({
@@ -44,6 +45,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         />
       </head>
       <body className="flex min-h-full w-full flex-col">
+        <NextTopLoader
+          color="var(--primary)"
+          height={3}
+          showSpinner={false}
+          shadow={false}
+          zIndex={1600}
+        />
         <Providers>{children}</Providers>
       </body>
     </html>

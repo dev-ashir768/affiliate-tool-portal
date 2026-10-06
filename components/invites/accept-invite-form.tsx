@@ -25,7 +25,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter } from "nextjs-toploader/app";
 import { useMe } from "@/hooks/use-me";
 import { acceptInvite } from "@/services/orgs";
 import { useState } from "react";

@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
+// Wrapped router starts the top loader for programmatic navigation too.
+import { useRouter } from "nextjs-toploader/app";
 import { useQueryClient } from "@tanstack/react-query";
 import { MenuIcon, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -33,6 +35,7 @@ export function AppTopbar({
   showCloseIcon: boolean;
 }) {
   const queryClient = useQueryClient();
+  const router = useRouter();
   const { data: me } = useMe();
   const displayName = me?.user.name ?? "Account";
   const subtitle = me?.user.email ?? "…";
@@ -106,7 +109,7 @@ export function AppTopbar({
             <DropdownMenuItem
               className="cursor-pointer"
               onClick={() => {
-                window.location.assign(settingsHref);
+                router.push(settingsHref);
               }}
             >
               {isStaff ? "Staff console" : "Settings"}
