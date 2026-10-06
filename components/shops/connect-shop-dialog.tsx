@@ -1,9 +1,14 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { CheckIcon, CopyIcon, StoreIcon } from "lucide-react";
+import {
+  BotIcon,
+  CheckIcon,
+  CopyIcon,
+  ShieldCheckIcon,
+  StoreIcon,
+} from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -14,12 +19,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field";
+import { Field, FieldLabel } from "@/components/ui/field";
 import {
   Select,
   SelectContent,
@@ -30,58 +30,124 @@ import {
 import { useMe } from "@/hooks/use-me";
 import { useConnectShop } from "@/hooks/use-shops";
 import { ShopsApiError } from "@/services/shops";
-import {
-  connectShopSchema,
-  type ConnectShopSchemaType,
-} from "@/validations/shop.validations";
-import { toast } from "sonner";
+import { cn } from "cn";
+
+type Region = "US" | "UK";
+type Step = "choose" | "bot-done";
 
 type ConnectShopDialogProps = {
   disabled?: boolean;
   disabledReason?: string | null;
+  oauthAvailable: boolean;
+  oauthPending?: boolean;
+  onOauthConnect: (region: Region) => Promise<void>;
   onPlanLimit?: () => void;
 };
+
+function MethodCard({
+  icon,
+  title,
+  badge,
+  description,
+  disabled,
+  busy,
+  onClick,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  badge?: React.ReactNode;
+  description: string;
+  disabled?: boolean;
+  busy?: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      disabled={disabled || busy}
+      onClick={onClick}
+      className={cn(
+        "flex w-full items-start gap-3 rounded-xl border border-border p-4 text-left transition-colors",
+        "hover:border-primary/50 hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        "disabled:cursor-not-allowed disabled:opacity-55 disabled:hover:border-border disabled:hover:bg-transparent",
+      )}
+    >
+      <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground">
+        {icon}
+      </span>
+      <span className="flex min-w-0 flex-col gap-1">
+        <span className="flex flex-wrap items-center gap-2 text-sm font-medium">
+          {busy ? "Starting…" : title}
+          {badge}
+        </span>
+        <span className="text-xs leading-relaxed text-muted-foreground">
+          {description}
+        </span>
+      </span>
+    </button>
+  );
+}
 
 export function ConnectShopDialog({
   disabled,
   disabledReason,
+  oauthAvailable,
+  oauthPending,
+  onOauthConnect,
   onPlanLimit,
 }: ConnectShopDialogProps) {
   const { data: me } = useMe();
   const connect = useConnectShop();
   const [open, setOpen] = useState(false);
-  const [connectedBotEmail, setConnectedBotEmail] = useState<string | null>(
-    null,
-  );
+  const [step, setStep] = useState<Step>("choose");
+  const [region, setRegion] = useState<Region>("US");
+  const [botEmail, setBotEmail] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
-  const orgRole = useMemo(() => {
-    if (!me?.currentOrganizationId) return null;
-    return (
-      me.memberships.find(
-        (m) => m.organization.id === me.currentOrganizationId,
-      )?.role ?? null
-    );
+  const canConnect = useMemo(() => {
+    if (!me?.currentOrganizationId) return false;
+    const role = me.memberships.find(
+      (m) => m.organization.id === me.currentOrganizationId,
+    )?.role;
+    return role === "OWNER" || role === "ADMIN";
   }, [me]);
 
-  const canConnect = orgRole === "OWNER" || orgRole === "ADMIN";
-
-  const form = useForm<ConnectShopSchemaType>({
-    resolver: zodResolver(connectShopSchema),
-    defaultValues: { region: "US" },
-  });
-
-  if (!canConnect) {
-    return null;
-  }
+  if (!canConnect) return null;
 
   function handleOpenChange(next: boolean) {
     setOpen(next);
     if (!next) {
-      form.reset({ region: "US" });
-      form.clearErrors();
-      setConnectedBotEmail(null);
+      setStep("choose");
+      setBotEmail(null);
+      setError(null);
       setCopied(false);
+    }
+  }
+
+  async function connectViaOauth() {
+    setError(null);
+    try {
+      await onOauthConnect(region);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to start TikTok authorization");
+    }
+  }
+
+  async function connectViaBot() {
+    setError(null);
+    try {
+      const shop = await connect.mutateAsync({ region });
+      setBotEmail(shop.botEmail);
+      setStep("bot-done");
+      toast.success("Shop created — invite the bot email in Seller Center");
+    } catch (err) {
+      if (err instanceof ShopsApiError && err.code === "PLAN_LIMIT") {
+        onPlanLimit?.();
+        setError("Shop limit reached. Upgrade your plan to connect more shops.");
+        return;
+      }
+      setError(err instanceof Error ? err.message : "Failed to connect shop");
     }
   }
 
@@ -96,146 +162,120 @@ export function ConnectShopDialog({
     }
   }
 
-  async function onSubmit(data: ConnectShopSchemaType) {
-    form.clearErrors("root");
-    try {
-      const shop = await connect.mutateAsync(data);
-      const email = shop.botEmail;
-      setConnectedBotEmail(email);
-      toast.success(
-        email
-          ? `Shop connected — invite ${email} in Seller Center`
-          : "Shop connect started",
-      );
-    } catch (err) {
-      if (err instanceof ShopsApiError && err.code === "PLAN_LIMIT") {
-        onPlanLimit?.();
-        const message =
-          "Shop limit reached. Upgrade your plan to connect more shops.";
-        form.setError("root", { message });
-        toast.error(message);
-        return;
-      }
-      const message =
-        err instanceof Error ? err.message : "Failed to connect shop";
-      form.setError("root", { message });
-      toast.error(message);
-    }
-  }
-
-  const isSubmitting = form.formState.isSubmitting || connect.isPending;
-  const formError = form.formState.errors.root;
+  const busy = connect.isPending || Boolean(oauthPending);
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger
-        render={<Button type="button" disabled={disabled || !me} />}
-      >
+      <DialogTrigger render={<Button type="button" size="lg" disabled={disabled || !me} />}>
         <StoreIcon data-icon="inline-start" />
         Connect shop
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>
-            {connectedBotEmail ? "Invite your bot" : "Connect a shop"}
-          </DialogTitle>
-          <DialogDescription>
-            {connectedBotEmail
-              ? "Send a TikTok Shop collaborator invite to this bot email, then run Verify."
-              : "Reserve a bot identity for TikTok Shop in the selected region."}
-            {!connectedBotEmail && disabledReason
-              ? ` ${disabledReason}`
-              : null}
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="sm:max-w-lg">
+        {step === "choose" ? (
+          <>
+            <DialogHeader>
+              <DialogTitle>Connect a TikTok Shop</DialogTitle>
+              <DialogDescription>
+                Choose how influxa should connect to your shop.
+                {disabledReason ? ` ${disabledReason}` : null}
+              </DialogDescription>
+            </DialogHeader>
 
-        {connectedBotEmail ? (
-          <div className="space-y-3">
-            <p className="rounded-lg border border-border bg-muted/40 px-3 py-2 font-mono text-sm break-all">
-              {connectedBotEmail}
-            </p>
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full"
-              onClick={() => void copyBotEmail(connectedBotEmail)}
-            >
-              {copied ? (
-                <CheckIcon data-icon="inline-start" />
-              ) : (
-                <CopyIcon data-icon="inline-start" />
-              )}
-              {copied ? "Copied" : "Copy bot email"}
-            </Button>
-          </div>
-        ) : (
-          <form
-            id="connect-shop-form"
-            noValidate
-            onSubmit={form.handleSubmit(onSubmit)}
-          >
-            <FieldGroup>
-              <Controller
-                control={form.control}
-                name="region"
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid || undefined}>
-                    <FieldLabel htmlFor="shop-region">Region</FieldLabel>
-                    <Select
-                      value={field.value}
-                      onValueChange={(value) => {
-                        if (value === "US" || value === "UK") {
-                          field.onChange(value);
-                        }
-                      }}
-                      disabled={isSubmitting || disabled}
-                    >
-                      <SelectTrigger
-                        id="shop-region"
-                        className="w-full"
-                        aria-invalid={fieldState.invalid || undefined}
-                      >
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="US">United States</SelectItem>
-                        <SelectItem value="UK">United Kingdom</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    {fieldState.invalid ? (
-                      <FieldError errors={[fieldState.error]} />
-                    ) : null}
-                  </Field>
-                )}
+            <Field>
+              <FieldLabel htmlFor="connect-region">Shop region</FieldLabel>
+              <Select
+                value={region}
+                onValueChange={(v) => {
+                  if (v === "US" || v === "UK") setRegion(v);
+                }}
+                disabled={busy}
+              >
+                <SelectTrigger id="connect-region" className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="US">United States</SelectItem>
+                  <SelectItem value="UK">United Kingdom</SelectItem>
+                </SelectContent>
+              </Select>
+            </Field>
+
+            <div className="flex flex-col gap-3">
+              <MethodCard
+                icon={<ShieldCheckIcon className="size-4" />}
+                title="Authorize with TikTok"
+                badge={
+                  oauthAvailable ? (
+                    <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                      Recommended
+                    </span>
+                  ) : (
+                    <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
+                      Coming soon
+                    </span>
+                  )
+                }
+                description="Sign in to TikTok Seller Center and approve access. Official, secure, and syncs orders and products automatically."
+                disabled={!oauthAvailable || disabled}
+                busy={Boolean(oauthPending)}
+                onClick={() => void connectViaOauth()}
               />
-              {formError ? <FieldError errors={[formError]} /> : null}
-            </FieldGroup>
-          </form>
+              <MethodCard
+                icon={<BotIcon className="size-4" />}
+                title="Connect with a bot collaborator"
+                description="We give you a bot email. You invite it as a collaborator in Seller Center, then click Verify. No TikTok app approval needed."
+                disabled={disabled}
+                busy={connect.isPending}
+                onClick={() => void connectViaBot()}
+              />
+            </div>
+
+            {error ? (
+              <p className="text-sm text-destructive" role="alert">
+                {error}
+              </p>
+            ) : null}
+          </>
+        ) : (
+          <>
+            <DialogHeader>
+              <DialogTitle>Invite your bot</DialogTitle>
+              <DialogDescription>
+                Finish the connection in TikTok Seller Center.
+              </DialogDescription>
+            </DialogHeader>
+
+            {botEmail ? (
+              <div className="flex flex-col gap-2">
+                <p className="rounded-lg border border-border bg-muted/40 px-3 py-2 font-mono text-sm break-all">
+                  {botEmail}
+                </p>
+                <Button type="button" variant="outline" onClick={() => void copyBotEmail(botEmail)}>
+                  {copied ? <CheckIcon data-icon="inline-start" /> : <CopyIcon data-icon="inline-start" />}
+                  {copied ? "Copied" : "Copy bot email"}
+                </Button>
+              </div>
+            ) : null}
+
+            <ol className="flex list-decimal flex-col gap-1.5 pl-5 text-sm text-muted-foreground">
+              <li>Open TikTok Seller Center → Account → User management.</li>
+              <li>Invite the bot email above as a collaborator.</li>
+              <li>
+                Come back here and click <span className="font-medium text-foreground">Verify</span> on the shop.
+              </li>
+            </ol>
+          </>
         )}
 
         <DialogFooter>
-          {connectedBotEmail ? (
+          {step === "bot-done" ? (
             <Button type="button" onClick={() => handleOpenChange(false)}>
               Done
             </Button>
           ) : (
-            <>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => handleOpenChange(false)}
-                disabled={isSubmitting}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                form="connect-shop-form"
-                disabled={isSubmitting || disabled}
-              >
-                {isSubmitting ? "Connecting…" : "Connect"}
-              </Button>
-            </>
+            <Button type="button" variant="outline" onClick={() => handleOpenChange(false)} disabled={busy}>
+              Cancel
+            </Button>
           )}
         </DialogFooter>
       </DialogContent>
