@@ -1,6 +1,5 @@
 "use client";
 
-import { cn } from "cn";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -253,23 +252,18 @@ export function OutreachPageContent() {
         }
       />
 
-      {delivery ? (
-        <div
-          className={cn(
-            "rounded-xl border px-4 py-3 text-sm",
-            delivery.ready
-              ? "border-border bg-card text-muted-foreground"
-              : "border-destructive/40 bg-destructive/5 text-destructive",
-          )}
-        >
-          <span className="font-medium text-foreground">
-            Email: {delivery.provider}
-          </span>
-          {" · "}
-          {delivery.note}
-          {!delivery.live && delivery.ready ? (
-            <span> (dev log only)</span>
-          ) : null}
+      {/* Shown only when sending is limited; healthy email needs no banner. */}
+      {delivery && !delivery.ready ? (
+        <div className="rounded-xl border border-destructive/40 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+          <span className="font-medium">
+            Email sending isn&apos;t available right now.
+          </span>{" "}
+          Please contact support.
+        </div>
+      ) : delivery && !delivery.live ? (
+        <div className="rounded-xl border bg-card px-4 py-3 text-sm text-muted-foreground">
+          <span className="font-medium text-foreground">Test mode:</span>{" "}
+          emails are recorded but not delivered to creators.
         </div>
       ) : null}
 

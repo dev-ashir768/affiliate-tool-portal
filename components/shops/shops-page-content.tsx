@@ -243,13 +243,10 @@ export function ShopsPageContent() {
       {canManage && oauthStatus.data && !oauthReady ? (
         <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm text-muted-foreground">
           <span className="font-medium text-foreground">
-            TikTok OAuth is not configured on the API.
+            TikTok Shop connection isn&apos;t available yet.
           </span>{" "}
-          Set <code className="text-xs">TIKTOK_SHOP_APP_KEY</code>,{" "}
-          <code className="text-xs">TIKTOK_SHOP_APP_SECRET</code> and{" "}
-          <code className="text-xs">TIKTOK_SHOP_REDIRECT_URI</code> (your
-          portal&apos;s <code className="text-xs">/shops/tiktok/callback</code>{" "}
-          URL) on the API server.
+          Authorizing a shop will be enabled shortly — please contact support
+          if you need it now.
         </div>
       ) : null}
 

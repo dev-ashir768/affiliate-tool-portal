@@ -76,11 +76,6 @@ export async function fetchTikTokOAuthStatus(signal?: AbortSignal) {
   if (!res.ok) throw await parseError(res);
   return (await res.json()) as {
     configured: boolean;
-    appKeySet: boolean;
-    appSecretSet: boolean;
-    redirectUriSet: boolean;
-    redirectUri: string | null;
-    serviceId: string | null;
   };
 }
 
