@@ -1,0 +1,9 @@
+import { proxyActivation } from "@/lib/api/bot-activation-proxy";
+
+type RouteContext = { params: Promise<{ id: string }> };
+
+export async function POST(request: Request, context: RouteContext) {
+  const { id } = await context.params;
+  const body = await request.text();
+  return proxyActivation(id, "/complete", { method: "POST", body: body || "{}" }, "Failed to save bot sign-in");
+}

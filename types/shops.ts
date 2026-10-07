@@ -13,6 +13,10 @@ export type Shop = {
   region: ShopRegion;
   botIdentityId: string | null;
   botEmail: string | null;
+  /** Bot generated for this organization (merchant sets it up themselves). */
+  botSelfServe?: boolean;
+  /** When the bot's TikTok sign-in was saved; null = not activated. */
+  botActivatedAt?: string | null;
   status: ShopStatus;
   statusReason: string | null;
   displayName: string | null;
@@ -23,6 +27,19 @@ export type Shop = {
   oauthConnected?: boolean;
   oauthScopes?: string[];
   oauthAccessExpiresAt?: string | null;
+};
+
+export type BotMailSummary = {
+  subject: string;
+  from: string;
+  receivedAt: string;
+  code: string | null;
+  preview: string;
+};
+
+export type BotInboxResponse = {
+  botEmail: string;
+  messages: BotMailSummary[];
 };
 
 export type ShopsListResponse = {
