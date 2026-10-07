@@ -1,4 +1,5 @@
 import type {
+  BotInboxResponse,
   Shop,
   ShopsListResponse,
   VerifyShopResponse,
@@ -57,6 +58,18 @@ export async function verifyShop(id: string): Promise<VerifyShopResponse> {
   });
   if (!res.ok) throw await parseError(res);
   return (await res.json()) as VerifyShopResponse;
+}
+
+export async function fetchShopBotInbox(
+  id: string,
+  signal?: AbortSignal,
+): Promise<BotInboxResponse> {
+  const res = await fetch(`/api/shops/${encodeURIComponent(id)}/bot-inbox`, {
+    credentials: "include",
+    signal,
+  });
+  if (!res.ok) throw await parseError(res);
+  return (await res.json()) as BotInboxResponse;
 }
 
 export async function disconnectShop(id: string): Promise<Shop> {

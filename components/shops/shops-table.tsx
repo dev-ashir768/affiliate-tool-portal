@@ -39,6 +39,7 @@ type ShopsTableProps = {
   authorizingId: string | null;
   oauthAvailable: boolean;
   onVerify: (id: string) => Promise<void>;
+  onSetupBot: (id: string) => void;
   onAuthorizeTikTok: (id: string) => Promise<void>;
   onDisconnect: (id: string) => Promise<void>;
 };
@@ -51,6 +52,7 @@ export function ShopsTable({
   authorizingId,
   oauthAvailable,
   onVerify,
+  onSetupBot,
   onAuthorizeTikTok,
   onDisconnect,
 }: ShopsTableProps) {
@@ -85,6 +87,10 @@ export function ShopsTable({
             const canAuthorize =
               oauthAvailable && !shop.oauthConnected && shop.status !== "DISCONNECTED";
             const canDisconnect = shop.status !== "DISCONNECTED";
+            const canSetupBot =
+              Boolean(shop.botSelfServe) &&
+              shop.status !== "DISCONNECTED" &&
+              shop.status !== "ACTIVE";
             const isConfirming = confirmId === shop.id;
 
             return (
@@ -142,6 +148,16 @@ export function ShopsTable({
                           {authorizingId === shop.id
                             ? "Opening…"
                             : "Authorize TikTok"}
+                        </Button>
+                      ) : null}
+                      {canSetupBot ? (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant={shop.botActivatedAt ? "outline" : "default"}
+                          onClick={() => onSetupBot(shop.id)}
+                        >
+                          {shop.botActivatedAt ? "Bot setup" : "Set up bot"}
                         </Button>
                       ) : null}
                       {canVerify ? (

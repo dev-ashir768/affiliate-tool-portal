@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   connectShop,
   disconnectShop,
+  fetchShopBotInbox,
   fetchShops,
   fetchTikTokOAuthStatus,
   startTikTokShopOAuth,
@@ -71,5 +72,15 @@ export function useDisconnectShop() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["shops", "list"] });
     },
+  });
+}
+
+export function useShopBotInbox(shopId: string | null) {
+  return useQuery({
+    queryKey: ["shops", "bot-inbox", shopId],
+    queryFn: ({ signal }) => fetchShopBotInbox(shopId!, signal),
+    enabled: Boolean(shopId),
+    refetchInterval: 10_000,
+    retry: false,
   });
 }

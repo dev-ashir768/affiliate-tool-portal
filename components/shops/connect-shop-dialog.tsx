@@ -30,6 +30,7 @@ import {
 import { useMe } from "@/hooks/use-me";
 import { useConnectShop } from "@/hooks/use-shops";
 import { ShopsApiError } from "@/services/shops";
+import type { Shop } from "@/types/shops";
 import { cn } from "cn";
 
 type Region = "US" | "UK";
@@ -42,6 +43,8 @@ type ConnectShopDialogProps = {
   oauthPending?: boolean;
   onOauthConnect: (region: Region) => Promise<void>;
   onPlanLimit?: () => void;
+  /** Self-serve bot shops continue in the bot setup dialog. */
+  onBotShopCreated?: (shop: Shop) => void;
 };
 
 function MethodCard({
@@ -95,6 +98,7 @@ export function ConnectShopDialog({
   oauthPending,
   onOauthConnect,
   onPlanLimit,
+  onBotShopCreated,
 }: ConnectShopDialogProps) {
   const { data: me } = useMe();
   const connect = useConnectShop();
@@ -138,6 +142,11 @@ export function ConnectShopDialog({
     setError(null);
     try {
       const shop = await connect.mutateAsync({ region });
+      if (shop.botSelfServe && onBotShopCreated) {
+        handleOpenChange(false);
+        onBotShopCreated(shop);
+        return;
+      }
       setBotEmail(shop.botEmail);
       setStep("bot-done");
       toast.success("Shop created — invite the bot email in Seller Center");

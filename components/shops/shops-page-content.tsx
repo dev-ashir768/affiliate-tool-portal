@@ -14,6 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { buttonVariants } from "@/components/ui/button";
 import type { ShopStatus } from "@/types/shops";
 import { ConnectShopDialog } from "@/components/shops/connect-shop-dialog";
+import { BotSetupDialog } from "@/components/shops/bot-setup-dialog";
 import { ShopsTable } from "@/components/shops/shops-table";
 import { useMe } from "@/hooks/use-me";
 import { useOrg } from "@/hooks/use-org";
@@ -39,6 +40,7 @@ export function ShopsPageContent() {
   const [actionError, setActionError] = useState<string | null>(null);
   const [showUpgradeHint, setShowUpgradeHint] = useState(false);
   const prevStatus = useRef<Record<string, ShopStatus>>({});
+  const [setupShopId, setSetupShopId] = useState<string | null>(null);
 
   const orgRole = useMemo(() => {
     const me = meQuery.data;
@@ -202,6 +204,7 @@ export function ShopsPageContent() {
               oauthPending={startOauth.isPending}
               onOauthConnect={handleOauthConnectNew}
               onPlanLimit={() => setShowUpgradeHint(true)}
+              onBotShopCreated={(shop) => setSetupShopId(shop.id)}
             />
           ) : undefined
         }
@@ -260,8 +263,17 @@ export function ShopsPageContent() {
         }
         oauthAvailable={oauthReady}
         onVerify={handleVerify}
+        onSetupBot={setSetupShopId}
         onAuthorizeTikTok={handleAuthorize}
         onDisconnect={handleDisconnect}
+      />
+
+      <BotSetupDialog
+        shop={shops.find((s) => s.id === setupShopId) ?? null}
+        open={setupShopId !== null}
+        onOpenChange={(open) => {
+          if (!open) setSetupShopId(null);
+        }}
       />
     </div>
   );
