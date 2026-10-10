@@ -12,6 +12,7 @@ import {
   fetchPlatformOrganization,
   fetchPlatformOrganizations,
   grantPlatformOrganizationAccess,
+  impersonatePlatformUser,
   revokePlatformOrganizationAccess,
   fetchPlatformPlans,
   fetchPlatformShops,
@@ -112,6 +113,18 @@ export function useRevokePlatformOrganizationAccess() {
       void qc.invalidateQueries({ queryKey: ["platform", "organizations", id] });
       void qc.invalidateQueries({ queryKey: ["platform", "organizations"] });
     },
+  });
+}
+
+export function useImpersonatePlatformUser() {
+  return useMutation({
+    mutationFn: ({
+      userId,
+      organizationId,
+    }: {
+      userId: string;
+      organizationId: string;
+    }) => impersonatePlatformUser(userId, { organizationId }),
   });
 }
 

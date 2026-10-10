@@ -133,6 +133,30 @@ export async function revokePlatformOrganizationAccess(
   return (await parseJson(res)) as PlatformOrgDetail;
 }
 
+export async function impersonatePlatformUser(
+  userId: string,
+  body: { organizationId: string },
+): Promise<{
+  redirectTo: string;
+  user: { id: string; email: string; name: string };
+  organizationId: string;
+}> {
+  const res = await fetch(
+    `/api/platform/users/${encodeURIComponent(userId)}/impersonate`,
+    {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    },
+  );
+  return (await parseJson(res)) as {
+    redirectTo: string;
+    user: { id: string; email: string; name: string };
+    organizationId: string;
+  };
+}
+
 export async function fetchPlatformShops(
   params: PlatformListParams,
   signal?: AbortSignal,

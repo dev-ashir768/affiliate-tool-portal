@@ -13,6 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
+  useImpersonatePlatformUser,
   usePlatformOrganization,
   useRevokePlatformOrganizationAccess,
 } from "@/hooks/use-platform";
@@ -21,6 +22,7 @@ import { GrantAccessDialog } from "@/components/backoffice/organizations/grant-a
 export function OrganizationDetail({ id }: { id: string }) {
   const query = usePlatformOrganization(id);
   const revoke = useRevokePlatformOrganizationAccess();
+  const impersonate = useImpersonatePlatformUser();
 
   if (query.isLoading) {
     return (
@@ -224,9 +226,39 @@ export function OrganizationDetail({ id }: { id: string }) {
                   <p className="font-medium">{m.user.name}</p>
                   <p className="text-muted-foreground">{m.user.email}</p>
                 </div>
-                <p className="text-muted-foreground">
-                  {m.role} · {m.status}
-                </p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="text-muted-foreground">
+                    {m.role} · {m.status}
+                  </p>
+                  {m.status === "ACTIVE" ? (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      disabled={impersonate.isPending}
+                      onClick={() => {
+                        impersonate.mutate(
+                          { userId: m.user.id, organizationId: id },
+                          {
+                            onSuccess: (data) => {
+                              toast.success(`Viewing as ${data.user.email}`);
+                              window.location.assign(data.redirectTo);
+                            },
+                            onError: (err) => {
+                              toast.error(
+                                err instanceof Error
+                                  ? err.message
+                                  : "Impersonation failed",
+                              );
+                            },
+                          },
+                        );
+                      }}
+                    >
+                      View as user
+                    </Button>
+                  ) : null}
+                </div>
               </div>
             ))
           )}

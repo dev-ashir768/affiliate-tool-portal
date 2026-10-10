@@ -27,9 +27,11 @@ function getDesktopServerSnapshot() {
 export function AppShell({
   area,
   children,
+  topSlot,
 }: {
   area: NavArea;
   children: ReactNode;
+  topSlot?: ReactNode;
 }) {
   const pathname = usePathname();
   const { data, isLoading, isError } = useNavigation(area);
@@ -58,6 +60,7 @@ export function AppShell({
         onMenuClick={handleMenuClick}
         showCloseIcon={showCloseIcon}
       />
+      {topSlot}
 
       <div className="flex min-h-0 flex-1">
         <div className="hidden lg:block">

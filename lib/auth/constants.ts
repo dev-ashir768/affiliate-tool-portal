@@ -1,5 +1,9 @@
 export const ACCESS_TOKEN_COOKIE = "access_token";
 export const REFRESH_TOKEN_COOKIE = "refresh_token";
+/** Stashed staff session while viewing as a merchant (impersonation). */
+export const STAFF_BACKUP_ACCESS_COOKIE = "staff_backup_access";
+export const STAFF_BACKUP_REFRESH_COOKIE = "staff_backup_refresh";
+export const IMPERSONATION_META_COOKIE = "impersonation_meta";
 
 export function getApiBaseUrl() {
   return (
