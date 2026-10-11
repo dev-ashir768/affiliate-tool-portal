@@ -61,6 +61,14 @@ export default function SignupForm() {
         toast.error(message);
         return;
       }
+      if (payload?.status === "mfa_setup") {
+        window.location.replace("/2fa/setup");
+        return;
+      }
+      if (payload?.status === "mfa_required") {
+        window.location.replace("/2fa/verify");
+        return;
+      }
       const dest =
         typeof payload?.redirectTo === "string" &&
         payload.redirectTo.startsWith("/")

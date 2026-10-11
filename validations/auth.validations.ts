@@ -44,7 +44,21 @@ export const resetPasswordSchema = z.object({
     .min(8, { message: "Password must be at least 8 characters long" }),
 });
 
+export const totpCodeSchema = z.object({
+  code: z
+    .string()
+    .trim()
+    .min(6, { message: "Enter the 6-digit code from your authenticator app" })
+    .max(32, { message: "Code is too long" }),
+});
+
+export const verifyTotpSchema = totpCodeSchema.extend({
+  rememberDevice: z.boolean(),
+});
+
 export type LoginFormSchemaType = z.infer<typeof loginSchema>;
 export type SignupFormSchemaType = z.infer<typeof signupSchema>;
 export type ForgotPasswordFormSchemaType = z.infer<typeof forgotPasswordSchema>;
 export type ResetPasswordFormSchemaType = z.infer<typeof resetPasswordSchema>;
+export type TotpCodeFormSchemaType = z.infer<typeof totpCodeSchema>;
+export type VerifyTotpFormSchemaType = z.infer<typeof verifyTotpSchema>;

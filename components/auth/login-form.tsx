@@ -58,6 +58,14 @@ export default function LoginForm() {
         toast.error(message);
         return;
       }
+      if (payload?.status === "mfa_setup") {
+        window.location.replace("/2fa/setup");
+        return;
+      }
+      if (payload?.status === "mfa_required") {
+        window.location.replace("/2fa/verify");
+        return;
+      }
       const next = searchParams.get("next");
       const platformRole =
         payload?.platformMembership?.role ??
