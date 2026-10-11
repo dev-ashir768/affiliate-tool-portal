@@ -37,6 +37,14 @@ export async function apiFetch<T>(
   path: string,
   init: ApiFetchOptions = {}
 ): Promise<T> {
+  return (await apiFetchWithHeaders<T>(path, init)).data;
+}
+
+/** Like apiFetch but also returns response headers (e.g. Set-Cookie from the API). */
+export async function apiFetchWithHeaders<T>(
+  path: string,
+  init: ApiFetchOptions = {}
+): Promise<{ data: T; headers: Headers }> {
   const { accessToken, clientIp, ...requestInit } = init;
   const url = `${getApiBaseUrl()}${path.startsWith("/") ? path : `/${path}`}`;
   const headers = new Headers(requestInit.headers);
@@ -57,7 +65,7 @@ export async function apiFetch<T>(
   });
 
   if (res.status === 204) {
-    return undefined as T;
+    return { data: undefined as T, headers: res.headers };
   }
 
   const data = (await res.json().catch(() => ({}))) as T & ApiErrorBody;
@@ -69,5 +77,22 @@ export async function apiFetch<T>(
       data.error?.details
     );
   }
-  return data;
+  return { data, headers: res.headers };
+}
+
+/** Value of a named cookie from the response's Set-Cookie headers, if any. */
+export function setCookieValue(headers: Headers, name: string): string | null {
+  for (const line of headers.getSetCookie()) {
+    const pair = line.split(";", 1)[0] ?? "";
+    const eq = pair.indexOf("=");
+    if (eq < 0 || pair.slice(0, eq).trim() !== name) continue;
+    const raw = pair.slice(eq + 1).trim();
+    if (!raw) return null;
+    try {
+      return decodeURIComponent(raw);
+    } catch {
+      return raw;
+    }
+  }
+  return null;
 }

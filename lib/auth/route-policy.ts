@@ -13,6 +13,9 @@ const GUEST_AUTH = new Set(["/login", "/signup", "/forgot-password"]);
 
 const TOKEN_AUTH_EXACT = new Set(["/reset-password"]);
 
+/** Password OK, 2FA pending — needs the mfa_pending cookie, not a session. */
+const MFA_CHALLENGE = new Set(["/2fa/setup", "/2fa/verify"]);
+
 function isInvitePath(pathname: string) {
   return pathname === "/invite" || pathname.startsWith("/invite/");
 }
@@ -21,6 +24,7 @@ export type RouteClass =
   | "entry"
   | "guest_auth"
   | "token_auth"
+  | "mfa_challenge"
   | "staff"
   | "merchant";
 
@@ -39,6 +43,8 @@ export function classifyRoute(pathname: string): RouteClass {
   if (path === "/") return "entry";
 
   if (GUEST_AUTH.has(path)) return "guest_auth";
+
+  if (MFA_CHALLENGE.has(path)) return "mfa_challenge";
 
   if (TOKEN_AUTH_EXACT.has(path) || isInvitePath(path)) {
     return "token_auth";

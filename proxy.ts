@@ -1,17 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   ACCESS_TOKEN_COOKIE,
+  MFA_PENDING_COOKIE,
+  MFA_PURPOSE_COOKIE,
   REFRESH_TOKEN_COOKIE,
   accessCookieOptions,
   clearAccessCookieOptions,
   clearRefreshCookieOptions,
+  isMfaPurpose,
   refreshCookieOptions,
+  type MfaPurpose,
 } from "@/lib/auth/constants";
 import {
   defaultRedirectForClaims,
   inspectAccessToken,
   secondsUntilExpiry,
   verifyAccessClaims,
+  verifyMfaPendingToken,
 } from "@/lib/auth/access-token";
 import { rotateSessionTokens } from "@/lib/auth/rotate";
 import { clientIpFromHeaders } from "@/lib/auth/client-ip";
@@ -47,6 +52,31 @@ function clearSessionCookies(response: NextResponse) {
     ...clearRefreshCookieOptions(),
     maxAge: 0,
   });
+}
+
+function clearMfaCookies(response: NextResponse) {
+  for (const name of [MFA_PENDING_COOKIE, MFA_PURPOSE_COOKIE]) {
+    response.cookies.set(name, "", { ...clearAccessCookieOptions(), maxAge: 0 });
+  }
+}
+
+const MFA_PATH: Record<MfaPurpose, string> = {
+  setup: "/2fa/setup",
+  verify: "/2fa/verify",
+};
+
+/**
+ * Pending-only state (password OK, 2FA incomplete): the challenge page to use,
+ * or null when there is no valid pending token. A missing/garbled purpose
+ * cookie yields `purpose: null` — the token alone cannot tell setup from verify.
+ */
+async function readMfaPending(
+  request: NextRequest
+): Promise<{ purpose: MfaPurpose | null } | null> {
+  const pending = request.cookies.get(MFA_PENDING_COOKIE)?.value;
+  if (!pending || !(await verifyMfaPendingToken(pending))) return null;
+  const purpose = request.cookies.get(MFA_PURPOSE_COOKIE)?.value;
+  return { purpose: isMfaPurpose(purpose) ? purpose : null };
 }
 
 function copySessionCookies(from: NextResponse, to: NextResponse) {
@@ -227,6 +257,35 @@ export async function proxy(request: NextRequest) {
     const rawAccess = request.cookies.get(ACCESS_TOKEN_COOKIE)?.value;
     const refreshToken = request.cookies.get(REFRESH_TOKEN_COOKIE)?.value;
 
+    if (kind === "mfa_challenge") {
+      const ensured = await ensureAccessToken(request, rawAccess, refreshToken);
+      if (ensured.accessToken) {
+        // Fully signed in — nothing to challenge.
+        const response = await redirectAuthedAwayFromAuth(
+          request,
+          ensured.accessToken
+        );
+        if (ensured.sessionResponse) {
+          copySessionCookies(ensured.sessionResponse, response);
+        }
+        return response;
+      }
+      const pending = await readMfaPending(request);
+      if (!pending) {
+        const login = NextResponse.redirect(new URL("/login", request.url));
+        clearMfaCookies(login);
+        if (ensured.cleared) clearSessionCookies(login);
+        return login;
+      }
+      // Keep users on the page that matches their challenge.
+      if (pending.purpose && MFA_PATH[pending.purpose] !== pathname.replace(/\/$/, "")) {
+        return NextResponse.redirect(
+          new URL(MFA_PATH[pending.purpose], request.url)
+        );
+      }
+      return NextResponse.next();
+    }
+
     if (kind === "entry") {
       const ensured = await ensureAccessToken(request, rawAccess, refreshToken);
       if (ensured.accessToken) {
@@ -239,6 +298,10 @@ export async function proxy(request: NextRequest) {
         }
         return response;
       }
+      const pending = await readMfaPending(request);
+      if (pending?.purpose) {
+        return NextResponse.redirect(new URL(MFA_PATH[pending.purpose], request.url));
+      }
       const login = NextResponse.redirect(new URL("/login", request.url));
       if (ensured.cleared) clearSessionCookies(login);
       return login;
@@ -248,6 +311,13 @@ export async function proxy(request: NextRequest) {
       const ensured = await ensureAccessToken(request, rawAccess, refreshToken);
 
       if (!ensured.accessToken) {
+        // Password OK but 2FA unfinished: send to the matching challenge page.
+        const pending = await readMfaPending(request);
+        if (pending?.purpose) {
+          return NextResponse.redirect(
+            new URL(MFA_PATH[pending.purpose], request.url)
+          );
+        }
         const login = redirectToLogin(request, pathname);
         // Keep cookies on JWT/BFF misconfig so ops can fix secrets without
         // forcing a dead refresh-token rotate loop.

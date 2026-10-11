@@ -1,15 +1,30 @@
 import { NextResponse } from "next/server";
 import { apiFetch, ApiClientError } from "@/lib/auth/api";
-import { setSessionCookies } from "@/lib/auth/session";
+import {
+  beginMfaChallenge,
+  completeSession,
+  isMfaChallengeStatus,
+  type MfaChallengeStatus,
+} from "@/lib/auth/mfa-bff";
 
-type RegisterResponse = {
-  user: { id: string; email: string; name: string };
-  organization: { id: string; name: string; slug: string };
-  platformMembership?: null;
-  redirectTo: string;
-  accessToken: string;
-  refreshToken: string;
-};
+type Organization = { id: string; name: string; slug: string };
+
+type RegisterResponse =
+  | {
+      status: MfaChallengeStatus;
+      user: { id: string; email: string; name: string };
+      organization?: Organization;
+      mfaPendingToken?: string;
+    }
+  | {
+      status?: "authenticated";
+      user: { id: string; email: string; name: string };
+      organization: Organization;
+      platformMembership?: null;
+      redirectTo: string;
+      accessToken: string;
+      refreshToken: string;
+    };
 
 export async function POST(request: Request) {
   try {
@@ -19,29 +34,30 @@ export async function POST(request: Request) {
       body: JSON.stringify(body),
     });
 
-    if (!data.accessToken?.trim() || !data.refreshToken?.trim()) {
-      return NextResponse.json(
-        {
-          error: {
-            code: "INTERNAL",
-            message:
-              "Auth tokens missing from API. Check PORTAL_BFF_SECRET matches on portal and APIs.",
-          },
-        },
-        { status: 502 },
-      );
+    if (isMfaChallengeStatus(data.status)) {
+      const challenge = data as Extract<RegisterResponse, { mfaPendingToken?: string }>;
+      const failed = await beginMfaChallenge({
+        status: data.status,
+        mfaPendingToken: challenge.mfaPendingToken,
+      });
+      if (failed) return failed;
+      return NextResponse.json({
+        status: data.status,
+        user: data.user,
+        organization: challenge.organization,
+      });
     }
 
-    await setSessionCookies({
-      accessToken: data.accessToken,
-      refreshToken: data.refreshToken,
-    });
+    const session = data as Extract<RegisterResponse, { accessToken: string }>;
+    const failed = await completeSession(session);
+    if (failed) return failed;
 
     return NextResponse.json({
-      user: data.user,
-      organization: data.organization,
-      platformMembership: data.platformMembership ?? null,
-      redirectTo: data.redirectTo ?? "/onboarding",
+      status: "authenticated",
+      user: session.user,
+      organization: session.organization,
+      platformMembership: session.platformMembership ?? null,
+      redirectTo: session.redirectTo ?? "/onboarding",
     });
   } catch (err) {
     if (err instanceof ApiClientError) {

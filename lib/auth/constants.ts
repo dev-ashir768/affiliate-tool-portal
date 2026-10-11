@@ -4,6 +4,20 @@ export const REFRESH_TOKEN_COOKIE = "refresh_token";
 export const STAFF_BACKUP_ACCESS_COOKIE = "staff_backup_access";
 export const STAFF_BACKUP_REFRESH_COOKIE = "staff_backup_refresh";
 export const IMPERSONATION_META_COOKIE = "impersonation_meta";
+/** Short-lived JWT proving password OK but 2FA not yet complete. */
+export const MFA_PENDING_COOKIE = "mfa_pending";
+/** Companion to mfa_pending: which challenge page to send the user to. */
+export const MFA_PURPOSE_COOKIE = "mfa_purpose";
+export const TRUSTED_DEVICE_COOKIE = "trusted_device";
+
+export type MfaPurpose = "setup" | "verify";
+
+export const MFA_PENDING_DEFAULT_MAX_AGE_SEC = 600;
+export const TRUSTED_DEVICE_MAX_AGE_SEC = 60 * 60 * 24 * 30;
+
+export function isMfaPurpose(value: unknown): value is MfaPurpose {
+  return value === "setup" || value === "verify";
+}
 
 export function getApiBaseUrl() {
   return (
@@ -52,6 +66,18 @@ export function clearAccessCookieOptions() {
 
 export function clearRefreshCookieOptions() {
   return clearAccessCookieOptions();
+}
+
+export function mfaPendingCookieOptions(
+  maxAgeSec = MFA_PENDING_DEFAULT_MAX_AGE_SEC,
+) {
+  return accessCookieOptions(maxAgeSec);
+}
+
+export function trustedDeviceCookieOptions(
+  maxAgeSec = TRUSTED_DEVICE_MAX_AGE_SEC,
+) {
+  return refreshCookieOptions(maxAgeSec);
 }
 
 export function getPortalBffSecret(): string | undefined {

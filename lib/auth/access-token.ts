@@ -80,6 +80,10 @@ export async function inspectAccessToken(
     const { payload } = await jwtVerify(token, verify.key, {
       algorithms: verify.algorithms,
     });
+    // MFA-pending JWTs share the signing key — never accept them as sessions.
+    if ((payload as Record<string, unknown>).purpose != null) {
+      return { status: "invalid" };
+    }
     return {
       status: "valid",
       claims: claimsFromPayload(payload as Record<string, unknown>),
@@ -95,6 +99,23 @@ export async function inspectAccessToken(
     } catch {
       return { status: "invalid" };
     }
+  }
+}
+
+/**
+ * Signature + expiry + `purpose === "mfa_pending"` check for the pending cookie.
+ * Used by the proxy to gate /2fa/* pages.
+ */
+export async function verifyMfaPendingToken(token: string): Promise<boolean> {
+  const verify = await accessVerifyKey();
+  if (!verify) return false;
+  try {
+    const { payload } = await jwtVerify(token, verify.key, {
+      algorithms: verify.algorithms,
+    });
+    return payload.purpose === "mfa_pending" && Boolean(payload.sub);
+  } catch {
+    return false;
   }
 }
 
