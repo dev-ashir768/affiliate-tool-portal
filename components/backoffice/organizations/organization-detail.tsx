@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import {
@@ -18,11 +19,93 @@ import {
   useRevokePlatformOrganizationAccess,
 } from "@/hooks/use-platform";
 import { GrantAccessDialog } from "@/components/backoffice/organizations/grant-access-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useMe } from "@/hooks/use-me";
+import { useAdminResetTwoFactor } from "@/hooks/use-two-factor";
+
+function MemberResetTwoFactor({
+  userId,
+  name,
+  email,
+}: {
+  userId: string;
+  name: string;
+  email: string;
+}) {
+  const resetTwoFactor = useAdminResetTwoFactor();
+  const [open, setOpen] = useState(false);
+
+  async function confirmReset() {
+    try {
+      await resetTwoFactor.mutateAsync(userId);
+      toast.success(`2FA reset for ${email}`);
+      setOpen(false);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to reset 2FA");
+    }
+  }
+
+  return (
+    <>
+      <Button
+        type="button"
+        size="sm"
+        variant="outline"
+        onClick={() => setOpen(true)}
+      >
+        Reset 2FA
+      </Button>
+      <Dialog
+        open={open}
+        onOpenChange={(next) => {
+          if (!resetTwoFactor.isPending) setOpen(next);
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Reset two-factor authentication?</DialogTitle>
+            <DialogDescription>
+              {name} ({email}) will lose their authenticator, backup codes, and
+              trusted devices, and must set up 2FA again on next sign-in.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={resetTwoFactor.isPending}
+              onClick={() => setOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              disabled={resetTwoFactor.isPending}
+              onClick={() => void confirmReset()}
+            >
+              {resetTwoFactor.isPending ? "Resetting…" : "Reset 2FA"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
 
 export function OrganizationDetail({ id }: { id: string }) {
   const query = usePlatformOrganization(id);
   const revoke = useRevokePlatformOrganizationAccess();
   const impersonate = useImpersonatePlatformUser();
+  const meQuery = useMe();
+  const isSuperadmin = meQuery.data?.platformMembership?.role === "SUPERADMIN";
 
   if (query.isLoading) {
     return (
@@ -230,6 +313,13 @@ export function OrganizationDetail({ id }: { id: string }) {
                   <p className="text-muted-foreground">
                     {m.role} · {m.status}
                   </p>
+                  {isSuperadmin ? (
+                    <MemberResetTwoFactor
+                      userId={m.user.id}
+                      name={m.user.name}
+                      email={m.user.email}
+                    />
+                  ) : null}
                   {m.status === "ACTIVE" ? (
                     <Button
                       type="button"
