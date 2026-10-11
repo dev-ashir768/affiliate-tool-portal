@@ -277,8 +277,14 @@ export async function proxy(request: NextRequest) {
         if (ensured.cleared) clearSessionCookies(login);
         return login;
       }
+      if (!pending.purpose) {
+        const login = NextResponse.redirect(new URL("/login", request.url));
+        clearMfaCookies(login);
+        if (ensured.cleared) clearSessionCookies(login);
+        return login;
+      }
       // Keep users on the page that matches their challenge.
-      if (pending.purpose && MFA_PATH[pending.purpose] !== pathname.replace(/\/$/, "")) {
+      if (MFA_PATH[pending.purpose] !== pathname.replace(/\/$/, "")) {
         return NextResponse.redirect(
           new URL(MFA_PATH[pending.purpose], request.url)
         );
@@ -303,6 +309,7 @@ export async function proxy(request: NextRequest) {
         return NextResponse.redirect(new URL(MFA_PATH[pending.purpose], request.url));
       }
       const login = NextResponse.redirect(new URL("/login", request.url));
+      if (pending && !pending.purpose) clearMfaCookies(login);
       if (ensured.cleared) clearSessionCookies(login);
       return login;
     }
@@ -319,6 +326,7 @@ export async function proxy(request: NextRequest) {
           );
         }
         const login = redirectToLogin(request, pathname);
+        if (pending && !pending.purpose) clearMfaCookies(login);
         // Keep cookies on JWT/BFF misconfig so ops can fix secrets without
         // forcing a dead refresh-token rotate loop.
         if (ensured.cleared && !ensured.misconfigured) {
