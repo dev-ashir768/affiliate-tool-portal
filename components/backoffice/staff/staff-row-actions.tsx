@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { MoreHorizontalIcon } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -10,13 +11,38 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useMe } from "@/hooks/use-me";
 import { usePatchPlatformStaff } from "@/hooks/use-platform";
+import { useAdminResetTwoFactor } from "@/hooks/use-two-factor";
 import type { PlatformRole, PlatformStaff } from "@/types/platform";
 
 const ROLES: PlatformRole[] = ["SUPERADMIN", "FINANCE", "OPS"];
 
 export function StaffRowActions({ staff }: { staff: PlatformStaff }) {
   const patch = usePatchPlatformStaff();
+  const meQuery = useMe();
+  const resetTwoFactor = useAdminResetTwoFactor();
+  const [resetOpen, setResetOpen] = useState(false);
+  const isSuperadmin = meQuery.data?.platformMembership?.role === "SUPERADMIN";
+
+  async function confirmReset() {
+    try {
+      await resetTwoFactor.mutateAsync(staff.userId);
+      toast.success(`2FA reset for ${staff.email}`);
+      setResetOpen(false);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to reset 2FA");
+    }
+  }
 
   async function update(body: {
     role?: PlatformRole;
@@ -33,6 +59,7 @@ export function StaffRowActions({ staff }: { staff: PlatformStaff }) {
   }
 
   return (
+    <>
     <DropdownMenu>
       {/* Match topbar: native trigger styles — nested Button via `render` can crash Base UI Menu. */}
       <DropdownMenuTrigger
@@ -77,7 +104,57 @@ export function StaffRowActions({ staff }: { staff: PlatformStaff }) {
             Enable
           </DropdownMenuItem>
         )}
+        {isSuperadmin ? (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel>Security</DropdownMenuLabel>
+            <DropdownMenuItem
+              disabled={patch.isPending}
+              onClick={() => setResetOpen(true)}
+            >
+              Reset 2FA
+            </DropdownMenuItem>
+          </>
+        ) : null}
       </DropdownMenuContent>
     </DropdownMenu>
+    {isSuperadmin ? (
+      <Dialog
+        open={resetOpen}
+        onOpenChange={(next) => {
+          if (!resetTwoFactor.isPending) setResetOpen(next);
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Reset two-factor authentication?</DialogTitle>
+            <DialogDescription>
+              {staff.name} ({staff.email}) will lose their authenticator,
+              backup codes, and trusted devices, and must set up 2FA again on
+              next sign-in.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={resetTwoFactor.isPending}
+              onClick={() => setResetOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              disabled={resetTwoFactor.isPending}
+              onClick={() => void confirmReset()}
+            >
+              {resetTwoFactor.isPending ? "Resetting…" : "Reset 2FA"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    ) : null}
+    </>
   );
 }

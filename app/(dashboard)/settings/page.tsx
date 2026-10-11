@@ -1,4 +1,5 @@
 import { OrgSettingsForm } from "@/components/settings/org-settings-form";
+import { TwoFactorSettings } from "@/components/settings/two-factor-settings";
 import { PageHeader } from "@/components/layout/page-header";
 import { pageMetadata } from "@/lib/site-metadata";
 
@@ -16,6 +17,7 @@ export default function SettingsPage() {
         description="View plan limits and update your organization name."
       />
       <OrgSettingsForm />
+      <TwoFactorSettings />
     </div>
   );
 }

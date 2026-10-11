@@ -76,3 +76,63 @@ export function twoFactorDestination(result: TwoFactorSessionResult): string {
       (result.redirectTo?.startsWith("/backoffice") ? "STAFF" : null),
   });
 }
+
+export type TrustedDevice = {
+  id: string;
+  label: string | null;
+  createdAt: string;
+  expiresAt: string;
+};
+
+export type TwoFactorStatus = {
+  enabled: boolean;
+  backupCodesRemaining: number;
+  trustedDevices: TrustedDevice[];
+};
+
+export async function fetchTwoFactorStatus(
+  signal?: AbortSignal,
+): Promise<TwoFactorStatus> {
+  const res = await fetch("/api/auth/2fa/status", {
+    method: "GET",
+    credentials: "include",
+    signal,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data?.error?.message ?? "Failed to load 2FA status");
+  }
+  return data as TwoFactorStatus;
+}
+
+export function regenerateBackupCodes(code: string) {
+  return postJson<{ backupCodes: string[] }>(
+    "/api/auth/2fa/backup-codes/regenerate",
+    { code },
+    "Failed to regenerate backup codes",
+  );
+}
+
+export async function revokeTrustedDevice(id: string): Promise<void> {
+  const res = await fetch(
+    `/api/auth/2fa/trusted-devices/${encodeURIComponent(id)}`,
+    { method: "DELETE", credentials: "include" },
+  );
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data?.error?.message ?? "Failed to revoke device");
+  }
+}
+
+export async function adminResetTwoFactor(userId: string): Promise<void> {
+  const res = await fetch("/api/auth/2fa/admin/reset", {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId }),
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data?.error?.message ?? "Failed to reset 2FA");
+  }
+}

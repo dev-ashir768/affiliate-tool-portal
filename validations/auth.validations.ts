@@ -52,6 +52,14 @@ export const totpCodeSchema = z.object({
     .max(32, { message: "Code is too long" }),
 });
 
+/** Authenticator-app code only (backup codes cannot mint new backup codes). */
+export const regenerateBackupCodesSchema = z.object({
+  code: z
+    .string()
+    .trim()
+    .regex(/^\d{6}$/, { message: "Enter the 6-digit code from your authenticator app" }),
+});
+
 export const verifyTotpSchema = totpCodeSchema.extend({
   rememberDevice: z.boolean(),
 });
@@ -61,4 +69,7 @@ export type SignupFormSchemaType = z.infer<typeof signupSchema>;
 export type ForgotPasswordFormSchemaType = z.infer<typeof forgotPasswordSchema>;
 export type ResetPasswordFormSchemaType = z.infer<typeof resetPasswordSchema>;
 export type TotpCodeFormSchemaType = z.infer<typeof totpCodeSchema>;
+export type RegenerateBackupCodesSchemaType = z.infer<
+  typeof regenerateBackupCodesSchema
+>;
 export type VerifyTotpFormSchemaType = z.infer<typeof verifyTotpSchema>;
