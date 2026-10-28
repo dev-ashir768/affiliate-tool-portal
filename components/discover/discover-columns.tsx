@@ -237,16 +237,19 @@ export function createDiscoverColumns(actions: DiscoverTableActions) {
       cell: (info) => {
         const row = info.row.original;
         const saving = actions.savingId === row.id;
+        const saved = Boolean(row.savedToCrm);
         return (
           <div className="text-right">
             <Button
               type="button"
               size="sm"
               variant="outline"
-              disabled={saving}
-              onClick={() => actions.onSave(row.id)}
+              disabled={saving || saved}
+              onClick={() => {
+                if (!saved) actions.onSave(row.id);
+              }}
             >
-              {saving ? "Saving…" : "Save"}
+              {saving ? "Saving…" : saved ? "Saved" : "Save"}
             </Button>
           </div>
         );

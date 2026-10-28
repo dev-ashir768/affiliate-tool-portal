@@ -34,6 +34,8 @@ export function useDiscoverySearch(params: {
   minFollowers?: number;
   maxFollowers?: number;
   minUnitsSold?: number;
+  gmvRange?: string;
+  unitsSoldRange?: string;
   gmvRangeContains?: string;
   hasEmail?: boolean;
   sortBy?: "followers" | "units" | "updated" | "gmv";
@@ -62,6 +64,7 @@ export function useSaveDiscoveryToCrm() {
     mutationFn: saveDiscoveryToCrm,
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["creators"] });
+      void qc.invalidateQueries({ queryKey: ["discovery"] });
     },
   });
 }

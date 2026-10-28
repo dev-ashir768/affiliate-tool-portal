@@ -32,6 +32,8 @@ export type DiscoveryProfile = {
   majorGenderPct?: number | null;
   ageRanges?: string[];
   metricsSyncedAt?: string | null;
+  /** True when this handle already exists in the org CRM. */
+  savedToCrm?: boolean;
   createdAt: string;
   updatedAt: string;
 };
