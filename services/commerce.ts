@@ -34,6 +34,8 @@ export async function searchDiscovery(
     minFollowers?: number;
     maxFollowers?: number;
     minUnitsSold?: number;
+    gmvRange?: string;
+    unitsSoldRange?: string;
     gmvRangeContains?: string;
     hasEmail?: boolean;
     sortBy?: "followers" | "units" | "updated" | "gmv";
@@ -465,6 +467,8 @@ export async function syncOrgDiscoveryFromTikTok(body: {
   maxPages?: number;
   keyword?: string | null;
   minFollowers?: number | null;
+  gmvRanges?: string[] | null;
+  unitsSoldRanges?: string[] | null;
   pageSize?: 12 | 20;
   categoryIds?: string[] | null;
   propagateCrm?: boolean;

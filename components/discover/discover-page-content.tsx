@@ -11,7 +11,6 @@ import type {
 import { DataTable } from "@/components/data-table";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   AppReactSelect,
   stringSelectValue,
@@ -28,6 +27,10 @@ import { createDiscoverColumns } from "./discover-columns";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { PageHeader } from "@/components/layout/page-header";
 import { FormGrid, SectionCard } from "@/components/layout/section-card";
+import {
+  TIKTOK_GMV_RANGE_OPTIONS,
+  TIKTOK_UNITS_SOLD_RANGE_OPTIONS,
+} from "@/lib/tiktok-marketplace-filters";
 
 const REGION_OPTIONS: SelectOption[] = [
   { value: "", label: "All regions" },
@@ -42,14 +45,17 @@ const SORT_OPTIONS: SelectOption[] = [
   { value: "updated", label: "Sort: recently updated" },
 ];
 
-const GMV_BAND_OPTIONS: SelectOption[] = [
-  { value: "", label: "Any GMV band" },
-  { value: "150K", label: "GMV $150K+" },
-  { value: "50K", label: "GMV contains 50K" },
-  { value: "10K", label: "GMV contains 10K" },
-  { value: "1K", label: "GMV contains 1K" },
-  { value: "1M", label: "GMV contains 1M" },
-];
+const GMV_BAND_OPTIONS: SelectOption[] = TIKTOK_GMV_RANGE_OPTIONS.map((o) => ({
+  value: o.value,
+  label: o.label,
+}));
+
+const UNITS_BAND_OPTIONS: SelectOption[] = TIKTOK_UNITS_SOLD_RANGE_OPTIONS.map(
+  (o) => ({
+    value: o.value,
+    label: o.label,
+  }),
+);
 
 function useDebouncedValue<T>(value: T, delayMs: number): T {
   const [debounced, setDebounced] = useState(value);
@@ -65,14 +71,16 @@ export function DiscoverPageContent() {
   const [search, setSearch] = useState("");
   const [minFollowersFilter, setMinFollowersFilter] = useState("");
   const [maxFollowersFilter, setMaxFollowersFilter] = useState("");
-  const [minUnitsSold, setMinUnitsSold] = useState("");
-  const [gmvRangeContains, setGmvRangeContains] = useState("");
+  const [gmvRange, setGmvRange] = useState("");
+  const [unitsSoldRange, setUnitsSoldRange] = useState("");
   const [sortBy, setSortBy] = useState<"followers" | "units" | "updated" | "gmv">(
     "followers",
   );
   const [hasEmail, setHasEmail] = useState<"" | "true" | "false">("");
   const [nicheKeyword, setNicheKeyword] = useState("");
   const [minFollowers, setMinFollowers] = useState("");
+  const [syncGmvRange, setSyncGmvRange] = useState("");
+  const [syncUnitsSoldRange, setSyncUnitsSoldRange] = useState("");
   const [shopId, setShopId] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
@@ -85,8 +93,8 @@ export function DiscoverPageContent() {
     region,
     minFollowersFilter,
     maxFollowersFilter,
-    minUnitsSold,
-    gmvRangeContains,
+    gmvRange,
+    unitsSoldRange,
     hasEmail,
     sortBy,
   ].join("\0");
@@ -102,8 +110,8 @@ export function DiscoverPageContent() {
     search: debouncedSearch.trim() || undefined,
     minFollowers: minFollowersFilter ? Number(minFollowersFilter) : undefined,
     maxFollowers: maxFollowersFilter ? Number(maxFollowersFilter) : undefined,
-    minUnitsSold: minUnitsSold ? Number(minUnitsSold) : undefined,
-    gmvRangeContains: gmvRangeContains || undefined,
+    gmvRange: gmvRange || undefined,
+    unitsSoldRange: unitsSoldRange || undefined,
     hasEmail: hasEmail === "" ? undefined : hasEmail === "true",
     sortBy,
     page,
@@ -209,6 +217,8 @@ export function DiscoverPageContent() {
         pageSize: 20,
         keyword: nicheKeyword.trim() || null,
         minFollowers: minFollowers ? Number(minFollowers) : null,
+        gmvRanges: syncGmvRange ? [syncGmvRange] : null,
+        unitsSoldRanges: syncUnitsSoldRange ? [syncUnitsSoldRange] : null,
         propagateCrm: true,
         sync: inline,
       })) as {
@@ -255,8 +265,6 @@ export function DiscoverPageContent() {
     }
   }
 
-  if (query.isLoading && !query.data) return <Skeleton className="h-48 w-full" />;
-
   const appReady = tiktok.data?.config?.appConfigured !== false;
   const busy = sync.isPending || refreshMetrics.isPending;
   const emailOptions: SelectOption[] = [
@@ -298,7 +306,7 @@ export function DiscoverPageContent() {
           </p>
         ) : (
           <div className="flex flex-col gap-4">
-            <FormGrid columns={3}>
+            <FormGrid columns={3} className="lg:grid-cols-5">
               <Field>
                 <FieldLabel>Shop</FieldLabel>
                 <AppReactSelect
@@ -331,6 +339,33 @@ export function DiscoverPageContent() {
                   placeholder="Any"
                   value={minFollowers}
                   onChange={(e) => setMinFollowers(e.target.value)}
+                />
+              </Field>
+              <Field>
+                <FieldLabel>GMV (TikTok)</FieldLabel>
+                <AppReactSelect
+                  options={GMV_BAND_OPTIONS}
+                  value={stringSelectValue(GMV_BAND_OPTIONS, syncGmvRange)}
+                  onChange={(opt) =>
+                    setSyncGmvRange(opt?.value ? String(opt.value) : "")
+                  }
+                  isSearchable={false}
+                  aria-label="Sync GMV band"
+                />
+              </Field>
+              <Field>
+                <FieldLabel>Units sold (TikTok)</FieldLabel>
+                <AppReactSelect
+                  options={UNITS_BAND_OPTIONS}
+                  value={stringSelectValue(
+                    UNITS_BAND_OPTIONS,
+                    syncUnitsSoldRange,
+                  )}
+                  onChange={(opt) =>
+                    setSyncUnitsSoldRange(opt?.value ? String(opt.value) : "")
+                  }
+                  isSearchable={false}
+                  aria-label="Sync units sold band"
                 />
               </Field>
             </FormGrid>
@@ -368,7 +403,7 @@ export function DiscoverPageContent() {
 
       <SectionCard
         title="Filters"
-        description={`${totalCount.toLocaleString()} matching creators`}
+        description={`${totalCount.toLocaleString()} matching creators · GMV / units bands match TikTok Shop Marketplace`}
       >
         <FormGrid columns={3} className="lg:grid-cols-4">
           <Field>
@@ -393,15 +428,27 @@ export function DiscoverPageContent() {
             />
           </Field>
           <Field>
-            <FieldLabel>GMV band</FieldLabel>
+            <FieldLabel>GMV (TikTok)</FieldLabel>
             <AppReactSelect
               options={GMV_BAND_OPTIONS}
-              value={stringSelectValue(GMV_BAND_OPTIONS, gmvRangeContains)}
+              value={stringSelectValue(GMV_BAND_OPTIONS, gmvRange)}
               onChange={(opt) =>
-                setGmvRangeContains(opt?.value ? String(opt.value) : "")
+                setGmvRange(opt?.value ? String(opt.value) : "")
               }
               isSearchable={false}
               aria-label="GMV band"
+            />
+          </Field>
+          <Field>
+            <FieldLabel>Units sold (TikTok)</FieldLabel>
+            <AppReactSelect
+              options={UNITS_BAND_OPTIONS}
+              value={stringSelectValue(UNITS_BAND_OPTIONS, unitsSoldRange)}
+              onChange={(opt) =>
+                setUnitsSoldRange(opt?.value ? String(opt.value) : "")
+              }
+              isSearchable={false}
+              aria-label="Units sold band"
             />
           </Field>
           <Field>
@@ -442,16 +489,6 @@ export function DiscoverPageContent() {
               placeholder="Any"
               value={maxFollowersFilter}
               onChange={(e) => setMaxFollowersFilter(e.target.value)}
-            />
-          </Field>
-          <Field>
-            <FieldLabel htmlFor="discover-min-units">Min units sold</FieldLabel>
-            <Input
-              id="discover-min-units"
-              inputMode="numeric"
-              placeholder="Any"
-              value={minUnitsSold}
-              onChange={(e) => setMinUnitsSold(e.target.value)}
             />
           </Field>
           <Field>
