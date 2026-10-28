@@ -26,6 +26,7 @@ export async function fetchConversations(
     nextPageToken: string | null;
     hasMore: boolean;
     synced: boolean;
+    syncWarning?: string | null;
   };
 }
 

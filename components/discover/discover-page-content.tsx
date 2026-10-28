@@ -1,7 +1,13 @@
 "use client";
-import { useMemo, useState } from "react";
+
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
+import type {
+  OnChangeFn,
+  PaginationState,
+  SortingState,
+} from "@tanstack/react-table";
 import { DataTable } from "@/components/data-table";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +17,6 @@ import {
   stringSelectValue,
   type SelectOption,
 } from "@/components/ui/react-select";
-import { useClientDataTable } from "@/hooks/use-client-data-table";
 import {
   useDiscoverySearch,
   useOrgDiscoveryTikTokStatus,
@@ -20,10 +25,10 @@ import {
   useSyncOrgDiscoveryTikTok,
 } from "@/hooks/use-commerce";
 import { createDiscoverColumns } from "./discover-columns";
-
 import { Field, FieldLabel } from "@/components/ui/field";
 import { PageHeader } from "@/components/layout/page-header";
 import { FormGrid, SectionCard } from "@/components/layout/section-card";
+
 const REGION_OPTIONS: SelectOption[] = [
   { value: "", label: "All regions" },
   { value: "US", label: "US" },
@@ -33,17 +38,27 @@ const REGION_OPTIONS: SelectOption[] = [
 const SORT_OPTIONS: SelectOption[] = [
   { value: "followers", label: "Sort: followers" },
   { value: "units", label: "Sort: units sold" },
+  { value: "gmv", label: "Sort: GMV" },
   { value: "updated", label: "Sort: recently updated" },
 ];
 
 const GMV_BAND_OPTIONS: SelectOption[] = [
   { value: "", label: "Any GMV band" },
-  { value: "150K", label: "GMV contains 150K" },
+  { value: "150K", label: "GMV $150K+" },
   { value: "50K", label: "GMV contains 50K" },
   { value: "10K", label: "GMV contains 10K" },
   { value: "1K", label: "GMV contains 1K" },
   { value: "1M", label: "GMV contains 1M" },
 ];
+
+function useDebouncedValue<T>(value: T, delayMs: number): T {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const t = window.setTimeout(() => setDebounced(value), delayMs);
+    return () => window.clearTimeout(t);
+  }, [value, delayMs]);
+  return debounced;
+}
 
 export function DiscoverPageContent() {
   const [region, setRegion] = useState("");
@@ -52,24 +67,47 @@ export function DiscoverPageContent() {
   const [maxFollowersFilter, setMaxFollowersFilter] = useState("");
   const [minUnitsSold, setMinUnitsSold] = useState("");
   const [gmvRangeContains, setGmvRangeContains] = useState("");
-  const [sortBy, setSortBy] = useState<"followers" | "units" | "updated">(
+  const [sortBy, setSortBy] = useState<"followers" | "units" | "updated" | "gmv">(
     "followers",
   );
   const [hasEmail, setHasEmail] = useState<"" | "true" | "false">("");
   const [nicheKeyword, setNicheKeyword] = useState("");
   const [minFollowers, setMinFollowers] = useState("");
   const [shopId, setShopId] = useState("");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [savingId, setSavingId] = useState<string | null>(null);
+
+  const debouncedSearch = useDebouncedValue(search, 300);
+
+  const filtersSignature = [
+    debouncedSearch,
+    region,
+    minFollowersFilter,
+    maxFollowersFilter,
+    minUnitsSold,
+    gmvRangeContains,
+    hasEmail,
+    sortBy,
+  ].join("\0");
+  const [appliedFiltersSignature, setAppliedFiltersSignature] =
+    useState(filtersSignature);
+  if (filtersSignature !== appliedFiltersSignature) {
+    setAppliedFiltersSignature(filtersSignature);
+    setPage(1);
+  }
 
   const query = useDiscoverySearch({
     region: region || undefined,
-    search: search.trim() || undefined,
+    search: debouncedSearch.trim() || undefined,
     minFollowers: minFollowersFilter ? Number(minFollowersFilter) : undefined,
     maxFollowers: maxFollowersFilter ? Number(maxFollowersFilter) : undefined,
     minUnitsSold: minUnitsSold ? Number(minUnitsSold) : undefined,
     gmvRangeContains: gmvRangeContains || undefined,
     hasEmail: hasEmail === "" ? undefined : hasEmail === "true",
     sortBy,
-    pageSize: 50,
+    page,
+    pageSize,
   });
   const tiktok = useOrgDiscoveryTikTokStatus();
   const sync = useSyncOrgDiscoveryTikTok();
@@ -91,37 +129,74 @@ export function DiscoverPageContent() {
   );
   const selectedShopId = shopId || shopOptions[0]?.value || "";
   const rows = query.data?.data ?? [];
-  const tableState = useClientDataTable({
-    data: rows,
-    getSearchText: (row) =>
-      [row.handle, row.displayName, row.region, row.gmvRange, row.gmvAmount]
-        .filter(Boolean)
-        .join(" "),
-    getSortValue: (row, id) => {
-      if (id === "gmv") return row.gmvAmount ?? row.gmvRange ?? "";
-      if (id === "gpm") return row.gpmAmount ?? row.gpmRange ?? "";
-      return (row as Record<string, unknown>)[id] as
-        | string
-        | number
-        | null
-        | undefined;
-    },
-  });
+  const totalCount = query.data?.meta.total ?? 0;
+  const pageCount = Math.max(1, Math.ceil(totalCount / Math.max(1, pageSize)));
+
+  // Keep page in range when filters shrink the result set — do not clamp while
+  // rendering (that desyncs controlled table state from React page state).
+  if (page > pageCount) {
+    setPage(pageCount);
+  }
+
+  const pagination: PaginationState = {
+    pageIndex: Math.max(0, page - 1),
+    pageSize,
+  };
+
+  const sorting: SortingState = useMemo(() => {
+    const id =
+      sortBy === "updated"
+        ? "metricsSyncedAt"
+        : sortBy === "followers"
+          ? "followerCount"
+          : sortBy;
+    return [{ id, desc: true }];
+  }, [sortBy]);
+
+  const onPaginationChange: OnChangeFn<PaginationState> = (updater) => {
+    const next = typeof updater === "function" ? updater(pagination) : updater;
+    if (next.pageSize !== pageSize) {
+      setPageSize(next.pageSize);
+      setPage(1);
+      return;
+    }
+    const nextPage = Math.max(1, next.pageIndex + 1);
+    setPage(nextPage);
+  };
+
+  const onSortingChange: OnChangeFn<SortingState> = (updater) => {
+    const next = typeof updater === "function" ? updater(sorting) : updater;
+    const id = next[0]?.id;
+    if (id === "units" || id === "gmv") {
+      setSortBy(id);
+      setPage(1);
+    } else if (id === "followers" || id === "followerCount") {
+      setSortBy("followers");
+      setPage(1);
+    } else if (id === "metricsSyncedAt" || id === "updated") {
+      setSortBy("updated");
+      setPage(1);
+    }
+  };
+
   const columns = useMemo(
     () =>
       createDiscoverColumns({
-        savePending: save.isPending,
+        savingId,
         onSave: (profileId) => {
+          setSavingId(profileId);
           void save
             .mutateAsync(profileId)
             .then(() => toast.success("Saved to CRM"))
             .catch((err) =>
               toast.error(err instanceof Error ? err.message : "Failed"),
-            );
+            )
+            .finally(() => setSavingId(null));
         },
       }),
-    [save],
+    [save, savingId],
   );
+
   async function onSync(inline: boolean) {
     if (!selectedShopId) {
       toast.error("Authorize a TikTok shop first (Shops page)");
@@ -130,7 +205,7 @@ export function DiscoverPageContent() {
     try {
       const result = (await sync.mutateAsync({
         shopId: selectedShopId,
-        maxPages: 3,
+        maxPages: 10,
         pageSize: 20,
         keyword: nicheKeyword.trim() || null,
         minFollowers: minFollowers ? Number(minFollowers) : null,
@@ -156,6 +231,7 @@ export function DiscoverPageContent() {
       toast.error(err instanceof Error ? err.message : "Sync failed");
     }
   }
+
   async function onRefreshCrmMetrics(inline: boolean) {
     if (!selectedShopId) {
       toast.error("Authorize a TikTok shop first (Shops page)");
@@ -178,7 +254,9 @@ export function DiscoverPageContent() {
       toast.error(err instanceof Error ? err.message : "Refresh failed");
     }
   }
-  if (query.isLoading) return <Skeleton className="h-48 w-full" />;
+
+  if (query.isLoading && !query.data) return <Skeleton className="h-48 w-full" />;
+
   const appReady = tiktok.data?.config?.appConfigured !== false;
   const busy = sync.isPending || refreshMetrics.isPending;
   const emailOptions: SelectOption[] = [
@@ -186,6 +264,7 @@ export function DiscoverPageContent() {
     { value: "true", label: "Has email" },
     { value: "false", label: "No email" },
   ];
+
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
@@ -195,7 +274,6 @@ export function DiscoverPageContent() {
 
       <SectionCard
         title="Sync from your shop"
-        // Merchant-facing copy only — the API note is operator detail.
         description={
           appReady
             ? "Search TikTok Creator Marketplace through your authorized shop and add matches to the index."
@@ -290,7 +368,7 @@ export function DiscoverPageContent() {
 
       <SectionCard
         title="Filters"
-        description={`${query.data?.meta.total ?? 0} matching creators`}
+        description={`${totalCount.toLocaleString()} matching creators`}
       >
         <FormGrid columns={3} className="lg:grid-cols-4">
           <Field>
@@ -383,7 +461,12 @@ export function DiscoverPageContent() {
               value={stringSelectValue(SORT_OPTIONS, sortBy)}
               onChange={(opt) => {
                 const v = opt?.value ? String(opt.value) : "followers";
-                if (v === "units" || v === "updated" || v === "followers") {
+                if (
+                  v === "units" ||
+                  v === "updated" ||
+                  v === "followers" ||
+                  v === "gmv"
+                ) {
                   setSortBy(v);
                 }
               }}
@@ -404,21 +487,26 @@ export function DiscoverPageContent() {
       <DataTable
         tableId="dashboard-discover"
         columns={columns}
-        data={tableState.data}
-        totalCount={query.data?.meta.total ?? tableState.totalCount}
-        pagination={tableState.pagination}
-        onPaginationChange={tableState.onPaginationChange}
-        sorting={tableState.sorting}
-        onSortingChange={tableState.onSortingChange}
-        search={tableState.search}
-        onSearchChange={tableState.onSearchChange}
+        data={rows}
+        totalCount={totalCount}
+        pageCount={pageCount}
+        pagination={pagination}
+        onPaginationChange={onPaginationChange}
+        sorting={sorting}
+        onSortingChange={onSortingChange}
+        search={search}
+        onSearchChange={(value) => {
+          if (value === search) return;
+          setSearch(value);
+          setPage(1);
+        }}
         isLoading={query.isLoading}
         isFetching={query.isFetching}
         isError={query.isError}
         onRetry={() => void query.refetch()}
         onRefresh={() => void query.refetch()}
         enableColumnOrdering
-        pageSizeOptions={[10, 20, 50]}
+        pageSizeOptions={[10, 20, 50, 100]}
         getRowId={(row) => row.id}
         ariaLabel="Discover creators"
       />

@@ -43,7 +43,15 @@ export function useDiscoverySearch(params: {
   return useQuery({
     queryKey: ["discovery", params],
     queryFn: ({ signal }) =>
-      searchDiscovery({ page: 1, pageSize: 30, ...params }, signal),
+      searchDiscovery(
+        {
+          page: params.page ?? 1,
+          pageSize: params.pageSize ?? 20,
+          ...params,
+        },
+        signal,
+      ),
+    placeholderData: (prev) => prev,
     retry: false,
   });
 }

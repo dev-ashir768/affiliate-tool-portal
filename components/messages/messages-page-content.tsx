@@ -200,6 +200,11 @@ export function MessagesPageContent() {
             : "Failed to load conversations"}
         </p>
       ) : null}
+      {conversationsQuery.data?.syncWarning ? (
+        <p className="text-sm text-destructive" role="alert">
+          {conversationsQuery.data.syncWarning}
+        </p>
+      ) : null}
 
       <Card className="grid min-h-[32rem] gap-0 overflow-hidden py-0 md:grid-cols-[18rem_1fr]">
         <div className="flex min-h-0 flex-col border-b md:border-r md:border-b-0">

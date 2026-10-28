@@ -224,6 +224,7 @@ export function DataTable<TData extends object>({
   columns,
   data,
   totalCount,
+  pageCount: pageCountProp,
   pagination,
   onPaginationChange,
   sorting,
@@ -247,6 +248,9 @@ export function DataTable<TData extends object>({
 }: DataTableComponentProps<TData>) {
   const prefs = useDataTablePreferences(tableId);
   const columnResizingEnabled = enableColumnResizing ?? true;
+  const resolvedPageCount =
+    pageCountProp ??
+    Math.max(1, Math.ceil(totalCount / Math.max(1, pagination.pageSize)));
 
   const table = useTable({
     features: dataTableFeatures,
@@ -255,7 +259,9 @@ export function DataTable<TData extends object>({
     getRowId,
     manualPagination: true,
     manualSorting: true,
+    autoResetPageIndex: false,
     rowCount: totalCount,
+    pageCount: resolvedPageCount,
     state: {
       pagination,
       sorting,

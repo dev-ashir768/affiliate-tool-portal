@@ -38,6 +38,8 @@ export type DataTableProps<TData extends object> = {
   columns: ColumnDef<DataTableFeatures, TData, unknown>[];
   data: TData[];
   totalCount: number;
+  /** Explicit page count for manual pagination (avoids clamp/desync bugs). */
+  pageCount?: number;
   pagination: PaginationState; // pageIndex 0-based
   onPaginationChange: OnChangeFn<PaginationState>;
   sorting: SortingState;

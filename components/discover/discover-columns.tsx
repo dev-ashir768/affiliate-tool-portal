@@ -8,45 +8,70 @@ import type { DiscoveryProfile } from "@/types/commerce";
 
 const columnHelper = createColumnHelper<DataTableFeatures, DiscoveryProfile>();
 
-function formatGmv(row: DiscoveryProfile) {
-  if (row.gmvRange?.trim()) return row.gmvRange.trim();
-  if (row.gmvAmount?.trim()) {
-    return `${row.gmvAmount}${row.gmvCurrency ? ` ${row.gmvCurrency}` : ""}`.trim();
+function formatMoney(
+  amount: string | null | undefined,
+  currency: string | null | undefined,
+  range?: string | null,
+) {
+  if (range?.trim()) return range.trim();
+  if (amount?.trim()) {
+    return `${amount}${currency ? ` ${currency}` : ""}`.trim();
   }
   return "—";
 }
 
-function formatGpm(row: DiscoveryProfile) {
-  if (row.gpmRange?.trim()) return row.gpmRange.trim();
-  if (row.gpmAmount) {
-    return `${row.gpmAmount}${row.gpmCurrency ? ` ${row.gpmCurrency}` : ""}`;
-  }
+function formatUnits(row: DiscoveryProfile) {
+  if (row.unitsSoldRange?.trim()) return row.unitsSoldRange.trim();
+  if (row.unitsSold != null) return row.unitsSold.toLocaleString();
   return "—";
+}
+
+function formatGender(row: DiscoveryProfile) {
+  if (!row.majorGender) return "—";
+  const pct =
+    row.majorGenderPct != null
+      ? ` ${Math.round(row.majorGenderPct / 100)}%`
+      : "";
+  return `${row.majorGender}${pct}`;
 }
 
 export type DiscoverTableActions = {
   onSave: (profileId: string) => void;
-  savePending?: boolean;
+  savingId?: string | null;
 };
 
 export function createDiscoverColumns(actions: DiscoverTableActions) {
   return columnHelper.columns([
-    columnHelper.accessor("handle", {
+    columnHelper.display({
+      id: "creator",
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Handle" />
+        <DataTableColumnHeader column={column} title="Creator" />
       ),
-      meta: { label: "Handle" },
+      meta: { label: "Creator" },
       enableHiding: false,
+      size: 260,
       cell: (info) => {
         const row = info.row.original;
         return (
-          <div>
-            <div className="font-medium">@{row.handle}</div>
-            {row.displayName ? (
-              <div className="text-xs text-muted-foreground">
-                {row.displayName}
-              </div>
-            ) : null}
+          <div className="flex items-center gap-3">
+            {row.avatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={row.avatarUrl}
+                alt=""
+                className="size-9 shrink-0 rounded-full object-cover"
+              />
+            ) : (
+              <div className="size-9 shrink-0 rounded-full bg-muted" />
+            )}
+            <div className="min-w-0">
+              <div className="truncate font-medium">@{row.handle}</div>
+              {row.displayName ? (
+                <div className="truncate text-xs text-muted-foreground">
+                  {row.displayName}
+                </div>
+              ) : null}
+            </div>
           </div>
         );
       },
@@ -65,20 +90,53 @@ export function createDiscoverColumns(actions: DiscoverTableActions) {
       meta: { label: "Followers" },
       cell: (info) => info.getValue()?.toLocaleString() ?? "—",
     }),
+    columnHelper.accessor("creatorLevel", {
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Level" />
+      ),
+      meta: { label: "Creator level" },
+      cell: (info) => info.getValue() ?? "—",
+    }),
     columnHelper.display({
       id: "gmv",
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="GMV" />
       ),
       meta: { label: "GMV" },
-      cell: (info) => formatGmv(info.row.original),
+      cell: (info) => {
+        const row = info.row.original;
+        return formatMoney(row.gmvAmount, row.gmvCurrency, row.gmvRange);
+      },
     }),
-    columnHelper.accessor("unitsSold", {
+    columnHelper.display({
+      id: "videoGmv",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Video GMV" />
+      ),
+      meta: { label: "Video GMV" },
+      cell: (info) => {
+        const row = info.row.original;
+        return formatMoney(row.videoGmvAmount, row.gmvCurrency);
+      },
+    }),
+    columnHelper.display({
+      id: "liveGmv",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Live GMV" />
+      ),
+      meta: { label: "Live GMV" },
+      cell: (info) => {
+        const row = info.row.original;
+        return formatMoney(row.liveGmvAmount, row.gmvCurrency);
+      },
+    }),
+    columnHelper.display({
+      id: "units",
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Units" />
       ),
-      meta: { label: "Units" },
-      cell: (info) => info.getValue()?.toLocaleString() ?? "—",
+      meta: { label: "Units sold" },
+      cell: (info) => formatUnits(info.row.original),
     }),
     columnHelper.display({
       id: "gpm",
@@ -86,13 +144,75 @@ export function createDiscoverColumns(actions: DiscoverTableActions) {
         <DataTableColumnHeader column={column} title="GPM" />
       ),
       meta: { label: "GPM" },
-      cell: (info) => formatGpm(info.row.original),
+      cell: (info) => {
+        const row = info.row.original;
+        return formatMoney(row.gpmAmount, row.gpmCurrency, row.gpmRange);
+      },
     }),
     columnHelper.accessor("avgCommissionRange", {
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Comm." />
       ),
       meta: { label: "Commission" },
+      cell: (info) => info.getValue()?.trim() || "—",
+    }),
+    columnHelper.accessor("avgEcVideoViewCount", {
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Avg video views" />
+      ),
+      meta: { label: "Avg EC video views" },
+      cell: (info) => info.getValue()?.toLocaleString() ?? "—",
+    }),
+    columnHelper.accessor("avgEcLiveUv", {
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Avg live UV" />
+      ),
+      meta: { label: "Avg EC live UV" },
+      cell: (info) => info.getValue()?.toLocaleString() ?? "—",
+    }),
+    columnHelper.display({
+      id: "audience",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Audience" />
+      ),
+      meta: { label: "Audience" },
+      size: 180,
+      cell: (info) => {
+        const row = info.row.original;
+        const ages = (row.ageRanges ?? [])
+          .map((a) => a.replace(/^AGE_RANGE_/, "").replace(/_/g, "-"))
+          .join(", ");
+        return (
+          <div className="text-xs">
+            <div>{formatGender(row)}</div>
+            {ages ? (
+              <div className="text-muted-foreground">{ages}</div>
+            ) : null}
+          </div>
+        );
+      },
+    }),
+    columnHelper.accessor("categories", {
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Categories" />
+      ),
+      meta: { label: "Categories" },
+      size: 160,
+      cell: (info) => {
+        const cats = info.getValue() ?? [];
+        if (!cats.length) return "—";
+        return (
+          <span className="line-clamp-2 text-xs text-muted-foreground">
+            {cats.join(", ")}
+          </span>
+        );
+      },
+    }),
+    columnHelper.accessor("contactEmail", {
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Email" />
+      ),
+      meta: { label: "Email" },
       cell: (info) => info.getValue()?.trim() || "—",
     }),
     columnHelper.accessor("metricsSyncedAt", {
@@ -116,16 +236,17 @@ export function createDiscoverColumns(actions: DiscoverTableActions) {
       enableHiding: false,
       cell: (info) => {
         const row = info.row.original;
+        const saving = actions.savingId === row.id;
         return (
           <div className="text-right">
             <Button
               type="button"
               size="sm"
               variant="outline"
-              disabled={actions.savePending}
+              disabled={saving}
               onClick={() => actions.onSave(row.id)}
             >
-              Save
+              {saving ? "Saving…" : "Save"}
             </Button>
           </div>
         );

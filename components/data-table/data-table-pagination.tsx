@@ -1,6 +1,7 @@
 "use client";
 
 import type { Table } from "@tanstack/react-table";
+import { useSelector } from "@tanstack/react-store";
 import { Button } from "@/components/ui/button";
 import {
   AppReactSelect,
@@ -25,7 +26,8 @@ export function DataTablePagination<TData extends object>({
   isLoading = false,
   disabled = false,
 }: DataTablePaginationProps<TData>) {
-  const pagination = table.atoms.pagination.get();
+  // Subscribe — `.get()` alone does not re-render when controlled page state commits.
+  const pagination = useSelector(table.atoms.pagination);
   const pageIndex = pagination.pageIndex;
   const pageSize = pagination.pageSize;
   const totalCount = table.getRowCount();

@@ -16,6 +16,7 @@ export type DiscoveryProfile = {
   productCardGmvAmount?: string | null;
   avgCommissionRange?: string | null;
   unitsSold?: number | null;
+  unitsSoldRange?: string | null;
   gpmAmount?: string | null;
   gpmCurrency?: string | null;
   gpmRange?: string | null;
@@ -24,6 +25,12 @@ export type DiscoveryProfile = {
   bio: string | null;
   source: string;
   enabled: boolean;
+  creatorLevel?: number | null;
+  avgEcVideoViewCount?: number | null;
+  avgEcLiveUv?: number | null;
+  majorGender?: string | null;
+  majorGenderPct?: number | null;
+  ageRanges?: string[];
   metricsSyncedAt?: string | null;
   createdAt: string;
   updatedAt: string;
