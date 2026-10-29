@@ -79,6 +79,7 @@ export function DiscoverPageContent() {
     "followers",
   );
   const [hasEmail, setHasEmail] = useState<"" | "true" | "false">("");
+  const [savedToCrm, setSavedToCrm] = useState<"" | "true" | "false">("");
   const [nicheKeyword, setNicheKeyword] = useState("");
   const [minFollowers, setMinFollowers] = useState("");
   const [syncGmvRange, setSyncGmvRange] = useState("");
@@ -101,6 +102,7 @@ export function DiscoverPageContent() {
     gmvRange,
     unitsSoldRange,
     hasEmail,
+    savedToCrm,
     sortBy,
   ].join("\0");
   const [appliedFiltersSignature, setAppliedFiltersSignature] =
@@ -118,6 +120,7 @@ export function DiscoverPageContent() {
     gmvRange: gmvRange || undefined,
     unitsSoldRange: unitsSoldRange || undefined,
     hasEmail: hasEmail === "" ? undefined : hasEmail === "true",
+    savedToCrm: savedToCrm === "" ? undefined : savedToCrm === "true",
     sortBy,
     page,
     pageSize,
@@ -151,7 +154,8 @@ export function DiscoverPageContent() {
       maxFollowersFilter ||
       gmvRange ||
       unitsSoldRange ||
-      hasEmail,
+      hasEmail ||
+      savedToCrm,
   );
   const showEmptyIndexPanel =
     query.isSuccess &&
@@ -339,6 +343,11 @@ export function DiscoverPageContent() {
     { value: "", label: "Email: any" },
     { value: "true", label: "Has email" },
     { value: "false", label: "No email" },
+  ];
+  const savedOptions: SelectOption[] = [
+    { value: "", label: "CRM: any" },
+    { value: "true", label: "Saved" },
+    { value: "false", label: "Not saved" },
   ];
 
   return (
@@ -533,6 +542,22 @@ export function DiscoverPageContent() {
               }
               isSearchable={false}
               aria-label="Email filter"
+            />
+          </Field>
+          <Field>
+            <FieldLabel>Saved to CRM</FieldLabel>
+            <AppReactSelect
+              options={savedOptions}
+              value={stringSelectValue(savedOptions, savedToCrm)}
+              onChange={(opt) =>
+                setSavedToCrm(
+                  opt?.value === "true" || opt?.value === "false"
+                    ? opt.value
+                    : "",
+                )
+              }
+              isSearchable={false}
+              aria-label="Saved to CRM filter"
             />
           </Field>
           <Field>

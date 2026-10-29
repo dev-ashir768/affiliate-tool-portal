@@ -38,6 +38,7 @@ export async function searchDiscovery(
     unitsSoldRange?: string;
     gmvRangeContains?: string;
     hasEmail?: boolean;
+    savedToCrm?: boolean;
     sortBy?: "followers" | "units" | "updated" | "gmv";
   } = {},
   signal?: AbortSignal,

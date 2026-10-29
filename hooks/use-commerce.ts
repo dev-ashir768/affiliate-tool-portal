@@ -38,6 +38,7 @@ export function useDiscoverySearch(params: {
   unitsSoldRange?: string;
   gmvRangeContains?: string;
   hasEmail?: boolean;
+  savedToCrm?: boolean;
   sortBy?: "followers" | "units" | "updated" | "gmv";
   page?: number;
   pageSize?: number;
