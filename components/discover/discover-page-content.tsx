@@ -139,6 +139,20 @@ export function DiscoverPageContent() {
   const rows = query.data?.data ?? [];
   const totalCount = query.data?.meta.total ?? 0;
   const pageCount = Math.max(1, Math.ceil(totalCount / Math.max(1, pageSize)));
+  const narrowingFiltersActive = Boolean(
+    debouncedSearch.trim() ||
+      region ||
+      minFollowersFilter ||
+      maxFollowersFilter ||
+      gmvRange ||
+      unitsSoldRange ||
+      hasEmail,
+  );
+  const showEmptyIndexPanel =
+    query.isSuccess &&
+    totalCount === 0 &&
+    !narrowingFiltersActive &&
+    oauthShops.length > 0;
 
   // Keep page in range when filters shrink the result set — do not clamp while
   // rendering (that desyncs controlled table state from React page state).
@@ -205,17 +219,29 @@ export function DiscoverPageContent() {
     [save, savingId],
   );
 
-  async function onSync(inline: boolean) {
+  const appReady = tiktok.data?.config?.appConfigured !== false;
+  const busy = sync.isPending || refreshMetrics.isPending;
+
+  async function onSync(
+    inline: boolean,
+    opts?: { keyword?: string | null; silentStartToast?: boolean },
+  ) {
     if (!selectedShopId) {
       toast.error("Authorize a TikTok shop first (Shops page)");
       return;
+    }
+    if (opts?.silentStartToast) {
+      toast.message("Starting first marketplace sync…");
     }
     try {
       const result = (await sync.mutateAsync({
         shopId: selectedShopId,
         maxPages: 10,
         pageSize: 20,
-        keyword: nicheKeyword.trim() || null,
+        keyword:
+          opts && "keyword" in opts
+            ? opts.keyword
+            : nicheKeyword.trim() || null,
         minFollowers: minFollowers ? Number(minFollowers) : null,
         gmvRanges: syncGmvRange ? [syncGmvRange] : null,
         unitsSoldRanges: syncUnitsSoldRange ? [syncUnitsSoldRange] : null,
@@ -242,6 +268,35 @@ export function DiscoverPageContent() {
     }
   }
 
+  // One-time first sync when shared index is empty and a shop is connected.
+  useEffect(() => {
+    if (!tiktok.isSuccess || !query.isSuccess) return;
+    if (!appReady) return;
+    if (oauthShops.length === 0 || !selectedShopId) return;
+    if (totalCount !== 0 || narrowingFiltersActive) return;
+    if (sync.isPending) return;
+
+    const key = `discover:firstSyncQueued:${selectedShopId}`;
+    try {
+      if (window.localStorage.getItem(key)) return;
+      window.localStorage.setItem(key, "1");
+    } catch {
+      return;
+    }
+
+    void onSync(false, { keyword: null, silentStartToast: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional one-shot when index settles empty
+  }, [
+    tiktok.isSuccess,
+    query.isSuccess,
+    appReady,
+    oauthShops.length,
+    selectedShopId,
+    totalCount,
+    narrowingFiltersActive,
+    sync.isPending,
+  ]);
+
   async function onRefreshCrmMetrics(inline: boolean) {
     if (!selectedShopId) {
       toast.error("Authorize a TikTok shop first (Shops page)");
@@ -265,8 +320,6 @@ export function DiscoverPageContent() {
     }
   }
 
-  const appReady = tiktok.data?.config?.appConfigured !== false;
-  const busy = sync.isPending || refreshMetrics.isPending;
   const emailOptions: SelectOption[] = [
     { value: "", label: "Email: any" },
     { value: "true", label: "Has email" },
@@ -521,6 +574,30 @@ export function DiscoverPageContent() {
             : "Unable to load discovery"}
         </p>
       ) : null}
+
+      {showEmptyIndexPanel ? (
+        <SectionCard
+          title="Your marketplace index is empty"
+          description="Run Sync now to pull creators through your shop into the shared index."
+          actions={
+            <Button
+              type="button"
+              size="sm"
+              disabled={!appReady || busy}
+              onClick={() => void onSync(true)}
+            >
+              Sync now
+            </Button>
+          }
+        >
+          <p className="text-sm text-muted-foreground">
+            Discover uses a shared Creator Marketplace index. After your first
+            sync (or a platform crawl), creators will show up here for every
+            org.
+          </p>
+        </SectionCard>
+      ) : null}
+
       <DataTable
         tableId="dashboard-discover"
         columns={columns}

@@ -315,6 +315,7 @@ export function useSyncOrgDiscoveryTikTok() {
   return useMutation({
     mutationFn: syncOrgDiscoveryFromTikTok,
     onSuccess: () => {
+      // Refetch Discover table after sync / first-sync queue settles client-side.
       void qc.invalidateQueries({ queryKey: ["discovery"] });
       void qc.invalidateQueries({
         queryKey: ["discovery", "tiktok", "status"],
