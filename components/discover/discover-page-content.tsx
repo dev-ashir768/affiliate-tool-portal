@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/react-select";
 import {
   useDiscoverySearch,
-  useOrgDiscoveryJobStatus,
+  useOrgDiscoveryJobStatuses,
   useOrgDiscoveryTikTokStatus,
   useRefreshOrgCrmCreatorMetrics,
   useSaveDiscoveryToCrm,
@@ -37,20 +37,45 @@ import {
 } from "@/lib/tiktok-marketplace-filters";
 import type { DiscoveryProfile } from "@/types/commerce";
 
-const TRACKED_JOB_KEY = "discover:trackedJobId";
+const TRACKED_JOBS_KEY = "discover:trackedJobIds";
+/** Legacy single-id key — migrated into the list on first read. */
+const LEGACY_TRACKED_JOB_KEY = "discover:trackedJobId";
+const MAX_TRACKED_JOBS = 10;
 
-function readTrackedJobId(): string | null {
+function readTrackedJobIds(): string[] {
   try {
-    return window.localStorage.getItem(TRACKED_JOB_KEY);
+    const raw = window.localStorage.getItem(TRACKED_JOBS_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw) as unknown;
+      if (Array.isArray(parsed)) {
+        return parsed
+          .filter((id): id is string => typeof id === "string" && id.length > 0)
+          .slice(0, MAX_TRACKED_JOBS);
+      }
+    }
+    const legacy = window.localStorage.getItem(LEGACY_TRACKED_JOB_KEY);
+    if (legacy) {
+      writeTrackedJobIds([legacy]);
+      window.localStorage.removeItem(LEGACY_TRACKED_JOB_KEY);
+      return [legacy];
+    }
   } catch {
-    return null;
+    /* ignore */
   }
+  return [];
 }
 
-function writeTrackedJobId(jobId: string | null) {
+function writeTrackedJobIds(jobIds: string[]) {
   try {
-    if (jobId) window.localStorage.setItem(TRACKED_JOB_KEY, jobId);
-    else window.localStorage.removeItem(TRACKED_JOB_KEY);
+    if (jobIds.length === 0) {
+      window.localStorage.removeItem(TRACKED_JOBS_KEY);
+      window.localStorage.removeItem(LEGACY_TRACKED_JOB_KEY);
+    } else {
+      window.localStorage.setItem(
+        TRACKED_JOBS_KEY,
+        JSON.stringify(jobIds.slice(0, MAX_TRACKED_JOBS)),
+      );
+    }
   } catch {
     /* ignore */
   }
@@ -113,21 +138,44 @@ export function DiscoverPageContent() {
   const [detailProfile, setDetailProfile] = useState<DiscoveryProfile | null>(
     null,
   );
-  const [trackedJobId, setTrackedJobId] = useState<string | null>(null);
+  const [trackedJobIds, setTrackedJobIds] = useState<string[]>([]);
+  const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const [jobSheetOpen, setJobSheetOpen] = useState(false);
 
   useEffect(() => {
-    setTrackedJobId(readTrackedJobId());
+    const ids = readTrackedJobIds();
+    setTrackedJobIds(ids);
+    setSelectedJobId(ids[0] ?? null);
   }, []);
 
   function trackJob(jobId: string) {
-    writeTrackedJobId(jobId);
-    setTrackedJobId(jobId);
+    setTrackedJobIds((prev) => {
+      const next = [jobId, ...prev.filter((id) => id !== jobId)].slice(
+        0,
+        MAX_TRACKED_JOBS,
+      );
+      writeTrackedJobIds(next);
+      return next;
+    });
+    setSelectedJobId(jobId);
   }
 
-  function clearTrackedJob() {
-    writeTrackedJobId(null);
-    setTrackedJobId(null);
+  function dismissJob(jobId: string) {
+    setTrackedJobIds((prev) => {
+      const next = prev.filter((id) => id !== jobId);
+      writeTrackedJobIds(next);
+      setSelectedJobId((cur) => {
+        if (cur !== jobId) return cur;
+        return next[0] ?? null;
+      });
+      return next;
+    });
+  }
+
+  function clearTrackedJobs() {
+    writeTrackedJobIds([]);
+    setTrackedJobIds([]);
+    setSelectedJobId(null);
   }
 
   const debouncedSearch = useDebouncedValue(search, 300);
@@ -167,21 +215,69 @@ export function DiscoverPageContent() {
   const sync = useSyncOrgDiscoveryTikTok();
   const refreshMetrics = useRefreshOrgCrmCreatorMetrics();
   const save = useSaveDiscoveryToCrm();
-  const jobStatus = useOrgDiscoveryJobStatus(trackedJobId);
+  const jobQueries = useOrgDiscoveryJobStatuses(trackedJobIds);
+  const jobHistory = useMemo(
+    () =>
+      trackedJobIds.map((jobId, i) => ({
+        jobId,
+        job: jobQueries[i]?.data,
+        isLoading: jobQueries[i]?.isLoading,
+        isError: jobQueries[i]?.isError,
+        error: jobQueries[i]?.error,
+      })),
+    [trackedJobIds, jobQueries],
+  );
+  const selectedJobQuery = useMemo(() => {
+    if (!selectedJobId) return null;
+    const idx = trackedJobIds.indexOf(selectedJobId);
+    return idx >= 0 ? jobQueries[idx] : null;
+  }, [selectedJobId, trackedJobIds, jobQueries]);
+  const primaryJobId = useMemo(() => {
+    const active = jobHistory.find(
+      (h) =>
+        h.job?.status === "QUEUED" ||
+        h.job?.status === "RUNNING" ||
+        (h.isLoading && !h.isError),
+    );
+    return active?.jobId ?? trackedJobIds[0] ?? null;
+  }, [jobHistory, trackedJobIds]);
+  const primaryJobQuery = useMemo(() => {
+    if (!primaryJobId) return null;
+    const idx = trackedJobIds.indexOf(primaryJobId);
+    return idx >= 0 ? jobQueries[idx] : null;
+  }, [primaryJobId, trackedJobIds, jobQueries]);
 
+  const completedIdsKey = jobHistory
+    .filter((h) => h.job?.status === "COMPLETED")
+    .map((h) => h.jobId)
+    .join(",");
   useEffect(() => {
-    if (jobStatus.data?.status !== "COMPLETED") return;
+    if (!completedIdsKey) return;
     void query.refetch();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- refresh table once when job completes
-  }, [jobStatus.data?.status]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- refresh table when a tracked job newly completes
+  }, [completedIdsKey]);
 
+  const missingIdsKey = jobHistory
+    .filter((item) => {
+      if (!item.isError) return false;
+      const msg = item.error instanceof Error ? item.error.message : "";
+      return /not found/i.test(msg);
+    })
+    .map((item) => item.jobId)
+    .join(",");
   useEffect(() => {
-    if (!jobStatus.isError || !trackedJobId) return;
-    // Stale / foreign / expired job id — drop tracking quietly.
-    const msg =
-      jobStatus.error instanceof Error ? jobStatus.error.message : "";
-    if (/not found/i.test(msg)) clearTrackedJob();
-  }, [jobStatus.isError, jobStatus.error, trackedJobId]);
+    if (!missingIdsKey) return;
+    const missing = missingIdsKey.split(",");
+    setTrackedJobIds((prev) => {
+      const next = prev.filter((id) => !missing.includes(id));
+      if (next.length === prev.length) return prev;
+      writeTrackedJobIds(next);
+      setSelectedJobId((cur) =>
+        cur && missing.includes(cur) ? (next[0] ?? null) : cur,
+      );
+      return next;
+    });
+  }, [missingIdsKey]);
   const oauthShops = useMemo(
     () => (tiktok.data?.shops ?? []).filter((s) => s.oauthConnected),
     [tiktok.data?.shops],
@@ -308,7 +404,7 @@ export function DiscoverPageContent() {
     try {
       const result = (await sync.mutateAsync({
         shopId: selectedShopId,
-        maxPages: 10,
+        maxPages: 50,
         pageSize: 20,
         keyword:
           opts && "keyword" in opts
@@ -533,32 +629,50 @@ export function DiscoverPageContent() {
         )}
       </SectionCard>
 
-      {trackedJobId ? (
+      {trackedJobIds.length > 0 ? (
         <>
           <DiscoverJobStatusBanner
-            job={jobStatus.data}
-            isLoading={jobStatus.isLoading}
-            isError={jobStatus.isError}
+            job={primaryJobQuery?.data}
+            isLoading={primaryJobQuery?.isLoading}
+            isError={primaryJobQuery?.isError}
             errorMessage={
-              jobStatus.error instanceof Error
-                ? jobStatus.error.message
+              primaryJobQuery?.error instanceof Error
+                ? primaryJobQuery.error.message
                 : null
             }
-            onOpenDetails={() => setJobSheetOpen(true)}
-            onDismiss={clearTrackedJob}
+            recentCount={trackedJobIds.length}
+            onOpenDetails={() => {
+              setSelectedJobId(primaryJobId);
+              setJobSheetOpen(true);
+            }}
+            onDismiss={() => {
+              if (primaryJobId) dismissJob(primaryJobId);
+              else clearTrackedJobs();
+            }}
           />
           <DiscoverJobDetailSheet
-            job={jobStatus.data ?? null}
-            open={jobSheetOpen && jobStatus.data != null}
+            job={selectedJobQuery?.data ?? null}
+            open={jobSheetOpen}
             onOpenChange={setJobSheetOpen}
+            history={jobHistory}
+            selectedJobId={selectedJobId}
+            onSelectJob={setSelectedJobId}
             canDismiss={
-              jobStatus.data?.status === "COMPLETED" ||
-              jobStatus.data?.status === "FAILED" ||
-              jobStatus.isError
+              selectedJobQuery?.data?.status === "COMPLETED" ||
+              selectedJobQuery?.data?.status === "FAILED" ||
+              Boolean(selectedJobQuery?.isError)
             }
             onDismiss={() => {
-              clearTrackedJob();
-              setJobSheetOpen(false);
+              if (!selectedJobId) {
+                clearTrackedJobs();
+                setJobSheetOpen(false);
+                return;
+              }
+              const remaining = trackedJobIds.filter(
+                (id) => id !== selectedJobId,
+              );
+              dismissJob(selectedJobId);
+              if (remaining.length === 0) setJobSheetOpen(false);
             }}
           />
         </>

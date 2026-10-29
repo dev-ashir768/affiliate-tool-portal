@@ -58,6 +58,7 @@ export function DiscoverJobStatusBanner({
   isLoading,
   isError,
   errorMessage,
+  recentCount = 1,
   onOpenDetails,
   onDismiss,
 }: {
@@ -65,6 +66,7 @@ export function DiscoverJobStatusBanner({
   isLoading?: boolean;
   isError?: boolean;
   errorMessage?: string | null;
+  recentCount?: number;
   onOpenDetails: () => void;
   onDismiss: () => void;
 }) {
@@ -77,7 +79,7 @@ export function DiscoverJobStatusBanner({
 
   return (
     <div
-      className="flex flex-col gap-2 rounded-lg border bg-muted/40 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+      className="flex flex-col gap-2 rounded-lg border bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
       role="status"
       aria-live="polite"
     >
@@ -102,6 +104,11 @@ export function DiscoverJobStatusBanner({
               #{job.jobId}
             </span>
           ) : null}
+          {recentCount > 1 ? (
+            <span className="text-xs text-muted-foreground">
+              · {recentCount} recent
+            </span>
+          ) : null}
         </div>
         {isError ? (
           <p className="text-sm text-destructive">
@@ -117,15 +124,18 @@ export function DiscoverJobStatusBanner({
           <p className="text-sm text-muted-foreground">{summary}</p>
         ) : job?.status === "QUEUED" || job?.status === "RUNNING" ? (
           <p className="text-sm text-muted-foreground">
-            Status updates automatically. Click for details.
+            Status updates automatically. Click for details
+            {recentCount > 1 ? " / history" : ""}.
           </p>
         ) : (
-          <p className="text-sm text-muted-foreground">Click for details</p>
+          <p className="text-sm text-muted-foreground">
+            Click for details{recentCount > 1 ? " / history" : ""}
+          </p>
         )}
       </button>
       <div className="flex shrink-0 items-center gap-1 self-start sm:self-center">
         <Button type="button" variant="ghost" size="sm" onClick={onOpenDetails}>
-          Details
+          {recentCount > 1 ? "History" : "Details"}
         </Button>
         {terminal ? (
           <Button type="button" variant="ghost" size="sm" onClick={onDismiss}>

@@ -1,6 +1,11 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQueries,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import {
   createCrawlTerm,
   createOrder,
@@ -338,16 +343,33 @@ export function useRefreshOrgCrmCreatorMetrics() {
   });
 }
 
+const orgDiscoveryJobQueryOptions = (jobId: string) => ({
+  queryKey: ["discovery", "jobs", jobId] as const,
+  queryFn: ({ signal }: { signal: AbortSignal }) =>
+    fetchOrgDiscoveryJobStatus(jobId, signal),
+  retry: false as const,
+  refetchInterval: (q: {
+    state: { data?: { status?: string } | undefined };
+  }) => {
+    const status = q.state.data?.status;
+    if (status === "COMPLETED" || status === "FAILED") return false;
+    return 3_000;
+  },
+});
+
 export function useOrgDiscoveryJobStatus(jobId: string | null) {
   return useQuery({
-    queryKey: ["discovery", "jobs", jobId],
-    queryFn: ({ signal }) => fetchOrgDiscoveryJobStatus(jobId!, signal),
+    ...orgDiscoveryJobQueryOptions(jobId ?? ""),
     enabled: Boolean(jobId),
-    retry: false,
-    refetchInterval: (q) => {
-      const status = q.state.data?.status;
-      if (status === "COMPLETED" || status === "FAILED") return false;
-      return 3_000;
-    },
+  });
+}
+
+/** Poll status for multiple tracked discovery jobs (newest-first ids). */
+export function useOrgDiscoveryJobStatuses(jobIds: string[]) {
+  return useQueries({
+    queries: jobIds.map((jobId) => ({
+      ...orgDiscoveryJobQueryOptions(jobId),
+      enabled: Boolean(jobId),
+    })),
   });
 }

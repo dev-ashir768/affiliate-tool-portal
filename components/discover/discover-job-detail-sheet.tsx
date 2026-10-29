@@ -11,6 +11,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { cn } from "@/lib/utils";
 import type { OrgDiscoveryJobStatus } from "@/types/commerce";
 
 function kindLabel(kind: OrgDiscoveryJobStatus["kind"]) {
@@ -111,72 +112,153 @@ function resultRows(job: OrgDiscoveryJobStatus): Array<{
   ];
 }
 
+export type DiscoverJobHistoryItem = {
+  jobId: string;
+  job?: OrgDiscoveryJobStatus;
+  isLoading?: boolean;
+  isError?: boolean;
+};
+
 export function DiscoverJobDetailSheet({
   job,
   open,
   onOpenChange,
   onDismiss,
   canDismiss,
+  history = [],
+  selectedJobId,
+  onSelectJob,
 }: {
   job: OrgDiscoveryJobStatus | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onDismiss?: () => void;
   canDismiss?: boolean;
+  history?: DiscoverJobHistoryItem[];
+  selectedJobId?: string | null;
+  onSelectJob?: (jobId: string) => void;
 }) {
   const rows = job ? resultRows(job) : [];
+  const showHistory = history.length > 1 && onSelectJob;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-full sm:max-w-md">
-        {job ? (
+        {job || history.length > 0 ? (
           <>
             <SheetHeader className="border-b">
               <div className="flex flex-wrap items-center gap-2 pr-8">
-                <SheetTitle>{kindLabel(job.kind)}</SheetTitle>
-                <Badge variant={statusBadgeVariant(job.status)}>
-                  {statusLabel(job.status)}
-                </Badge>
+                <SheetTitle>
+                  {job ? kindLabel(job.kind) : "Job details"}
+                </SheetTitle>
+                {job ? (
+                  <Badge variant={statusBadgeVariant(job.status)}>
+                    {statusLabel(job.status)}
+                  </Badge>
+                ) : null}
               </div>
               <SheetDescription className="font-mono text-xs">
-                Job #{job.jobId}
+                {job
+                  ? `Job #${job.jobId}`
+                  : selectedJobId
+                    ? `Job #${selectedJobId}`
+                    : "Select a job"}
               </SheetDescription>
             </SheetHeader>
 
             <div className="flex-1 overflow-y-auto px-4">
-              <dl>
-                <DetailRow label="Status" value={statusLabel(job.status)} />
-                <DetailRow label="Queue" value={job.queue || "—"} />
-                <DetailRow
-                  label="Requested"
-                  value={formatWhen(job.requestedAt)}
-                />
-                <DetailRow label="Started" value={formatWhen(job.startedAt)} />
-                <DetailRow
-                  label="Finished"
-                  value={formatWhen(job.finishedAt)}
-                />
-                {job.status === "FAILED" ? (
-                  <DetailRow
-                    label="Error"
-                    value={
-                      <span className="text-destructive">
-                        {job.failedReason?.trim() || "Unknown error"}
-                      </span>
-                    }
-                  />
-                ) : null}
-                {rows.map((row) => (
-                  <DetailRow key={row.label} label={row.label} value={row.value} />
-                ))}
-              </dl>
-
-              {job.status === "QUEUED" || job.status === "RUNNING" ? (
-                <p className="mt-4 text-sm text-muted-foreground">
-                  This updates automatically. Creators show in Discover when the
-                  job finishes.
-                </p>
+              {showHistory ? (
+                <div className="mb-4 border-b border-border/60 pb-4">
+                  <p className="mb-2 text-xs font-medium text-muted-foreground">
+                    Recent jobs
+                  </p>
+                  <ul className="flex flex-col gap-1">
+                    {history.map((item) => {
+                      const active = item.jobId === selectedJobId;
+                      const status = item.job?.status;
+                      return (
+                        <li key={item.jobId}>
+                          <button
+                            type="button"
+                            className={cn(
+                              "flex w-full items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm transition-colors",
+                              active
+                                ? "bg-muted font-medium"
+                                : "hover:bg-muted/60",
+                            )}
+                            onClick={() => onSelectJob(item.jobId)}
+                          >
+                            <span className="font-mono text-xs">
+                              #{item.jobId}
+                            </span>
+                            {status ? (
+                              <Badge
+                                variant={statusBadgeVariant(status)}
+                                className="shrink-0"
+                              >
+                                {statusLabel(status)}
+                              </Badge>
+                            ) : item.isError ? (
+                              <Badge variant="destructive">Missing</Badge>
+                            ) : (
+                              <Badge variant="outline">…</Badge>
+                            )}
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
               ) : null}
+
+              {job ? (
+                <>
+                  <dl>
+                    <DetailRow label="Status" value={statusLabel(job.status)} />
+                    <DetailRow label="Queue" value={job.queue || "—"} />
+                    <DetailRow
+                      label="Requested"
+                      value={formatWhen(job.requestedAt)}
+                    />
+                    <DetailRow
+                      label="Started"
+                      value={formatWhen(job.startedAt)}
+                    />
+                    <DetailRow
+                      label="Finished"
+                      value={formatWhen(job.finishedAt)}
+                    />
+                    {job.status === "FAILED" ? (
+                      <DetailRow
+                        label="Error"
+                        value={
+                          <span className="text-destructive">
+                            {job.failedReason?.trim() || "Unknown error"}
+                          </span>
+                        }
+                      />
+                    ) : null}
+                    {rows.map((row) => (
+                      <DetailRow
+                        key={row.label}
+                        label={row.label}
+                        value={row.value}
+                      />
+                    ))}
+                  </dl>
+
+                  {job.status === "QUEUED" || job.status === "RUNNING" ? (
+                    <p className="mt-4 text-sm text-muted-foreground">
+                      This updates automatically. Creators show in Discover when
+                      the job finishes.
+                    </p>
+                  ) : null}
+                </>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Select a job from the list to see details.
+                </p>
+              )}
             </div>
 
             {canDismiss && onDismiss ? (
