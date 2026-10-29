@@ -3,6 +3,7 @@
 import { createColumnHelper } from "@tanstack/react-table";
 import { DataTableColumnHeader } from "@/components/data-table";
 import type { DataTableFeatures } from "@/components/data-table/types";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { DiscoveryProfile } from "@/types/commerce";
 
@@ -26,17 +27,9 @@ function formatUnits(row: DiscoveryProfile) {
   return "—";
 }
 
-function formatGender(row: DiscoveryProfile) {
-  if (!row.majorGender) return "—";
-  const pct =
-    row.majorGenderPct != null
-      ? ` ${Math.round(row.majorGenderPct / 100)}%`
-      : "";
-  return `${row.majorGender}${pct}`;
-}
-
 export type DiscoverTableActions = {
   onSave: (profileId: string) => void;
+  onOpenDetails: (profile: DiscoveryProfile) => void;
   savingId?: string | null;
 };
 
@@ -49,11 +42,15 @@ export function createDiscoverColumns(actions: DiscoverTableActions) {
       ),
       meta: { label: "Creator" },
       enableHiding: false,
-      size: 260,
+      size: 240,
       cell: (info) => {
         const row = info.row.original;
         return (
-          <div className="flex items-center gap-3">
+          <button
+            type="button"
+            className="flex max-w-full items-center gap-3 text-left hover:opacity-90"
+            onClick={() => actions.onOpenDetails(row)}
+          >
             {row.avatarUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -72,7 +69,7 @@ export function createDiscoverColumns(actions: DiscoverTableActions) {
                 </div>
               ) : null}
             </div>
-          </div>
+          </button>
         );
       },
     }),
@@ -81,6 +78,7 @@ export function createDiscoverColumns(actions: DiscoverTableActions) {
         <DataTableColumnHeader column={column} title="Region" />
       ),
       meta: { label: "Region" },
+      size: 80,
       cell: (info) => info.getValue() ?? "—",
     }),
     columnHelper.accessor("followerCount", {
@@ -89,13 +87,6 @@ export function createDiscoverColumns(actions: DiscoverTableActions) {
       ),
       meta: { label: "Followers" },
       cell: (info) => info.getValue()?.toLocaleString() ?? "—",
-    }),
-    columnHelper.accessor("creatorLevel", {
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Level" />
-      ),
-      meta: { label: "Creator level" },
-      cell: (info) => info.getValue() ?? "—",
     }),
     columnHelper.display({
       id: "gmv",
@@ -109,28 +100,6 @@ export function createDiscoverColumns(actions: DiscoverTableActions) {
       },
     }),
     columnHelper.display({
-      id: "videoGmv",
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Video GMV" />
-      ),
-      meta: { label: "Video GMV" },
-      cell: (info) => {
-        const row = info.row.original;
-        return formatMoney(row.videoGmvAmount, row.gmvCurrency);
-      },
-    }),
-    columnHelper.display({
-      id: "liveGmv",
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Live GMV" />
-      ),
-      meta: { label: "Live GMV" },
-      cell: (info) => {
-        const row = info.row.original;
-        return formatMoney(row.liveGmvAmount, row.gmvCurrency);
-      },
-    }),
-    columnHelper.display({
       id: "units",
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Units" />
@@ -138,82 +107,39 @@ export function createDiscoverColumns(actions: DiscoverTableActions) {
       meta: { label: "Units sold" },
       cell: (info) => formatUnits(info.row.original),
     }),
-    columnHelper.display({
-      id: "gpm",
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="GPM" />
-      ),
-      meta: { label: "GPM" },
-      cell: (info) => {
-        const row = info.row.original;
-        return formatMoney(row.gpmAmount, row.gpmCurrency, row.gpmRange);
-      },
-    }),
-    columnHelper.accessor("avgCommissionRange", {
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Comm." />
-      ),
-      meta: { label: "Commission" },
-      cell: (info) => info.getValue()?.trim() || "—",
-    }),
-    columnHelper.accessor("avgEcVideoViewCount", {
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Avg video views" />
-      ),
-      meta: { label: "Avg EC video views" },
-      cell: (info) => info.getValue()?.toLocaleString() ?? "—",
-    }),
-    columnHelper.accessor("avgEcLiveUv", {
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Avg live UV" />
-      ),
-      meta: { label: "Avg EC live UV" },
-      cell: (info) => info.getValue()?.toLocaleString() ?? "—",
-    }),
-    columnHelper.display({
-      id: "audience",
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Audience" />
-      ),
-      meta: { label: "Audience" },
-      size: 180,
-      cell: (info) => {
-        const row = info.row.original;
-        const ages = (row.ageRanges ?? [])
-          .map((a) => a.replace(/^AGE_RANGE_/, "").replace(/_/g, "-"))
-          .join(", ");
-        return (
-          <div className="text-xs">
-            <div>{formatGender(row)}</div>
-            {ages ? (
-              <div className="text-muted-foreground">{ages}</div>
-            ) : null}
-          </div>
-        );
-      },
-    }),
     columnHelper.accessor("categories", {
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Categories" />
       ),
       meta: { label: "Categories" },
-      size: 160,
+      size: 220,
       cell: (info) => {
         const cats = info.getValue() ?? [];
         if (!cats.length) return "—";
+        const shown = cats.slice(0, 3);
+        const extra = cats.length - shown.length;
         return (
-          <span className="line-clamp-2 text-xs text-muted-foreground">
-            {cats.join(", ")}
-          </span>
+          <div className="flex max-w-[14rem] flex-wrap gap-1">
+            {shown.map((cat) => (
+              <Badge
+                key={cat}
+                variant="secondary"
+                className="bg-muted text-muted-foreground"
+              >
+                {cat}
+              </Badge>
+            ))}
+            {extra > 0 ? (
+              <Badge
+                variant="secondary"
+                className="bg-muted text-muted-foreground"
+              >
+                +{extra}
+              </Badge>
+            ) : null}
+          </div>
         );
       },
-    }),
-    columnHelper.accessor("contactEmail", {
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Email" />
-      ),
-      meta: { label: "Email" },
-      cell: (info) => info.getValue()?.trim() || "—",
     }),
     columnHelper.accessor("metricsSyncedAt", {
       header: ({ column }) => (
@@ -234,12 +160,21 @@ export function createDiscoverColumns(actions: DiscoverTableActions) {
       header: () => <span className="sr-only">Actions</span>,
       meta: { label: "Actions" },
       enableHiding: false,
+      size: 160,
       cell: (info) => {
         const row = info.row.original;
         const saving = actions.savingId === row.id;
         const saved = Boolean(row.savedToCrm);
         return (
-          <div className="text-right">
+          <div className="flex justify-end gap-2">
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              onClick={() => actions.onOpenDetails(row)}
+            >
+              Details
+            </Button>
             <Button
               type="button"
               size="sm"

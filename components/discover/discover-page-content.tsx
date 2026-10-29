@@ -24,6 +24,7 @@ import {
   useSyncOrgDiscoveryTikTok,
 } from "@/hooks/use-commerce";
 import { createDiscoverColumns } from "./discover-columns";
+import { DiscoverProfileDetailSheet } from "./discover-profile-detail-sheet";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { PageHeader } from "@/components/layout/page-header";
 import { FormGrid, SectionCard } from "@/components/layout/section-card";
@@ -31,6 +32,7 @@ import {
   TIKTOK_GMV_RANGE_OPTIONS,
   TIKTOK_UNITS_SOLD_RANGE_OPTIONS,
 } from "@/lib/tiktok-marketplace-filters";
+import type { DiscoveryProfile } from "@/types/commerce";
 
 const REGION_OPTIONS: SelectOption[] = [
   { value: "", label: "All regions" },
@@ -85,6 +87,9 @@ export function DiscoverPageContent() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   const [savingId, setSavingId] = useState<string | null>(null);
+  const [detailProfile, setDetailProfile] = useState<DiscoveryProfile | null>(
+    null,
+  );
 
   const debouncedSearch = useDebouncedValue(search, 300);
 
@@ -201,21 +206,31 @@ export function DiscoverPageContent() {
     }
   };
 
+  function saveProfile(profileId: string) {
+    setSavingId(profileId);
+    void save
+      .mutateAsync(profileId)
+      .then(() => {
+        toast.success("Saved to CRM");
+        setDetailProfile((prev) =>
+          prev?.id === profileId ? { ...prev, savedToCrm: true } : prev,
+        );
+      })
+      .catch((err) =>
+        toast.error(err instanceof Error ? err.message : "Failed"),
+      )
+      .finally(() => setSavingId(null));
+  }
+
   const columns = useMemo(
     () =>
       createDiscoverColumns({
         savingId,
-        onSave: (profileId) => {
-          setSavingId(profileId);
-          void save
-            .mutateAsync(profileId)
-            .then(() => toast.success("Saved to CRM"))
-            .catch((err) =>
-              toast.error(err instanceof Error ? err.message : "Failed"),
-            )
-            .finally(() => setSavingId(null));
-        },
+        onOpenDetails: setDetailProfile,
+        onSave: saveProfile,
       }),
+    // saveProfile closes over save/savingId — recreate when those change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [save, savingId],
   );
 
@@ -623,6 +638,16 @@ export function DiscoverPageContent() {
         pageSizeOptions={[10, 20, 50, 100]}
         getRowId={(row) => row.id}
         ariaLabel="Discover creators"
+      />
+
+      <DiscoverProfileDetailSheet
+        profile={detailProfile}
+        open={detailProfile != null}
+        onOpenChange={(open) => {
+          if (!open) setDetailProfile(null);
+        }}
+        onSave={saveProfile}
+        saving={Boolean(detailProfile && savingId === detailProfile.id)}
       />
     </div>
   );
