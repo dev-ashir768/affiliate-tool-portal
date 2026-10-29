@@ -58,12 +58,14 @@ export function DiscoverJobStatusBanner({
   isLoading,
   isError,
   errorMessage,
+  onOpenDetails,
   onDismiss,
 }: {
   job: OrgDiscoveryJobStatus | undefined;
   isLoading?: boolean;
   isError?: boolean;
   errorMessage?: string | null;
+  onOpenDetails: () => void;
   onDismiss: () => void;
 }) {
   const terminal =
@@ -79,7 +81,11 @@ export function DiscoverJobStatusBanner({
       role="status"
       aria-live="polite"
     >
-      <div className="min-w-0 space-y-1">
+      <button
+        type="button"
+        className="min-w-0 flex-1 space-y-1 text-left hover:opacity-90"
+        onClick={onOpenDetails}
+      >
         <div className="flex flex-wrap items-center gap-2">
           <p className="text-sm font-medium">
             {job ? kindLabel(job.kind) : "Queued job"}
@@ -103,28 +109,30 @@ export function DiscoverJobStatusBanner({
           </p>
         ) : null}
         {job?.status === "FAILED" && job.failedReason ? (
-          <p className="text-sm text-destructive">{job.failedReason}</p>
+          <p className="truncate text-sm text-destructive">
+            {job.failedReason}
+          </p>
         ) : null}
         {summary ? (
           <p className="text-sm text-muted-foreground">{summary}</p>
         ) : job?.status === "QUEUED" || job?.status === "RUNNING" ? (
           <p className="text-sm text-muted-foreground">
-            Status updates automatically. Creators appear in the table when
-            this finishes.
+            Status updates automatically. Click for details.
           </p>
+        ) : (
+          <p className="text-sm text-muted-foreground">Click for details</p>
+        )}
+      </button>
+      <div className="flex shrink-0 items-center gap-1 self-start sm:self-center">
+        <Button type="button" variant="ghost" size="sm" onClick={onOpenDetails}>
+          Details
+        </Button>
+        {terminal ? (
+          <Button type="button" variant="ghost" size="sm" onClick={onDismiss}>
+            Dismiss
+          </Button>
         ) : null}
       </div>
-      {terminal ? (
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          className="shrink-0 self-start sm:self-center"
-          onClick={onDismiss}
-        >
-          Dismiss
-        </Button>
-      ) : null}
     </div>
   );
 }

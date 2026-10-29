@@ -25,6 +25,7 @@ import {
   useSyncOrgDiscoveryTikTok,
 } from "@/hooks/use-commerce";
 import { createDiscoverColumns } from "./discover-columns";
+import { DiscoverJobDetailSheet } from "./discover-job-detail-sheet";
 import { DiscoverJobStatusBanner } from "./discover-job-status-banner";
 import { DiscoverProfileDetailSheet } from "./discover-profile-detail-sheet";
 import { Field, FieldLabel } from "@/components/ui/field";
@@ -113,6 +114,7 @@ export function DiscoverPageContent() {
     null,
   );
   const [trackedJobId, setTrackedJobId] = useState<string | null>(null);
+  const [jobSheetOpen, setJobSheetOpen] = useState(false);
 
   useEffect(() => {
     setTrackedJobId(readTrackedJobId());
@@ -532,17 +534,34 @@ export function DiscoverPageContent() {
       </SectionCard>
 
       {trackedJobId ? (
-        <DiscoverJobStatusBanner
-          job={jobStatus.data}
-          isLoading={jobStatus.isLoading}
-          isError={jobStatus.isError}
-          errorMessage={
-            jobStatus.error instanceof Error
-              ? jobStatus.error.message
-              : null
-          }
-          onDismiss={clearTrackedJob}
-        />
+        <>
+          <DiscoverJobStatusBanner
+            job={jobStatus.data}
+            isLoading={jobStatus.isLoading}
+            isError={jobStatus.isError}
+            errorMessage={
+              jobStatus.error instanceof Error
+                ? jobStatus.error.message
+                : null
+            }
+            onOpenDetails={() => setJobSheetOpen(true)}
+            onDismiss={clearTrackedJob}
+          />
+          <DiscoverJobDetailSheet
+            job={jobStatus.data ?? null}
+            open={jobSheetOpen && jobStatus.data != null}
+            onOpenChange={setJobSheetOpen}
+            canDismiss={
+              jobStatus.data?.status === "COMPLETED" ||
+              jobStatus.data?.status === "FAILED" ||
+              jobStatus.isError
+            }
+            onDismiss={() => {
+              clearTrackedJob();
+              setJobSheetOpen(false);
+            }}
+          />
+        </>
       ) : null}
 
       <SectionCard
