@@ -500,3 +500,16 @@ export async function refreshOrgCrmCreatorMetrics(body: {
     | { refreshed: number; skipped: number; failed: number }
   >;
 }
+
+export async function fetchOrgDiscoveryJobStatus(
+  jobId: string,
+  signal?: AbortSignal,
+) {
+  const res = await fetch(
+    `/api/discovery/jobs/${encodeURIComponent(jobId)}`,
+    { credentials: "include", signal },
+  );
+  return parseJson(res) as Promise<
+    import("@/types/commerce").OrgDiscoveryJobStatus
+  >;
+}

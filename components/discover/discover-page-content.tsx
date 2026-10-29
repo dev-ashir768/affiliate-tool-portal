@@ -18,12 +18,14 @@ import {
 } from "@/components/ui/react-select";
 import {
   useDiscoverySearch,
+  useOrgDiscoveryJobStatus,
   useOrgDiscoveryTikTokStatus,
   useRefreshOrgCrmCreatorMetrics,
   useSaveDiscoveryToCrm,
   useSyncOrgDiscoveryTikTok,
 } from "@/hooks/use-commerce";
 import { createDiscoverColumns } from "./discover-columns";
+import { DiscoverJobStatusBanner } from "./discover-job-status-banner";
 import { DiscoverProfileDetailSheet } from "./discover-profile-detail-sheet";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { PageHeader } from "@/components/layout/page-header";
@@ -33,6 +35,25 @@ import {
   TIKTOK_UNITS_SOLD_RANGE_OPTIONS,
 } from "@/lib/tiktok-marketplace-filters";
 import type { DiscoveryProfile } from "@/types/commerce";
+
+const TRACKED_JOB_KEY = "discover:trackedJobId";
+
+function readTrackedJobId(): string | null {
+  try {
+    return window.localStorage.getItem(TRACKED_JOB_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function writeTrackedJobId(jobId: string | null) {
+  try {
+    if (jobId) window.localStorage.setItem(TRACKED_JOB_KEY, jobId);
+    else window.localStorage.removeItem(TRACKED_JOB_KEY);
+  } catch {
+    /* ignore */
+  }
+}
 
 const REGION_OPTIONS: SelectOption[] = [
   { value: "", label: "All regions" },
@@ -91,6 +112,21 @@ export function DiscoverPageContent() {
   const [detailProfile, setDetailProfile] = useState<DiscoveryProfile | null>(
     null,
   );
+  const [trackedJobId, setTrackedJobId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setTrackedJobId(readTrackedJobId());
+  }, []);
+
+  function trackJob(jobId: string) {
+    writeTrackedJobId(jobId);
+    setTrackedJobId(jobId);
+  }
+
+  function clearTrackedJob() {
+    writeTrackedJobId(null);
+    setTrackedJobId(null);
+  }
 
   const debouncedSearch = useDebouncedValue(search, 300);
 
@@ -129,6 +165,21 @@ export function DiscoverPageContent() {
   const sync = useSyncOrgDiscoveryTikTok();
   const refreshMetrics = useRefreshOrgCrmCreatorMetrics();
   const save = useSaveDiscoveryToCrm();
+  const jobStatus = useOrgDiscoveryJobStatus(trackedJobId);
+
+  useEffect(() => {
+    if (jobStatus.data?.status !== "COMPLETED") return;
+    void query.refetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- refresh table once when job completes
+  }, [jobStatus.data?.status]);
+
+  useEffect(() => {
+    if (!jobStatus.isError || !trackedJobId) return;
+    // Stale / foreign / expired job id — drop tracking quietly.
+    const msg =
+      jobStatus.error instanceof Error ? jobStatus.error.message : "";
+    if (/not found/i.test(msg)) clearTrackedJob();
+  }, [jobStatus.isError, jobStatus.error, trackedJobId]);
   const oauthShops = useMemo(
     () => (tiktok.data?.shops ?? []).filter((s) => s.oauthConnected),
     [tiktok.data?.shops],
@@ -274,7 +325,8 @@ export function DiscoverPageContent() {
         pages?: number;
       };
       if (result.jobId) {
-        toast.success(`Discovery sync queued (${result.jobId})`);
+        trackJob(result.jobId);
+        toast.success(`Discovery sync queued (#${result.jobId})`);
       } else {
         toast.success(
           `Imported ${result.imported ?? 0}, updated ${result.updated ?? 0}, CRM ${result.crmPropagated ?? 0} (${result.pages ?? 0} pages)`,
@@ -328,7 +380,8 @@ export function DiscoverPageContent() {
         sync: inline,
       });
       if ("jobId" in result) {
-        toast.success(`CRM metrics refresh queued (${result.jobId})`);
+        trackJob(result.jobId);
+        toast.success(`CRM metrics refresh queued (#${result.jobId})`);
       } else {
         toast.success(
           `Refreshed ${result.refreshed}, skipped ${result.skipped}, failed ${result.failed}`,
@@ -477,6 +530,20 @@ export function DiscoverPageContent() {
           </div>
         )}
       </SectionCard>
+
+      {trackedJobId ? (
+        <DiscoverJobStatusBanner
+          job={jobStatus.data}
+          isLoading={jobStatus.isLoading}
+          isError={jobStatus.isError}
+          errorMessage={
+            jobStatus.error instanceof Error
+              ? jobStatus.error.message
+              : null
+          }
+          onDismiss={clearTrackedJob}
+        />
+      ) : null}
 
       <SectionCard
         title="Filters"

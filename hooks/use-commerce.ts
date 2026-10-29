@@ -10,6 +10,7 @@ import {
   fetchCrawlTerms,
   fetchDiscoveryCrawlStatus,
   fetchOrders,
+  fetchOrgDiscoveryJobStatus,
   fetchOrgDiscoveryTikTokStatus,
   fetchPlatformDiscovery,
   fetchTikTokDiscoveryStatus,
@@ -333,6 +334,20 @@ export function useRefreshOrgCrmCreatorMetrics() {
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["creators"] });
       void qc.invalidateQueries({ queryKey: ["discovery"] });
+    },
+  });
+}
+
+export function useOrgDiscoveryJobStatus(jobId: string | null) {
+  return useQuery({
+    queryKey: ["discovery", "jobs", jobId],
+    queryFn: ({ signal }) => fetchOrgDiscoveryJobStatus(jobId!, signal),
+    enabled: Boolean(jobId),
+    retry: false,
+    refetchInterval: (q) => {
+      const status = q.state.data?.status;
+      if (status === "COMPLETED" || status === "FAILED") return false;
+      return 3_000;
     },
   });
 }

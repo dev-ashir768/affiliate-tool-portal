@@ -38,6 +38,19 @@ export type DiscoveryProfile = {
   updatedAt: string;
 };
 
+export type OrgDiscoveryJobStatus = {
+  jobId: string;
+  queue: string;
+  name: string;
+  kind: "discovery_sync" | "crm_metrics_refresh" | "other";
+  status: "QUEUED" | "RUNNING" | "COMPLETED" | "FAILED" | "UNKNOWN";
+  requestedAt: string | null;
+  startedAt: string | null;
+  finishedAt: string | null;
+  failedReason: string | null;
+  result: Record<string, unknown> | null;
+};
+
 export type ShopOrderRow = {
   id: string;
   externalOrderId: string;
