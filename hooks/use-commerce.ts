@@ -46,6 +46,8 @@ export function useDiscoverySearch(params: {
   hasEmail?: boolean;
   savedToCrm?: boolean;
   sortBy?: "followers" | "units" | "updated" | "gmv";
+  updatedFrom?: string;
+  updatedTo?: string;
   page?: number;
   pageSize?: number;
 }) {

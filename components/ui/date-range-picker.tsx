@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { format, isValid, parse, subDays } from "date-fns";
+import { format, isValid, parse, startOfMonth, subDays } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import type { DateRange } from "react-day-picker";
 import { cn } from "cn";
@@ -43,6 +43,11 @@ function fromIso(value: string): Date | undefined {
 export function rangeFromDays(days: number): DateRangeValue {
   const to = new Date();
   return { from: toIso(subDays(to, days - 1)), to: toIso(to) };
+}
+
+export function rangeFromMonthToDate(): DateRangeValue {
+  const to = new Date();
+  return { from: toIso(startOfMonth(to)), to: toIso(to) };
 }
 
 export function emptyDateRange(): DateRangeValue {

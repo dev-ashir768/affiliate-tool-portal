@@ -10,6 +10,11 @@ import type {
 } from "@tanstack/react-table";
 import { DataTable } from "@/components/data-table";
 import { Button, buttonVariants } from "@/components/ui/button";
+import {
+  DateRangePicker,
+  rangeFromMonthToDate,
+  type DateRangeValue,
+} from "@/components/ui/date-range-picker";
 import { Input } from "@/components/ui/input";
 import {
   AppReactSelect,
@@ -127,6 +132,9 @@ export function DiscoverPageContent() {
   );
   const [hasEmail, setHasEmail] = useState<"" | "true" | "false">("");
   const [savedToCrm, setSavedToCrm] = useState<"" | "true" | "false">("");
+  const [dateRange, setDateRange] = useState<DateRangeValue>(() =>
+    rangeFromMonthToDate(),
+  );
   const [nicheKeyword, setNicheKeyword] = useState("");
   const [minFollowers, setMinFollowers] = useState("");
   const [syncGmvRange, setSyncGmvRange] = useState("");
@@ -190,6 +198,8 @@ export function DiscoverPageContent() {
     hasEmail,
     savedToCrm,
     sortBy,
+    dateRange.from,
+    dateRange.to,
   ].join("\0");
   const [appliedFiltersSignature, setAppliedFiltersSignature] =
     useState(filtersSignature);
@@ -208,6 +218,8 @@ export function DiscoverPageContent() {
     hasEmail: hasEmail === "" ? undefined : hasEmail === "true",
     savedToCrm: savedToCrm === "" ? undefined : savedToCrm === "true",
     sortBy,
+    updatedFrom: dateRange.from || undefined,
+    updatedTo: dateRange.to || undefined,
     page,
     pageSize,
   });
@@ -677,6 +689,15 @@ export function DiscoverPageContent() {
           />
         </>
       ) : null}
+
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-sm text-muted-foreground">Updated</p>
+        <DateRangePicker
+          value={dateRange}
+          onChange={setDateRange}
+          defaultValue={rangeFromMonthToDate()}
+        />
+      </div>
 
       <SectionCard
         title="Filters"

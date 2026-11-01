@@ -40,6 +40,8 @@ export async function searchDiscovery(
     hasEmail?: boolean;
     savedToCrm?: boolean;
     sortBy?: "followers" | "units" | "updated" | "gmv";
+    updatedFrom?: string;
+    updatedTo?: string;
   } = {},
   signal?: AbortSignal,
 ) {
