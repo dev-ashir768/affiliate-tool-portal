@@ -72,6 +72,7 @@ type Props = {
   defaultValue?: DateRangeValue;
   className?: string;
   disabled?: boolean;
+  ariaLabel?: string;
 };
 
 function presetFor(value: DateRangeValue): string {
@@ -101,6 +102,7 @@ export function DateRangePicker({
   defaultValue,
   className,
   disabled,
+  ariaLabel,
 }: Props) {
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<DateRangeValue>(value);
@@ -145,6 +147,7 @@ export function DateRangePicker({
             variant="outline"
             size="lg"
             className={cn("min-w-56 justify-start font-normal", className)}
+            aria-label={ariaLabel}
           />
         }
       >

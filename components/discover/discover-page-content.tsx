@@ -308,7 +308,7 @@ export function DiscoverPageContent() {
   const rows = query.data?.data ?? [];
   const totalCount = query.data?.meta.total ?? 0;
   const pageCount = Math.max(1, Math.ceil(totalCount / Math.max(1, pageSize)));
-  const narrowingFiltersActive = Boolean(
+  const otherContentFiltersActive = Boolean(
     debouncedSearch.trim() ||
       region ||
       minFollowersFilter ||
@@ -318,11 +318,19 @@ export function DiscoverPageContent() {
       hasEmail ||
       savedToCrm,
   );
+  const dateFilterActive = Boolean(dateRange.from || dateRange.to);
+  const contentFiltersActive =
+    otherContentFiltersActive || dateFilterActive;
   const showEmptyIndexPanel =
     query.isSuccess &&
     totalCount === 0 &&
-    !narrowingFiltersActive &&
+    !contentFiltersActive &&
     oauthShops.length > 0;
+  const showEmptyDateRangeMessage =
+    query.isSuccess &&
+    totalCount === 0 &&
+    dateFilterActive &&
+    !otherContentFiltersActive;
 
   // Keep page in range when filters shrink the result set — do not clamp while
   // rendering (that desyncs controlled table state from React page state).
@@ -454,7 +462,7 @@ export function DiscoverPageContent() {
     if (!tiktok.isSuccess || !query.isSuccess) return;
     if (!appReady) return;
     if (oauthShops.length === 0 || !selectedShopId) return;
-    if (totalCount !== 0 || narrowingFiltersActive) return;
+    if (totalCount !== 0 || contentFiltersActive) return;
     if (sync.isPending) return;
 
     const key = `discover:firstSyncQueued:${selectedShopId}`;
@@ -474,7 +482,7 @@ export function DiscoverPageContent() {
     oauthShops.length,
     selectedShopId,
     totalCount,
-    narrowingFiltersActive,
+    contentFiltersActive,
     sync.isPending,
   ]);
 
@@ -696,6 +704,7 @@ export function DiscoverPageContent() {
           value={dateRange}
           onChange={setDateRange}
           defaultValue={rangeFromMonthToDate()}
+          ariaLabel="Last updated range"
         />
       </div>
 
@@ -833,6 +842,13 @@ export function DiscoverPageContent() {
           {query.error instanceof Error
             ? query.error.message
             : "Unable to load discovery"}
+        </p>
+      ) : null}
+
+      {showEmptyDateRangeMessage ? (
+        <p className="text-sm text-muted-foreground">
+          No creators updated in this date range. Widen the range or choose All
+          time.
         </p>
       ) : null}
 
