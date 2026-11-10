@@ -22,6 +22,7 @@ import {
   useDisconnectShop,
   useShops,
   useStartTikTokOAuth,
+  useSyncOpenCollabCreators,
   useTikTokOAuthStatus,
   useVerifyShop,
 } from "@/hooks/use-shops";
@@ -36,6 +37,7 @@ export function ShopsPageContent() {
   const verify = useVerifyShop();
   const disconnect = useDisconnectShop();
   const startOauth = useStartTikTokOAuth();
+  const syncCreators = useSyncOpenCollabCreators();
   const searchParams = useSearchParams();
   const [actionError, setActionError] = useState<string | null>(null);
   const [showUpgradeHint, setShowUpgradeHint] = useState(false);
@@ -67,7 +69,7 @@ export function ShopsPageContent() {
 
   useEffect(() => {
     if (searchParams.get("oauth") === "connected") {
-      toast.success("TikTok Shop authorized");
+      toast.success("TikTok Shop authorized — syncing open-collab creators…");
       void shopsQuery.refetch();
     }
   }, [searchParams, shopsQuery]);
@@ -129,6 +131,19 @@ export function ShopsPageContent() {
         setShowUpgradeHint(true);
       }
       throw err;
+    }
+  }
+
+  async function handleSyncCreators(id: string) {
+    setActionError(null);
+    try {
+      await syncCreators.mutateAsync(id);
+      toast.message("Creator sync started");
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Failed to start creators sync";
+      setActionError(message);
+      toast.error(message);
     }
   }
 
@@ -261,10 +276,14 @@ export function ShopsPageContent() {
               "__new__")
             : null
         }
+        syncingId={
+          syncCreators.isPending ? (syncCreators.variables ?? null) : null
+        }
         oauthAvailable={oauthReady}
         onVerify={handleVerify}
         onSetupBot={setSetupShopId}
         onAuthorizeTikTok={handleAuthorize}
+        onSyncCreators={handleSyncCreators}
         onDisconnect={handleDisconnect}
       />
 

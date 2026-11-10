@@ -11,7 +11,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import type { Shop, ShopStatus } from "@/types/shops";
+import type {
+  OpenCollabCreatorsSyncStatus,
+  Shop,
+  ShopStatus,
+} from "@/types/shops";
 import { cn } from "cn";
 
 function statusBadgeClass(status: ShopStatus) {
@@ -31,16 +35,33 @@ function formatStatus(status: ShopStatus) {
   return status.replace(/_/g, " ").toLowerCase();
 }
 
+function formatSyncStatus(status: OpenCollabCreatorsSyncStatus["status"]) {
+  return status.replace(/_/g, " ").toLowerCase();
+}
+
+function syncSummaryText(sync: OpenCollabCreatorsSyncStatus) {
+  const parts = [
+    `${sync.creatorsUpserted} creators`,
+    `${sync.creatorsLinkedToList} added to Shop collaborators`,
+  ];
+  if (sync.failedProducts > 0) {
+    parts.push(`${sync.failedProducts} products failed`);
+  }
+  return parts.join(" · ");
+}
+
 type ShopsTableProps = {
   shops: Shop[];
   canManage: boolean;
   verifyingId: string | null;
   disconnectingId: string | null;
   authorizingId: string | null;
+  syncingId: string | null;
   oauthAvailable: boolean;
   onVerify: (id: string) => Promise<void>;
   onSetupBot: (id: string) => void;
   onAuthorizeTikTok: (id: string) => Promise<void>;
+  onSyncCreators: (id: string) => Promise<void>;
   onDisconnect: (id: string) => Promise<void>;
 };
 
@@ -50,10 +71,12 @@ export function ShopsTable({
   verifyingId,
   disconnectingId,
   authorizingId,
+  syncingId,
   oauthAvailable,
   onVerify,
   onSetupBot,
   onAuthorizeTikTok,
+  onSyncCreators,
   onDisconnect,
 }: ShopsTableProps) {
   const [confirmId, setConfirmId] = useState<string | null>(null);
@@ -86,6 +109,11 @@ export function ShopsTable({
               (shop.status === "PENDING_INVITE" || shop.status === "FAILED");
             const canAuthorize =
               oauthAvailable && !shop.oauthConnected && shop.status !== "DISCONNECTED";
+            const canSyncCreators =
+              Boolean(shop.oauthConnected) && shop.status !== "DISCONNECTED";
+            const syncRunning =
+              shop.openCollabCreatorsSync?.status === "QUEUED" ||
+              shop.openCollabCreatorsSync?.status === "RUNNING";
             const canDisconnect = shop.status !== "DISCONNECTED";
             const canSetupBot =
               Boolean(shop.botSelfServe) &&
@@ -105,6 +133,31 @@ export function ShopsTable({
                       title={shop.statusReason}
                     >
                       {shop.statusReason}
+                    </p>
+                  ) : null}
+                  {shop.openCollabCreatorsSync ? (
+                    <p
+                      className={cn(
+                        "mt-0.5 max-w-sm whitespace-normal break-words text-xs",
+                        shop.openCollabCreatorsSync.status === "FAILED"
+                          ? "text-destructive"
+                          : "text-muted-foreground",
+                      )}
+                      title={
+                        shop.openCollabCreatorsSync.lastError ??
+                        `Last updated ${new Date(shop.openCollabCreatorsSync.updatedAt).toLocaleString()}`
+                      }
+                    >
+                      Creators sync:{" "}
+                      {formatSyncStatus(shop.openCollabCreatorsSync.status)}
+                      {shop.openCollabCreatorsSync.status === "SUCCEEDED" ||
+                      shop.openCollabCreatorsSync.status === "PARTIAL"
+                        ? ` · ${syncSummaryText(shop.openCollabCreatorsSync)}`
+                        : null}
+                      {shop.openCollabCreatorsSync.status === "FAILED" &&
+                      shop.openCollabCreatorsSync.lastError
+                        ? ` · ${shop.openCollabCreatorsSync.lastError}`
+                        : null}
                     </p>
                   ) : null}
                 </TableCell>
@@ -169,6 +222,21 @@ export function ShopsTable({
                           onClick={() => void onVerify(shop.id)}
                         >
                           {verifyingId === shop.id ? "Starting…" : "Verify"}
+                        </Button>
+                      ) : null}
+                      {canSyncCreators ? (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          disabled={
+                            syncingId === shop.id || syncRunning
+                          }
+                          onClick={() => void onSyncCreators(shop.id)}
+                        >
+                          {syncingId === shop.id || syncRunning
+                            ? "Syncing…"
+                            : "Sync shop creators"}
                         </Button>
                       ) : null}
                       {shop.status === "VERIFYING" ? (

@@ -7,6 +7,17 @@ export type ShopStatus =
   | "FAILED"
   | "DISCONNECTED";
 
+export type OpenCollabCreatorsSyncStatus = {
+  status: "QUEUED" | "RUNNING" | "SUCCEEDED" | "PARTIAL" | "FAILED";
+  jobId?: string | null;
+  productsScanned: number;
+  creatorsUpserted: number;
+  creatorsLinkedToList: number;
+  failedProducts: number;
+  lastError?: string | null;
+  updatedAt: string;
+};
+
 export type Shop = {
   id: string;
   organizationId: string;
@@ -27,6 +38,7 @@ export type Shop = {
   oauthConnected?: boolean;
   oauthScopes?: string[];
   oauthAccessExpiresAt?: string | null;
+  openCollabCreatorsSync?: OpenCollabCreatorsSyncStatus | null;
 };
 
 export type BotMailSummary = {

@@ -1,5 +1,6 @@
 import type {
   BotInboxResponse,
+  OpenCollabCreatorsSyncStatus,
   Shop,
   ShopsListResponse,
   VerifyShopResponse,
@@ -122,6 +123,43 @@ export async function completeTikTokShopOAuth(body: {
   });
   if (!res.ok) throw await parseError(res);
   return (await res.json()) as Shop;
+}
+
+export type SyncOpenCollabCreatorsResponse = {
+  jobId: string;
+  status: "QUEUED" | "RUNNING";
+  shopId: string;
+};
+
+export async function syncOpenCollabCreators(
+  shopId: string,
+): Promise<SyncOpenCollabCreatorsResponse> {
+  const res = await fetch(
+    `/api/shops/${encodeURIComponent(shopId)}/sync-open-collab-creators`,
+    {
+      method: "POST",
+      credentials: "include",
+    },
+  );
+  if (!res.ok) throw await parseError(res);
+  return (await res.json()) as SyncOpenCollabCreatorsResponse;
+}
+
+export async function fetchOpenCollabCreatorsSyncStatus(
+  shopId: string,
+  signal?: AbortSignal,
+): Promise<{ status: OpenCollabCreatorsSyncStatus | null }> {
+  const res = await fetch(
+    `/api/shops/${encodeURIComponent(shopId)}/sync-open-collab-creators/status`,
+    {
+      credentials: "include",
+      signal,
+    },
+  );
+  if (!res.ok) throw await parseError(res);
+  return (await res.json()) as {
+    status: OpenCollabCreatorsSyncStatus | null;
+  };
 }
 
 export async function fetchShopProducts(
