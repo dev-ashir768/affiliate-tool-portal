@@ -7,9 +7,11 @@ import { Button } from "@/components/ui/button";
 export function ImpersonationBanner({
   email,
   name,
+  mode = "impersonate",
 }: {
   email: string;
   name: string;
+  mode?: "impersonate" | "break_glass";
 }) {
   const [pending, startTransition] = useTransition();
 
@@ -28,7 +30,9 @@ export function ImpersonationBanner({
         window.location.replace(
           typeof payload.redirectTo === "string"
             ? payload.redirectTo
-            : "/backoffice/organizations",
+            : mode === "break_glass"
+              ? "/login"
+              : "/backoffice/organizations",
         );
       } catch {
         toast.error("Could not exit impersonation");
@@ -36,10 +40,14 @@ export function ImpersonationBanner({
     });
   }
 
+  const label = mode === "break_glass" ? "Break-glass as" : "Viewing as";
+  const exitLabel =
+    mode === "break_glass" ? "Exit session" : "Exit to backoffice";
+
   return (
     <div className="flex flex-wrap items-center justify-between gap-2 bg-amber-100 px-4 py-2 text-sm text-amber-950">
       <p>
-        Viewing as <span className="font-medium">{name}</span> ({email}). Actions
+        {label} <span className="font-medium">{name}</span> ({email}). Actions
         run as this user; start is audited.
       </p>
       <Button
@@ -49,7 +57,7 @@ export function ImpersonationBanner({
         disabled={pending}
         onClick={exit}
       >
-        {pending ? "Exiting…" : "Exit to backoffice"}
+        {pending ? "Exiting…" : exitLabel}
       </Button>
     </div>
   );

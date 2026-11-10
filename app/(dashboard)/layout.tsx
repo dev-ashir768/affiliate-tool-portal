@@ -15,7 +15,11 @@ export default async function DashboardLayout({ children }: Props) {
       area="dashboard"
       topSlot={
         meta ? (
-          <ImpersonationBanner email={meta.email} name={meta.name} />
+          <ImpersonationBanner
+            email={meta.email}
+            name={meta.name}
+            mode={meta.mode ?? "impersonate"}
+          />
         ) : null
       }
     >

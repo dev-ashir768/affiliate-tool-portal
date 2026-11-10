@@ -7,7 +7,10 @@ import {
   requireMfaPendingToken,
   type SessionTokenPayload,
 } from "@/lib/auth/mfa-bff";
-import { setTrustedDeviceCookie } from "@/lib/auth/session";
+import {
+  setBreakGlassImpersonationMeta,
+  setTrustedDeviceCookie,
+} from "@/lib/auth/session";
 
 type VerifyResponse = SessionTokenPayload & {
   status: string;
@@ -16,6 +19,7 @@ type VerifyResponse = SessionTokenPayload & {
   platformMembership?: { id: string; role: string; status: string } | null;
   redirectTo: string;
   trustedDeviceRaw?: string;
+  breakGlass?: boolean;
 };
 
 export async function POST(request: Request) {
@@ -30,6 +34,14 @@ export async function POST(request: Request) {
     const failed = await completeSession(data, { verifyClaims: true });
     if (failed) return failed;
 
+    if (data.breakGlass) {
+      await setBreakGlassImpersonationMeta({
+        email: data.user.email,
+        name: data.user.name,
+        mode: "break_glass",
+      });
+    }
+
     // The API sets trusted_device via Set-Cookie (BFF fetch drops it), and may
     // also echo trustedDeviceRaw in JSON — accept either.
     const trustedDevice =
@@ -43,6 +55,7 @@ export async function POST(request: Request) {
       organizationId: data.organizationId,
       platformMembership: data.platformMembership ?? null,
       redirectTo: data.redirectTo,
+      ...(data.breakGlass ? { breakGlass: true } : {}),
     });
   } catch (err) {
     return mfaErrorResponse(err, "Failed to verify 2FA code");

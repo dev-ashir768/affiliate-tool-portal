@@ -29,6 +29,7 @@ export type SessionTokens = {
 export type ImpersonationMeta = {
   email: string;
   name: string;
+  mode?: "impersonate" | "break_glass";
 };
 
 export async function setSessionCookies(tokens: SessionTokens) {
@@ -120,10 +121,24 @@ export async function stashStaffSessionForImpersonation(
   }
   jar.set(STAFF_BACKUP_ACCESS_COOKIE, access, refreshCookieOptions());
   jar.set(STAFF_BACKUP_REFRESH_COOKIE, refresh, refreshCookieOptions());
-  jar.set(IMPERSONATION_META_COOKIE, JSON.stringify(meta), {
-    ...refreshCookieOptions(),
-    httpOnly: false,
-  });
+  jar.set(
+    IMPERSONATION_META_COOKIE,
+    JSON.stringify({ ...meta, mode: meta.mode ?? "impersonate" }),
+    {
+      ...refreshCookieOptions(),
+      httpOnly: false,
+    },
+  );
+}
+
+/** Break-glass: banner meta only — no prior staff session to stash. */
+export async function setBreakGlassImpersonationMeta(meta: ImpersonationMeta) {
+  const jar = await cookies();
+  jar.set(
+    IMPERSONATION_META_COOKIE,
+    JSON.stringify({ ...meta, mode: meta.mode ?? "break_glass" }),
+    { ...refreshCookieOptions(), httpOnly: false },
+  );
 }
 
 export async function getImpersonationMeta(): Promise<ImpersonationMeta | null> {
@@ -141,7 +156,12 @@ export async function getImpersonationMeta(): Promise<ImpersonationMeta | null> 
 
 export async function isImpersonating(): Promise<boolean> {
   const jar = await cookies();
-  return Boolean(jar.get(STAFF_BACKUP_REFRESH_COOKIE)?.value);
+  if (jar.get(STAFF_BACKUP_REFRESH_COOKIE)?.value) return true;
+  return Boolean(jar.get(IMPERSONATION_META_COOKIE)?.value);
+}
+
+export async function clearBreakGlassSession() {
+  await clearSessionCookies();
 }
 
 /** Restore staff cookies after support session; returns false if no stash. */
