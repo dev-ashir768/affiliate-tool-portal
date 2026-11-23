@@ -130,7 +130,7 @@ export function OrgSettingsForm() {
     <div className="grid gap-6 lg:grid-cols-2">
       <SectionCard
         title="Organization"
-        description="Your organization's display name across influxa."
+        description="Your organization's display name across affimaticapp."
         footer={
           canEditName ? (
             <Button

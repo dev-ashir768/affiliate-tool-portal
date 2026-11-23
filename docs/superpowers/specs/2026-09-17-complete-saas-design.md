@@ -1,4 +1,4 @@
-# influxa Complete SaaS — Master Design (Portal)
+# affimaticapp Complete SaaS — Master Design (Portal)
 
 Canonical full spec lives in the APIs repo:
 

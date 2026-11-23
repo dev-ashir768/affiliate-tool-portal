@@ -6,7 +6,7 @@ import { pageMetadata } from "@/lib/site-metadata";
 export const metadata = pageMetadata({
   title: "Activity",
   description:
-    "Review audit events and changes made across your influxa organization.",
+    "Review audit events and changes made across your affimaticapp organization.",
 });
 
 export default function ActivityPage() {

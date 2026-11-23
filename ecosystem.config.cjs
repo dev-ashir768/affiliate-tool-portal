@@ -12,21 +12,21 @@
 module.exports = {
   apps: [
     {
-      name: "influxa-portal",
+      name: "affimaticapp-app",
       cwd: __dirname,
       script: "node_modules/next/dist/bin/next",
-      args: "start -p 3001",
+      args: "start -p 3000",
       instances: 1,
       exec_mode: "fork",
       env: {
         NODE_ENV: "production",
-        PORT: 3001,
-        API_URL: "https://api.dealhoper.com",
+        PORT: 3000,
+        API_URL: "https://app.affimaticapp.com",
       },
       max_memory_restart: "768M",
       time: true,
-      error_file: "logs/portal-error.log",
-      out_file: "logs/portal-out.log",
+      error_file: "logs/app-error.log",
+      out_file: "logs/app-out.log",
       merge_logs: true,
     },
   ],

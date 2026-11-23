@@ -185,7 +185,7 @@ export function ConnectShopDialog({
             <DialogHeader>
               <DialogTitle>Connect a TikTok Shop</DialogTitle>
               <DialogDescription>
-                Choose how influxa should connect to your shop.
+                Choose how affimaticapp should connect to your shop.
                 {disabledReason ? ` ${disabledReason}` : null}
               </DialogDescription>
             </DialogHeader>

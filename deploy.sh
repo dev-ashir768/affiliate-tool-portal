@@ -17,7 +17,7 @@ step "Building"
 npm run build
 
 step "Restarting portal"
-if pm2 describe influxa-portal >/dev/null 2>&1; then
+if pm2 describe affimaticapp-portal >/dev/null 2>&1; then
   pm2 reload ecosystem.config.cjs --update-env
 else
   pm2 start ecosystem.config.cjs

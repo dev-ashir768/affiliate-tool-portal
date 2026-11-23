@@ -6,7 +6,7 @@ import { pageMetadata } from "@/lib/site-metadata";
 export const metadata = pageMetadata({
   title: "Staff",
   description:
-    "Manage platform staff accounts, roles, and access to influxa backoffice tools.",
+    "Manage platform staff accounts, roles, and access to affimaticapp backoffice tools.",
 });
 
 export default function UsersPage() {

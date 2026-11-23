@@ -4,7 +4,7 @@ import { pageMetadata } from "@/lib/site-metadata";
 export const metadata = pageMetadata({
   title: "Finance",
   description:
-    "Monitor platform revenue, Stripe subscriptions, and billing health for influxa.",
+    "Monitor platform revenue, Stripe subscriptions, and billing health for affimaticapp.",
 });
 
 export default function FinancePage() {

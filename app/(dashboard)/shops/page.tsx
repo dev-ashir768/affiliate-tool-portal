@@ -6,7 +6,7 @@ import { pageMetadata } from "@/lib/site-metadata";
 export const metadata = pageMetadata({
   title: "Shops",
   description:
-    "Connect and manage TikTok Shop stores linked to your influxa organization.",
+    "Connect and manage TikTok Shop stores linked to your affimaticapp organization.",
 });
 
 export default function ShopsPage() {

@@ -1,4 +1,4 @@
-const KEY = "influxa:flash-toast";
+const KEY = "affimaticapp:flash-toast";
 
 export type FlashToast = {
   message: string;

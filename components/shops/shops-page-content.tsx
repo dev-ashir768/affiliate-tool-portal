@@ -192,7 +192,7 @@ export function ShopsPageContent() {
         title="Shops"
         description={
           <>
-            Authorize your TikTok Shop (OpenAPI) so influxa can discover
+            Authorize your TikTok Shop (OpenAPI) so affimaticapp can discover
             creators for your niche. Bot verify remains optional for
             collaborator sessions.
             {orgQuery.data ? (

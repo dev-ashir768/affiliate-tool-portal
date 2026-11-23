@@ -4,7 +4,7 @@ import { pageMetadata } from "@/lib/site-metadata";
 export const metadata = pageMetadata({
   title: "Organization",
   description:
-    "Inspect a tenant’s subscription, members, shops, and billing details in influxa backoffice.",
+    "Inspect a tenant’s subscription, members, shops, and billing details in affimaticapp backoffice.",
 });
 
 type PageProps = { params: Promise<{ id: string }> };

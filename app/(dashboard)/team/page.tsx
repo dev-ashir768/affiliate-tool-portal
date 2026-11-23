@@ -7,7 +7,7 @@ import { pageMetadata } from "@/lib/site-metadata";
 export const metadata = pageMetadata({
   title: "Team",
   description:
-    "Invite colleagues and manage roles for your influxa organization.",
+    "Invite colleagues and manage roles for your affimaticapp organization.",
 });
 
 export default function TeamPage() {
