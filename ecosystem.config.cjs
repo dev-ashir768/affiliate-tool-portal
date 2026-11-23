@@ -21,7 +21,7 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         PORT: 3000,
-        API_URL: "https://app.affimaticapp.com",
+        API_URL: "https://api.affimaticapp.com",
       },
       max_memory_restart: "768M",
       time: true,
